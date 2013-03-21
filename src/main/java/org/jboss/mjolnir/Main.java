@@ -24,7 +24,8 @@ public class Main {
         GitHubResponse response = null;
         try {
             response = client.get(request);
-            response.getBody()
+            Object body = response.getBody();
+            System.out.println("Response body is looks like: " + body.toString());
 
         } catch (IOException ioe) {
             ioe.printStackTrace();
