@@ -26,11 +26,9 @@ import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.GitHubRequest;
 import org.eclipse.egit.github.core.client.GitHubResponse;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -41,21 +39,27 @@ import java.util.Properties;
  */
 public class Main {
 
-    private static final String BASE_URL = "api.github.com";
+    private static final String BASE_URL = "https://api.github.com";
     private static final String PROPS_FILE = "users.properties";
+
+    /* The actual repository base can be appended after this bit */
+    private static String repository = "repos";
+    private static String project = null;
 
     public static void main(String[] args) {
         Properties properties = new Properties();
         try {
             properties.load(streamFromFile());
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        GitHubClient client = new GitHubClient();
+        client.setCredentials(properties.getProperty("NAME"), properties.getProperty("PASSWORD"));
+        System.out.println("Name and password are: " + properties.getProperty("NAME") + " " + properties.getProperty("PASSWORD"));
 
         GitHubRequest request = new GitHubRequest();
-        request.setUri(BASE_URL);
+        request.setUri(buildURI(properties));
 
-        GitHubClient client = new GitHubClient();
         GitHubResponse response = null;
         try {
             response = client.get(request);
@@ -65,14 +69,31 @@ public class Main {
         } catch (IOException ioe) {
             ioe.printStackTrace();
             throw new RuntimeException("There has been an error in executing the request to Github. " +
-                    "Your URL might be wrong. " + BASE_URL);
+                    "Your URL might be wrong. " + request.getUri());
         }
     }
 
-    private static InputStream streamFromFile() {
-        String propsFile = Main.class.getResource(PROPS_FILE).getFile();
-        System.out.println("Properties file: " + propsFile);
+    private static String buildURI(Properties properties) {
+        repository = repository + "/" + properties.getProperty("REPOSITORY_BASE");
+        project = properties.getProperty("PROJECT");
+        return BASE_URL + "/" + repository + "/" + project;
+    }
 
+    private static InputStream streamFromFile() {
+        String path = null;
+        try {
+
+            path = Main.class.getResource(PROPS_FILE).toString();
+            path = path.substring(path.indexOf(":") + 1);
+            return new FileInputStream(path);
+
+        } catch (Exception e) {
+            if (path.equals(null)) {
+                throw new NullPointerException();
+            } else {
+                e.printStackTrace();
+            }
+        }
         return null;
     }
 
