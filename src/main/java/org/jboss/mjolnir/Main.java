@@ -22,14 +22,12 @@
 
 package org.jboss.mjolnir;
 
-import org.eclipse.egit.github.core.client.GitHubClient;
-import org.eclipse.egit.github.core.client.GitHubRequest;
-import org.eclipse.egit.github.core.client.GitHubResponse;
+import org.eclipse.egit.github.core.PullRequest;
+import org.jboss.mjolnir.authentication.UserLogin;
+import org.jboss.mjolnir.util.PropertiesProcessor;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import java.util.List;
 
 /**
  * Main class to be used for this project. In time, we might not need a Main class.
@@ -39,62 +37,28 @@ import java.util.Properties;
  */
 public class Main {
 
-    private static final String BASE_URL = "https://api.github.com";
-    private static final String PROPS_FILE = "users.properties";
-
-    /* The actual repository base can be appended after this bit */
-    private static String repository = "repos";
-    private static String project = null;
+    private static final String PROPS_FILE_NAME = "/users.properties";
 
     public static void main(String[] args) {
-        Properties properties = new Properties();
-        try {
-            properties.load(streamFromFile());
-        } catch (Exception e) {
-            e.printStackTrace();
+        PropertiesProcessor.loadProperties(PROPS_FILE_NAME);
+        UserLogin user = null;
+        if (PropertiesProcessor.hasToken()) {
+            System.out.println("Has token");
+            user = new UserLogin(PropertiesProcessor.getToken());
+        } else {
+            user = new UserLogin(PropertiesProcessor.getName(), PropertiesProcessor.getPassword());
         }
-        GitHubClient client = new GitHubClient();
-        client.setCredentials(properties.getProperty("NAME"), properties.getProperty("PASSWORD"));
-        System.out.println("Name and password are: " + properties.getProperty("NAME") + " " + properties.getProperty("PASSWORD"));
-
-        GitHubRequest request = new GitHubRequest();
-        request.setUri(buildURI(properties));
-
-        GitHubResponse response = null;
         try {
-            response = client.get(request);
-            Object body = response.getBody();
-            System.out.println("Response body is looks like: " + body.toString());
-
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-            throw new RuntimeException("There has been an error in executing the request to Github. " +
-                    "Your URL might be wrong. " + request.getUri());
-        }
-    }
-
-    private static String buildURI(Properties properties) {
-        repository = repository + "/" + properties.getProperty("REPOSITORY_BASE");
-        project = properties.getProperty("PROJECT");
-        return BASE_URL + "/" + repository + "/" + project;
-    }
-
-    private static InputStream streamFromFile() {
-        String path = null;
-        try {
-
-            path = Main.class.getResource(PROPS_FILE).toString();
-            path = path.substring(path.indexOf(":") + 1);
-            return new FileInputStream(path);
-
-        } catch (Exception e) {
-            if (path.equals(null)) {
-                throw new NullPointerException();
-            } else {
-                e.printStackTrace();
+            final List<PullRequest> pulls = user.getPullRequests();
+            for (PullRequest pull : pulls) {
+                System.out.println("Pull request: " + pull.toString());
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
         }
-        return null;
+
     }
+
 
 }
