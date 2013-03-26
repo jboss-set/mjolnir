@@ -32,6 +32,6 @@ classes
 *.swp
 
 # The users.properties file - since it might hold usernames/passwords.
-src/main/resources/org/jboss/mjolnir/users.properties
+src/main/resources/users.properties
 
 
