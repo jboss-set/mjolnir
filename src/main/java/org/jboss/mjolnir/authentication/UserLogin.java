@@ -26,8 +26,12 @@ package org.jboss.mjolnir.authentication;
 import org.eclipse.egit.github.core.IRepositoryIdProvider;
 import org.eclipse.egit.github.core.PullRequest;
 import org.eclipse.egit.github.core.RepositoryId;
+import org.eclipse.egit.github.core.Team;
+import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.OrganizationService;
 import org.eclipse.egit.github.core.service.PullRequestService;
+import org.eclipse.egit.github.core.service.TeamService;
 import org.jboss.mjolnir.util.PropertiesProcessor;
 
 import javax.swing.JPasswordField;
@@ -69,13 +73,6 @@ public class UserLogin {
         client.setOAuth2Token(authToken.toString());
     }
 
-    public List<PullRequest> getPullRequests() throws IOException {
-        PullRequestService prs = new PullRequestService(client);
-        IRepositoryIdProvider repoProvider = RepositoryId.create(PropertiesProcessor.getRepositoryBase()
-                , PropertiesProcessor.getProjectName());
-        return prs.getPullRequests(repoProvider, "open");
-    }
-
     public String getUser() {
         return user;
     }
@@ -86,5 +83,26 @@ public class UserLogin {
 
     public String getAuthToken() {
         return authToken.toString();
+    }
+
+    public List<PullRequest> getPullRequests() throws IOException {
+        PullRequestService prs = new PullRequestService(client);
+        return prs.getPullRequests(getRepoProvider(), "open");
+    }
+
+    public List<Team> getTeams() throws IOException{
+        TeamService teamService = new TeamService(client);
+        System.out.println("RepositoryId for repo: " + PropertiesProcessor.getRepositoryBase() + " is: " + getRepoProvider());
+        return teamService.getTeams(getRepoProvider());
+    }
+
+    public List<User> getMembers() throws IOException {
+        OrganizationService organizationService = new OrganizationService(client);
+        System.out.println("OrganizationService created for " + organizationService.toString());
+        return organizationService.getMembers(PropertiesProcessor.getRepositoryBase());
+    }
+
+    private IRepositoryIdProvider getRepoProvider() {
+        return RepositoryId.create(PropertiesProcessor.getRepositoryBase(), PropertiesProcessor.getProjectName());
     }
 }

@@ -23,6 +23,9 @@
 package org.jboss.mjolnir;
 
 import org.eclipse.egit.github.core.PullRequest;
+import org.eclipse.egit.github.core.Team;
+import org.eclipse.egit.github.core.User;
+import org.eclipse.egit.github.core.service.OrganizationService;
 import org.jboss.mjolnir.authentication.UserLogin;
 import org.jboss.mjolnir.util.PropertiesProcessor;
 
@@ -41,18 +44,28 @@ public class Main {
 
     public static void main(String[] args) {
         PropertiesProcessor.loadProperties(PROPS_FILE_NAME);
-        UserLogin user = null;
+        UserLogin userLogin = null;
         if (PropertiesProcessor.hasToken()) {
-            System.out.println("Has token");
-            user = new UserLogin(PropertiesProcessor.getToken());
+            userLogin = new UserLogin(PropertiesProcessor.getToken());
         } else {
-            user = new UserLogin(PropertiesProcessor.getName(), PropertiesProcessor.getPassword());
+            userLogin = new UserLogin(PropertiesProcessor.getName(), PropertiesProcessor.getPassword());
         }
         try {
-            final List<PullRequest> pulls = user.getPullRequests();
+            final List<PullRequest> pulls = userLogin.getPullRequests();
             for (PullRequest pull : pulls) {
                 System.out.println("Pull request: " + pull.toString());
             }
+
+            final List<User> users = userLogin.getMembers();
+            for (User u : users) {
+                System.out.println("User: " + u.toString());
+            }
+
+            final List<Team> teams = userLogin.getTeams();
+            for (Team team : teams) {
+                System.out.println("Team: " + team.toString());
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
