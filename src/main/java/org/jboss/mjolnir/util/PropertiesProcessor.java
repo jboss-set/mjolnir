@@ -70,10 +70,10 @@ public class PropertiesProcessor {
         return properties.getProperty("PROJECT");
     }
 
-    // If we need to modify the token.
-    public static void setToken(char[] token) {
-        properties.setProperty("AUTH_TOKEN", String.copyValueOf(token));
+    public static int getTeamId() {
+        return Integer.parseInt(properties.getProperty("TEAM_ID"));
     }
+
 
     public static boolean hasToken() {
         return (!getToken().equals("-1"));

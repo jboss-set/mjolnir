@@ -22,10 +22,7 @@
 
 package org.jboss.mjolnir;
 
-import org.eclipse.egit.github.core.PullRequest;
-import org.eclipse.egit.github.core.Team;
 import org.eclipse.egit.github.core.User;
-import org.eclipse.egit.github.core.service.OrganizationService;
 import org.jboss.mjolnir.authentication.UserLogin;
 import org.jboss.mjolnir.util.PropertiesProcessor;
 
@@ -51,21 +48,8 @@ public class Main {
             userLogin = new UserLogin(PropertiesProcessor.getName(), PropertiesProcessor.getPassword());
         }
         try {
-            final List<PullRequest> pulls = userLogin.getPullRequests();
-            for (PullRequest pull : pulls) {
-                System.out.println("Pull request: " + pull.toString());
-            }
-
-            final List<User> users = userLogin.getMembers();
-            for (User u : users) {
-                System.out.println("User: " + u.toString());
-            }
-
-            final List<Team> teams = userLogin.getTeams();
-            for (Team team : teams) {
-                System.out.println("Team: " + team.toString());
-            }
-
+            List<String> userList = userLogin.getStringLogins();
+            // Now we need to do something with this user list.
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
