@@ -20,31 +20,52 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.mjolnir;
+package org.jboss.mjolnir.authentication;
 
-import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.util.GithubParser;
-
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Main class to be used for this project. In time, we might not need a Main class.
+ * Wrapper class to hold the team information for each Github organization in the github-team-data xml file.
  *
  * @author: navssurtani
  * @since: 0.1
  */
-public class Main {
 
-    private static final String XML_DATA = "/github-team-data.xml";
+public class GithubOrganization {
 
-    public static void main(String[] args) {
-        GithubParser parser = GithubParser.getInstance();
-        Set<GithubOrganization> organizations = parser.parse(XML_DATA);
-        System.out.println("List size: " + organizations.size());
-        for (GithubOrganization o : organizations) {
-            System.out.println(o.toString());
-        }
+    private String name;
+    private List<GithubTeam> teams;
+
+    public GithubOrganization(String name) {
+        this.name = name;
+        this.teams = new ArrayList<GithubTeam>();
     }
 
+    public void addTeam(GithubTeam t) {
+        teams.add(t);
+    }
 
+    public List<GithubTeam> getTeams() {
+        return teams;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        sb.append(" Org name: " + name);
+        sb.append(" Teams: ");
+        for (GithubTeam t : teams){
+            sb.append('[');
+            sb.append("Team name=" + t.getName() + " Id=" + t.getId());
+            sb.append("] ");
+        }
+        sb.append('}');
+        return sb.toString();
+    }
 }

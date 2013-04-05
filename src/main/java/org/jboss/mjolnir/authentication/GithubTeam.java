@@ -20,31 +20,31 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.mjolnir;
-
-import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.util.GithubParser;
-
-import java.util.Set;
+package org.jboss.mjolnir.authentication;
 
 /**
- * Main class to be used for this project. In time, we might not need a Main class.
+ * Wrapper class that holds basic information of each team in the github-team-data.xml file.
  *
  * @author: navssurtani
  * @since: 0.1
  */
-public class Main {
 
-    private static final String XML_DATA = "/github-team-data.xml";
+public class GithubTeam {
 
-    public static void main(String[] args) {
-        GithubParser parser = GithubParser.getInstance();
-        Set<GithubOrganization> organizations = parser.parse(XML_DATA);
-        System.out.println("List size: " + organizations.size());
-        for (GithubOrganization o : organizations) {
-            System.out.println(o.toString());
-        }
+    private String name;
+    private int id;
+
+    public GithubTeam(String name, int id) {
+        if (name == null || id == 0) throw new NullPointerException("Null params");
+        this.name = name;
+        this.id = id;
     }
 
+    public String getName() {
+        return name;
+    }
 
+    public int getId() {
+        return id;
+    }
 }
