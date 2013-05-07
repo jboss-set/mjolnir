@@ -87,7 +87,6 @@ public class GithubParser {
                 if (checkEventType(event, ORGANIZATION)) {
                     data = reader.nextEvent().asCharacters().getData();
                     org = new GithubOrganization(data);
-                    System.out.println("Org name: " + org.getName());
                 }
 
                 if (checkEventType(event, TEAM)) {
@@ -113,10 +112,8 @@ public class GithubParser {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            System.exit(1);
         } catch (XMLStreamException e) {
             e.printStackTrace();
-            System.exit(1);
         }
         return orgs;
     }

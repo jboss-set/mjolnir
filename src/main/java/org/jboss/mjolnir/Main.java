@@ -22,9 +22,15 @@
 
 package org.jboss.mjolnir;
 
+import org.eclipse.egit.github.core.Team;
+import org.eclipse.egit.github.core.User;
+import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.TeamService;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.util.GithubParser;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -40,10 +46,24 @@ public class Main {
     public static void main(String[] args) {
         GithubParser parser = GithubParser.getInstance();
         Set<GithubOrganization> organizations = parser.parse(XML_DATA);
-        System.out.println("List size: " + organizations.size());
+        GitHubClient client = new GitHubClient();
+        client.setCredentials("navssurtani",null);
+        TeamService teamService = new TeamService(client);
+
         for (GithubOrganization o : organizations) {
-            System.out.println(o.toString());
+            List<Team> teams = null;
+            try {
+                teams = teamService.getTeams(o.getName());
+                for (Team t : teams) {
+                    System.out.println("Team: " + t.getName());
+                    System.out.println("Team id: " + t.getId());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
         }
+
     }
 
 
