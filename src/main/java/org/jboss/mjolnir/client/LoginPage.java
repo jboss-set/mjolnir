@@ -102,14 +102,12 @@ public class LoginPage implements EntryPoint {
 
             @Override
             public void onClick(ClickEvent clickEvent) {
-                loginButton.setEnabled(false);
                 loginService.login(nameField.getText(), githubName.getText()
                         , passwordField.getText(), getCallback());
             }
 
             @Override
             public void onKeyUp(KeyUpEvent keyUpEvent) {
-                loginButton.setEnabled(false);
                 if (keyUpEvent.getNativeKeyCode() == KeyCodes.KEY_ENTER)
                     loginService.login(nameField.getText(), githubName.getText()
                             , passwordField.getText(), getCallback());
