@@ -30,6 +30,8 @@ import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.util.logging.Log;
+import org.infinispan.util.logging.LogFactory;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.LoginService;
 
@@ -69,11 +71,20 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
         cache = cacheManager.getCache();
     }
 
-    // TODO: Change this implementation to make the password check on the cache first since it will be faster.
     @Override
     public KerberosUser login(String krb5Name, String githubName, String password) {
+
+        log("login called with username " + krb5Name + " and g.... ");
+        KerberosUser toReturn = cache.get(krb5Name);
+        if (toReturn != null) {
+
+            log("found non-null - returning");
+            return toReturn;
+            // TODO: The GitHub API work has to be done here as well now.
+        }
         try {
             validateCredentials(krb5Name, password);
+            toReturn = register(krb5Name, githubName, password);
         } catch (LoginException e) {
             // TODO: We have to handle retries if a password has been mis-typed.
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -82,11 +93,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
-        KerberosUser toReturn = cache.get(krb5Name);
-        if (toReturn == null) {
-            toReturn = register(krb5Name, githubName, password);
-            // TODO: The GitHub API work has to be done here as well now.
-        }
+        log("Returning");
         return toReturn;
     }
 
@@ -121,6 +128,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
 
     private void validateCredentials(final String krb5Name, final String password)
             throws LoginException, URISyntaxException{
+        log("Validating credentials.");
         final Subject subject = null;
         final CallbackHandler callbackHandler = new CallbackHandler() {
             @Override
@@ -140,6 +148,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
                 .getResource("/jaas.config").toURI());
         final LoginContext loginContext = new LoginContext("Kerberos", subject, callbackHandler, loginConfiguration);
         loginContext.login();
+        log("Successful login for " + krb5Name);
     }
 
     private void storeInSession(KerberosUser kerberosUser) {
