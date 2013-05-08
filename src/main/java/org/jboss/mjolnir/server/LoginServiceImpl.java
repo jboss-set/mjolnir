@@ -27,6 +27,7 @@ import com.sun.security.auth.login.ConfigFile;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.jboss.mjolnir.authentication.KerberosUser;
@@ -56,6 +57,9 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     private Cache<String, KerberosUser> cache;
 
     public LoginServiceImpl() {
+        GlobalConfigurationBuilder global = new GlobalConfigurationBuilder();
+        global.globalJmxStatistics()
+                .allowDuplicateDomains(true).jmxDomain("org.jboss.mjolnir");
         ConfigurationBuilder builder = new ConfigurationBuilder();
         builder.loaders().preload(true)
                 .addFileCacheStore().location("/tmp/infinispan.store");

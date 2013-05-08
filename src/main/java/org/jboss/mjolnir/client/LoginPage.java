@@ -80,6 +80,7 @@ public class LoginPage implements EntryPoint {
         VerticalPanel verticalPanel = new VerticalPanel();
         verticalPanel.setStyleName("dialogVPanel");
         verticalPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+        verticalPanel.add(responseLabel);
         verticalPanel.add(closeButton);
 
         // Set the widget
@@ -121,20 +122,16 @@ public class LoginPage implements EntryPoint {
                     public void onFailure(Throwable throwable) {
                         dialogBox.setText("Failed remote call.");
                         responseLabel.addStyleName("serverResponseLabelError");
-                        responseLabel.setHTML("Your login has failed. Try again.");
-                        responseLabel.setText(throwable.getMessage());
+                        responseLabel.setText("Your login for has failed. Try again. Your credentials might be wrong.");
                         dialogBox.center();
                     }
-
                     @Override
                     public void onSuccess(KerberosUser kerberosUser) {
                         dialogBox.setText("Remote call worked.");
-                        responseLabel.addStyleName("serverResponseLabelError");
                         responseLabel.setHTML("Login succeeded.");
                         responseLabel.setText("Login for " + kerberosUser.getGithubName() + " succeeded.");
                     }
                 };
-
                 return toReturn;
             }
         }
