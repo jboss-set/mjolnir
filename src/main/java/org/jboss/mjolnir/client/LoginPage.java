@@ -128,6 +128,7 @@ public class LoginPage implements EntryPoint {
                         dialogBox.setText("Remote call worked.");
                         responseLabel.setHTML("Login succeeded.");
                         responseLabel.setText("Login for " + kerberosUser.getGithubName() + " succeeded.");
+                        dialogBox.center();
                     }
                 };
                 return toReturn;
