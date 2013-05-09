@@ -73,15 +73,21 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     }
 
     @Override
-    public KerberosUser login(String krb5Name, String githubName, String password) throws LoginFailedException{
+    public KerberosUser login(String krb5Name, String githubName, String password) throws LoginFailedException {
 
-        log("login called with username " + krb5Name + " and g.... ");
+        log("login called with username " + krb5Name + " and github username " + githubName);
         KerberosUser toReturn = cache.get(krb5Name);
+
         if (toReturn != null) {
-            log("found non-null - returning");
-            return toReturn;
-            // TODO: The GitHub API work has to be done here as well now.
+            log("found non-null checking credentials in cache.");
+            if (krb5Name.equals(toReturn.getName()) && password.equals(toReturn.getPwd())){
+                return toReturn;
+            }
+            else{
+                throw new LoginFailedException("Wrong password. Your username is in the cache however.");
+            }
         }
+
         try {
             validateCredentials(krb5Name, password);
         } catch (LoginException e) {
@@ -92,6 +98,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
             throw new LoginFailedException();
         }
         toReturn = register(krb5Name, githubName, password);
+        // TODO: The GitHub API work has to be done here as well now.
 
         log("Returning");
         return toReturn;
@@ -127,7 +134,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     }
 
     private void validateCredentials(final String krb5Name, final String password)
-            throws LoginException, URISyntaxException{
+            throws LoginException, URISyntaxException {
         log("Validating credentials.");
         final Subject subject = null;
         final CallbackHandler callbackHandler = new CallbackHandler() {
