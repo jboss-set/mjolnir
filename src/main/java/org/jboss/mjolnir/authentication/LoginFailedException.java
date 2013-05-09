@@ -20,26 +20,24 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-
-package org.jboss.mjolnir.client;
-
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.authentication.LoginFailedException;
-
-import javax.security.auth.login.LoginException;
-import java.net.URISyntaxException;
+package org.jboss.mjolnir.authentication;
 
 /**
  * @author: navssurtani
  * @since: 0.1
  */
 
-@RemoteServiceRelativePath("LoginService")
-public interface LoginService extends RemoteService {
+public class LoginFailedException extends Exception {
+    private String symbol;
 
-    KerberosUser login (String krb5Name, String githubName, String password) throws LoginFailedException;
-    KerberosUser loginFromSession();
-    void logout();
+    public LoginFailedException(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public LoginFailedException() {
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
 }

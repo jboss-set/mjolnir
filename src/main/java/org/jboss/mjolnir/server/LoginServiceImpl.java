@@ -33,6 +33,7 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.util.logging.Log;
 import org.infinispan.util.logging.LogFactory;
 import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.client.LoginService;
 
 import javax.security.auth.Subject;
@@ -72,26 +73,25 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     }
 
     @Override
-    public KerberosUser login(String krb5Name, String githubName, String password) {
+    public KerberosUser login(String krb5Name, String githubName, String password) throws LoginFailedException{
 
         log("login called with username " + krb5Name + " and g.... ");
         KerberosUser toReturn = cache.get(krb5Name);
         if (toReturn != null) {
-
             log("found non-null - returning");
             return toReturn;
             // TODO: The GitHub API work has to be done here as well now.
         }
         try {
             validateCredentials(krb5Name, password);
-            toReturn = register(krb5Name, githubName, password);
         } catch (LoginException e) {
-            // TODO: We have to handle retries if a password has been mis-typed.
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            log("LoginException caught from JaaS");
+            throw new LoginFailedException("Error with login credentials.");
         } catch (URISyntaxException e) {
-            // TODO: If this happens then there's something very very wrong happening.
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            log("URISyntaxException caught. Big problem here.");
+            throw new LoginFailedException();
         }
+        toReturn = register(krb5Name, githubName, password);
 
         log("Returning");
         return toReturn;
