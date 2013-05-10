@@ -65,7 +65,6 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     private Set<GithubOrganization> orgs;
 
     public LoginServiceImpl() {
-        log("Instantiating a LoginServiceImpl");
         GlobalConfigurationBuilder global = new GlobalConfigurationBuilder();
         global.globalJmxStatistics()
                 .allowDuplicateDomains(true).jmxDomain("org.jboss.mjolnir");
@@ -76,7 +75,6 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
         Configuration config = builder.build(true);
         EmbeddedCacheManager cacheManager = new DefaultCacheManager(config);
         cache = cacheManager.getCache();
-        log("Cache of " + cache.getName() + " instantiated.");
 
         // Now do the parsing work.
         parse();
