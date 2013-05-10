@@ -73,8 +73,7 @@ public class GithubParser {
         Set<GithubOrganization> orgs = null;
         try {
             GithubOrganization org = null;
-            File localFile = getAndCheckFile(xmlFile);
-            InputStream in = new FileInputStream(localFile);
+            InputStream in = getAndCheckFile(xmlFile);;
 
             // Create the XML Input Factory.
             XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -119,8 +118,6 @@ public class GithubParser {
                 }
             }
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (XMLStreamException e) {
             e.printStackTrace();
         }
@@ -136,11 +133,12 @@ public class GithubParser {
         }
     }
 
-    private File getAndCheckFile(String xmlFile) {
-        URL url= GithubParser.class.getResource(xmlFile);
-        String path = url.toExternalForm();
-        path = path.substring(path.indexOf(":") + 1);
-        log.trace("XML file of name " + xmlFile + " found. All good to return.");
-        return new File(path);
+    private InputStream getAndCheckFile(String xmlFile) {
+        InputStream stream = GithubParser.class.getResourceAsStream(xmlFile);
+        if (stream != null) {
+            if (log.isTraceEnabled()) log.trace("XML file of name " + xmlFile + " found. All good to return.");
+        }
+        else throw new NullPointerException("Null InputStream from file " + xmlFile);
+        return stream;
     }
 }
