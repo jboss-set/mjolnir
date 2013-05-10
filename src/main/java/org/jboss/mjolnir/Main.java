@@ -23,11 +23,10 @@
 package org.jboss.mjolnir;
 
 import org.eclipse.egit.github.core.Team;
-import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.TeamService;
 import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.util.GithubParser;
+import org.jboss.mjolnir.server.GithubParser;
 
 import java.io.IOException;
 import java.util.List;

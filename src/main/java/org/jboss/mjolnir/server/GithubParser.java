@@ -20,9 +20,10 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.mjolnir.util;
+package org.jboss.mjolnir.server;
 
 
+import org.jboss.logging.Logger;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 
@@ -53,17 +54,22 @@ public class GithubParser {
     private static final String NAME = "name";
     private static final String ID = "id";
 
+    private static final Logger log = Logger.getLogger(GithubParser.class);
+
     private static final GithubParser INSTANCE = new GithubParser();
 
     public static GithubParser getInstance() {
+        log.info("getInstance() called on GithubParser");
         return INSTANCE;
     }
 
     private GithubParser() {
+        log.info("Parser instantiated.");
         // Singleton.
     }
 
     public Set<GithubOrganization> parse(String xmlFile) {
+        log.info("parse() called within GithubParser.");
         Set<GithubOrganization> orgs = null;
         try {
             GithubOrganization org = null;
@@ -81,11 +87,13 @@ public class GithubParser {
                 String data = null;
 
                 if (checkEventType(event, ORGANIZATIONS)) {
+                    log.debug("Creating Set for GithubOrganizations.");
                     orgs = new HashSet<GithubOrganization>();
                 }
 
                 if (checkEventType(event, ORGANIZATION)) {
                     data = reader.nextEvent().asCharacters().getData();
+                    log.debug("Found a new GithubOrganization, creating it.");
                     org = new GithubOrganization(data);
                 }
 
@@ -102,6 +110,7 @@ public class GithubParser {
                                 teamId = Integer.parseInt(reader.nextEvent().asCharacters().getData());
                                 org.addTeam(new GithubTeam(teamName, teamId));
                                 orgs.add(org);
+                                log.info("Team of " + teamName + " and " + teamId + " added to " + org.getName());
                                 // We now have all the information for this team - so we will break from this while block.
                                 break;
                             }
@@ -119,6 +128,7 @@ public class GithubParser {
     }
 
     private boolean checkEventType(XMLEvent event, String constant) {
+        log.trace("Checking event type inside the Github Parser.");
         if (event.isStartElement()) {
             return event.asStartElement().getName().getLocalPart().equals(constant);
         } else {
@@ -130,6 +140,7 @@ public class GithubParser {
         URL url= GithubParser.class.getResource(xmlFile);
         String path = url.toExternalForm();
         path = path.substring(path.indexOf(":") + 1);
+        log.trace("XML file of name " + xmlFile + " found. All good to return.");
         return new File(path);
     }
 }

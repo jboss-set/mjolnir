@@ -32,6 +32,7 @@ import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.util.logging.Log;
 import org.infinispan.util.logging.LogFactory;
+import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.client.LoginService;
@@ -49,6 +50,7 @@ import javax.servlet.http.HttpSession;
 import java.io.Console;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Set;
 
 /**
  * @author: navssurtani
@@ -57,19 +59,27 @@ import java.net.URISyntaxException;
 
 public class LoginServiceImpl extends RemoteServiceServlet implements LoginService {
 
+    private static final String XML_DATA = "/github-team-data.xml";
+
     private Cache<String, KerberosUser> cache;
+    private Set<GithubOrganization> orgs;
 
     public LoginServiceImpl() {
+        log("Instantiating a LoginServiceImpl");
         GlobalConfigurationBuilder global = new GlobalConfigurationBuilder();
         global.globalJmxStatistics()
                 .allowDuplicateDomains(true).jmxDomain("org.jboss.mjolnir");
         ConfigurationBuilder builder = new ConfigurationBuilder();
         builder.loaders().preload(true)
-                .addFileCacheStore().location("/tmp/infinispan.store");
-        builder.eviction().maxEntries(50);
+                .addFileCacheStore().location("/tmp/infinispan.store")
+                .eviction().maxEntries(50);
         Configuration config = builder.build(true);
         EmbeddedCacheManager cacheManager = new DefaultCacheManager(config);
         cache = cacheManager.getCache();
+        log("Cache of " + cache.getName() + " instantiated.");
+
+        // Now do the parsing work.
+        parse();
     }
 
     @Override
@@ -79,11 +89,10 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
         KerberosUser toReturn = cache.get(krb5Name);
 
         if (toReturn != null) {
-            log("found non-null checking credentials in cache.");
-            if (krb5Name.equals(toReturn.getName()) && password.equals(toReturn.getPwd())){
+            log("Found non-null checking credentials in cache.");
+            if (krb5Name.equals(toReturn.getName()) && password.equals(toReturn.getPwd())) {
                 return toReturn;
-            }
-            else{
+            } else {
                 throw new LoginFailedException("Wrong password. Your username is in the cache however.");
             }
         }
@@ -162,5 +171,12 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
         HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
         HttpSession session = httpServletRequest.getSession();
         session.setAttribute("kerberosUser", kerberosUser);
+    }
+
+    private void parse() {
+        GithubParser parser = GithubParser.getInstance();
+        log("Instance of GithubParser received");
+        orgs = parser.parse(XML_DATA);
+        log(orgs.size() + " created in Set.");
     }
 }
