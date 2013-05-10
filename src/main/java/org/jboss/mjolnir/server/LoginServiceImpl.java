@@ -173,8 +173,6 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
 
     private void parse() {
         GithubParser parser = GithubParser.getInstance();
-        log("Instance of GithubParser received");
         orgs = parser.parse(XML_DATA);
-        log(orgs.size() + " created in Set.");
     }
 }
