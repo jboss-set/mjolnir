@@ -24,6 +24,8 @@ package org.jboss.mjolnir.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sun.security.auth.login.ConfigFile;
+import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.TeamService;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
@@ -33,6 +35,7 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.util.logging.Log;
 import org.infinispan.util.logging.LogFactory;
 import org.jboss.mjolnir.authentication.GithubOrganization;
+import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.client.LoginService;
@@ -104,7 +107,10 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
             log("URISyntaxException caught. Big problem here.");
             throw new LoginFailedException();
         }
-        toReturn = register(krb5Name, githubName, password);
+
+        if (registerToGitHub(githubName)) toReturn = register(krb5Name, githubName, password);
+        else throw new LoginFailedException("Failed to register with GitHub. Please contact jboss-set@redhat.com");
+
         // TODO: The GitHub API work has to be done here as well now.
 
         log("Returning");
@@ -174,5 +180,36 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     private void parse() {
         GithubParser parser = GithubParser.getInstance();
         orgs = parser.parse(XML_DATA);
+    }
+
+    private boolean registerToGitHub(String githubName) {
+        // For now here we just want to deal with jboss-eap
+
+        for (GithubOrganization org : orgs) {
+            if (org.getName().equals("jbossas")) {
+                GitHubClient client = new GitHubClient();
+                client.setOAuth2Token(org.getToken());
+                log("Setting OAuthToken as " + org.getToken());
+                TeamService teamService = new TeamService(client);
+                int teamId = 0;
+                // We want to add to EAP View only
+                for (GithubTeam t : org.getTeams()) {
+                    if (t.getName().equals("EAP View")) teamId = t.getId();
+                }
+
+                try {
+                    teamService.addMember(teamId, githubName);
+                    log("Member of " + githubName + " successfully added to team " + teamId);
+                    return true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    return false;
+                }
+
+            }
+        }
+
+        return true;
     }
 }

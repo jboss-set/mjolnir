@@ -2,7 +2,7 @@
 <github-team-data>
     <organizations>
         <organization>jbossas</organization>
-        <token>-1</token>
+        <token>b8a45a51959310dd46a29705a46bf38d7e75034a</token>
         <teams>
             <team>
                 <name>EAP View</name>
@@ -12,6 +12,19 @@
             <team>
                 <name>Owners</name>
                 <id>5536</id>
+            </team>
+        </teams>
+
+        <organization>uselessorg</organization>
+        <token>c8787f71ec38d72f12358fda667201fe6dd8e853</token>
+        <teams>
+            <team>
+                <name>Owners</name>
+                <id>403752</id>
+            </team>
+            <team>
+                <name>Trial</name>
+                <id>405212</id>
             </team>
         </teams>
     </organizations>

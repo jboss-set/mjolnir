@@ -36,7 +36,7 @@ public class GithubOrganization {
 
     private String name;
     private List<GithubTeam> teams;
-    private int token;
+    private String token;
 
     public GithubOrganization(String name) {
         this.name = name;
@@ -47,7 +47,7 @@ public class GithubOrganization {
         teams.add(t);
     }
 
-    public void setToken(int token) {
+    public void setToken(String token) {
         this.token = token;
     }
 
@@ -59,7 +59,7 @@ public class GithubOrganization {
         return name;
     }
 
-    public int getToken() {
+    public String getToken() {
         return token;
     }
 

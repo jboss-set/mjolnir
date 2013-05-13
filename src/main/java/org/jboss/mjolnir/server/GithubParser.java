@@ -100,7 +100,7 @@ public class GithubParser {
                 // The OAuth token part.
                 if (checkEventType(event, TOKEN)) {
                     data = reader.nextEvent().asCharacters().getData();
-                    org.setToken(Integer.parseInt(data));
+                    org.setToken(data);
                 }
 
                 if (checkEventType(event, TEAM)) {
