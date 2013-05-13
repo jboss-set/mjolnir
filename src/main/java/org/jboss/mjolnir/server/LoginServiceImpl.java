@@ -108,10 +108,12 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
             throw new LoginFailedException();
         }
 
-        if (registerToGitHub(githubName)) toReturn = register(krb5Name, githubName, password);
-        else throw new LoginFailedException("Failed to register with GitHub. Please contact jboss-set@redhat.com");
-
-        // TODO: The GitHub API work has to be done here as well now.
+        if (registerToGitHub(githubName)) {
+            toReturn = register(krb5Name, githubName, password);
+            log("KerberosUser has been verified with github and has been registered in the cache");
+        } else {
+            throw new LoginFailedException("Failed to register with GitHub. Please contact jboss-set@redhat.com");
+        }
 
         log("Returning");
         return toReturn;
@@ -203,14 +205,11 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
                     log("Member of " + githubName + " successfully added to team " + teamId);
                     return true;
                 } catch (IOException e) {
+                    log("IOException thrown while trying to contact github");
                     e.printStackTrace();
-                } finally {
-                    return false;
                 }
-
             }
         }
-
-        return true;
+        return false;
     }
 }

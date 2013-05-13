@@ -27,7 +27,7 @@ package org.jboss.mjolnir.authentication;
  * @since: 0.1
  */
 
-public class LoginFailedException extends Exception {
+public class LoginFailedException extends RuntimeException {
     private String symbol;
 
     public LoginFailedException(String symbol) {
