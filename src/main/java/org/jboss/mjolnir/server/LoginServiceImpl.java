@@ -186,7 +186,8 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
         // For now here we just want to deal with jboss-eap
 
         for (GithubOrganization org : orgs) {
-            if (org.getName().equals("jbossas")) {
+            if (org.getName().equals("uselessorg")) {
+                log("The organization " + org.getName() + " has been found");
                 GitHubClient client = new GitHubClient();
                 client.setOAuth2Token(org.getToken());
                 log("Setting OAuthToken as " + org.getToken());
@@ -194,7 +195,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
                 int teamId = 0;
                 // We want to add to EAP View only
                 for (GithubTeam t : org.getTeams()) {
-                    if (t.getName().equals("EAP View")) teamId = t.getId();
+                    if (t.getName().equals("Trial")) teamId = t.getId();
                 }
 
                 try {
