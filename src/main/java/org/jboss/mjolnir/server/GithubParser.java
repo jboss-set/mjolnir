@@ -50,6 +50,7 @@ public class GithubParser {
     /* Constant Strings */
     private static final String ORGANIZATIONS = "organizations";
     private static final String ORGANIZATION = "organization";
+    private static final String TOKEN = "token";
     private static final String TEAM = "team";
     private static final String NAME = "name";
     private static final String ID = "id";
@@ -94,6 +95,12 @@ public class GithubParser {
                     data = reader.nextEvent().asCharacters().getData();
                     log.debug("Found a new GithubOrganization, creating it.");
                     org = new GithubOrganization(data);
+                }
+
+                // The OAuth token part.
+                if (checkEventType(event, TOKEN)) {
+                    data = reader.nextEvent().asCharacters().getData();
+                    org.setToken(Integer.parseInt(data));
                 }
 
                 if (checkEventType(event, TEAM)) {

@@ -2,6 +2,7 @@
 <github-team-data>
     <organizations>
         <organization>jbossas</organization>
+        <token>-1</token>
         <teams>
             <team>
                 <name>EAP View</name>
