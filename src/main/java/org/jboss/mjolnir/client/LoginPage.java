@@ -124,7 +124,7 @@ public class LoginPage implements EntryPoint {
                     @Override
                     public void onFailure(Throwable throwable) {
                         dialogBox.setText("Remote call failed");
-                        responseLabel.setText(throwable.getMessage());
+                        responseLabel.setHTML(throwable.getMessage());
                         dialogBox.center();
                     }
 
