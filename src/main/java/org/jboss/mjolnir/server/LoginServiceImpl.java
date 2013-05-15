@@ -22,7 +22,7 @@
 
 package org.jboss.mjolnir.server;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
 import com.sun.security.auth.login.ConfigFile;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.TeamService;
@@ -32,8 +32,6 @@ import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
-import org.infinispan.util.logging.Log;
-import org.infinispan.util.logging.LogFactory;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
@@ -50,7 +48,6 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.Console;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
@@ -60,7 +57,7 @@ import java.util.Set;
  * @since: 0.1
  */
 
-public class LoginServiceImpl extends RemoteServiceServlet implements LoginService {
+public class LoginServiceImpl extends XsrfProtectedServiceServlet implements LoginService {
 
     private static final String XML_DATA = "/github-team-data.xml";
 
@@ -139,6 +136,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     }
 
     private KerberosUser register(String krb5Name, String githubName, String password) {
+        log("Registering user of " + githubName + " to cache.");
         KerberosUser kerberosUser = new KerberosUser();
         kerberosUser.setName(krb5Name);
         kerberosUser.setGithubName(githubName);
