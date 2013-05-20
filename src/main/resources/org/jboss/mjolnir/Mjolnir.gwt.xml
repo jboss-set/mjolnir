@@ -8,7 +8,6 @@
 <module rename-to='mjolnir'>
     <!-- Inherit the core Web Toolkit stuff.-->
     <inherits name='com.google.gwt.user.User'/>
-    <inherits name="com.google.gwt.logging.Logging"/>
 
      <!--Inherit the default GWT style sheet.-->
     <inherits name='com.google.gwt.user.theme.clean.Clean'/>
@@ -20,7 +19,5 @@
     <source path='client'/>
     <source path='authentication'/>
 
-    <!-- Enable the remote logging -->
-    <set-property name="gwt.logging.simpleRemoteHandler" value="ENABLED"/>
 
 </module>

@@ -27,17 +27,6 @@
         <url-pattern>/mjolnir/xsrf</url-pattern>
     </servlet-mapping>
 
-    <!-- Remote logging -->
-    <servlet>
-        <servlet-name>remoteLogging</servlet-name>
-        <servlet-class>com.google.gwt.logging.server.RemoteLoggingServiceImpl</servlet-class>
-    </servlet>
-    
-    <servlet-mapping>
-        <servlet-name>remoteLogging</servlet-name>
-        <url-pattern>/mjolnir/logging</url-pattern>
-    </servlet-mapping>
-    
     <context-param>
         <param-name>gwt.xsrf.session_cookie_name</param-name>
         <param-value>JSESSIONID</param-value>
