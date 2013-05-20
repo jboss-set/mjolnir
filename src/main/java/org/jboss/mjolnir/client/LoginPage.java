@@ -103,6 +103,8 @@ public class LoginPage implements EntryPoint {
             }
         });
 
+        Cookies.setCookie("JSESSIONID", "testCookie");
+
         // Handler for the login phase.
         class LoginHandler implements ClickHandler, KeyUpHandler {
             private final LoginServiceAsync loginService = (LoginServiceAsync) GWT.create(LoginService.class);

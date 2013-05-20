@@ -22,6 +22,7 @@
 
 package org.jboss.mjolnir.server;
 
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
 import com.sun.security.auth.login.ConfigFile;
 import org.eclipse.egit.github.core.client.GitHubClient;
@@ -84,6 +85,10 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
     @Override
     public KerberosUser login(String krb5Name, String githubName, String password) throws LoginFailedException {
         log("login called with username " + krb5Name + " and github username " + githubName);
+
+        String cookie = Cookies.getCookie("JSESSIONID");
+        log("Cookie found as: " + cookie);
+
         KerberosUser toReturn = cache.get(krb5Name);
 
         if (toReturn != null) {
