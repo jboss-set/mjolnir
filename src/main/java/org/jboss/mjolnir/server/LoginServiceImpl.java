@@ -37,6 +37,7 @@ import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.client.LoginService;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -82,13 +83,14 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
 
     @Override
     public KerberosUser login(String krb5Name, String githubName, String password) throws LoginFailedException {
-
         log("login called with username " + krb5Name + " and github username " + githubName);
         KerberosUser toReturn = cache.get(krb5Name);
 
         if (toReturn != null) {
-            log("Found non-null checking credentials in cache.");
-            if (krb5Name.equals(toReturn.getName()) && password.equals(toReturn.getPwd())) {
+            log("User " + krb5Name + " exists in cache.");
+            String hashedPwd = toReturn.getPwd();
+            boolean validPwd = BCrypt.checkpw(password, hashedPwd);
+            if (validPwd) {
                 return toReturn;
             } else {
                 throw new LoginFailedException("Wrong password. Your username is in the cache however.");
@@ -140,12 +142,15 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         KerberosUser kerberosUser = new KerberosUser();
         kerberosUser.setName(krb5Name);
         kerberosUser.setGithubName(githubName);
-        kerberosUser.setPwd(password);
+        String hash = BCrypt.hashpw(password, BCrypt.gensalt());
+        log("Password has been hashed to: " + hash);
+        kerberosUser.setPwd(hash);
         cache.put(krb5Name, kerberosUser);
         storeInSession(kerberosUser);
         return kerberosUser;
     }
 
+    // Method that will only be called if someone tries to log into the application for the first time.
     private void validateCredentials(final String krb5Name, final String password)
             throws LoginException, URISyntaxException {
         log("Validating credentials.");

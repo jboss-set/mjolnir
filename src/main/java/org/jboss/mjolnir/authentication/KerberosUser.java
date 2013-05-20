@@ -45,6 +45,10 @@ public class KerberosUser implements Serializable {
         this.krb5Name = krb5Name;
     }
 
+    /**
+     * @return The hashed password using BCrypt.
+     */
+
     public String getPwd() {
         return pwd;
     }
