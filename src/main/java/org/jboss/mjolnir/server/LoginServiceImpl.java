@@ -142,6 +142,14 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         session.removeAttribute("kerberosUser");
     }
 
+    @Override
+    public void setSession() {
+        log("setSession() called.");
+        String cookieValue = getThreadLocalRequest().getRequestedSessionId();
+        Cookies.setCookie("JSESSIONID", cookieValue);
+        log("Session ID cookie set as: " + cookieValue);
+    }
+
     private KerberosUser register(String krb5Name, String githubName, String password) {
         log("Registering user of " + githubName + " to cache.");
         KerberosUser kerberosUser = new KerberosUser();

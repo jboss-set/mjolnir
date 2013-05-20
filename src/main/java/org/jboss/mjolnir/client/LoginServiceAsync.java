@@ -15,4 +15,6 @@ public interface LoginServiceAsync {
     void loginFromSession(AsyncCallback<KerberosUser> async);
 
     void logout(AsyncCallback<Void> async);
+
+    void setSession(AsyncCallback<Void> async);
 }

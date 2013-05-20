@@ -32,6 +32,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.HasRpcToken;
+import com.google.gwt.user.client.rpc.RpcTokenException;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.rpc.XsrfToken;
 import com.google.gwt.user.client.rpc.XsrfTokenService;
@@ -56,10 +57,13 @@ import java.util.logging.LogRecord;
 
 public class LoginPage implements EntryPoint {
 
-    private static final String JSESSIONID = "JSESSIONID";
 
     @Override
     public void onModuleLoad() {
+
+        // Make the remote call to set the Session ID.
+        final LoginServiceAsync loginService = (LoginServiceAsync) GWT.create(LoginService.class);
+        setSessionIdFromClient(loginService);
 
         final Button loginButton = new Button("Login");
         loginButton.setEnabled(true);
@@ -107,11 +111,9 @@ public class LoginPage implements EntryPoint {
             }
         });
 
-        Cookies.setCookie(JSESSIONID, "testCookie");
 
         // Handler for the login phase.
         class LoginHandler implements ClickHandler, KeyUpHandler {
-            private final LoginServiceAsync loginService = (LoginServiceAsync) GWT.create(LoginService.class);
 
             @Override
             public void onClick(ClickEvent clickEvent) {
@@ -120,19 +122,26 @@ public class LoginPage implements EntryPoint {
 
             @Override
             public void onKeyUp(KeyUpEvent keyUpEvent) {
-                if (keyUpEvent.getNativeKeyCode() == KeyCodes.KEY_ENTER){
+                if (keyUpEvent.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
                     makeSecureLogin(nameField.getText(), githubName.getText(), passwordField.getText());
                 }
             }
 
             private void makeSecureLogin(final String krb5Name, final String githubName, final String pwd) {
                 XsrfTokenServiceAsync xsrf = (XsrfTokenServiceAsync) GWT.create(XsrfTokenService.class);
-                ((ServiceDefTarget)xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
+                ((ServiceDefTarget) xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
                 xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
                     @Override
                     public void onFailure(Throwable throwable) {
                         dialogBox.setText("Remote call failed");
-                        responseLabel.setHTML(throwable.getMessage());
+
+                        try {
+                            throw throwable;
+                        } catch (RpcTokenException rpcException) {
+                            responseLabel.setHTML("RPC Token could not be generated.");
+                        } catch (Throwable other) {
+                            responseLabel.setHTML(other.getMessage());
+                        }
                         dialogBox.center();
                     }
 
@@ -175,5 +184,21 @@ public class LoginPage implements EntryPoint {
         LoginHandler handler = new LoginHandler();
         loginButton.addClickHandler(handler);
         passwordField.addKeyUpHandler(handler);
+    }
+
+    private void setSessionIdFromClient(LoginServiceAsync loginService) {
+        // Empty hack in order to get the server to do some work and sort out the session management.
+        loginService.setSession(new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                // Do nothing here since we will pick up any issue with the session id from the XSRF Token part.
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                // Again we don't need to actually do anything here.
+            }
+        });
+
     }
 }

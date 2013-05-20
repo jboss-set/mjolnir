@@ -41,4 +41,5 @@ public interface LoginService extends RemoteService {
     KerberosUser login (String krb5Name, String githubName, String password) throws LoginFailedException;
     KerberosUser loginFromSession();
     void logout();
+    void setSession();
 }
