@@ -5,6 +5,7 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
+    <!-- The LoginService servlet -->
     <servlet>
         <servlet-name>loginService</servlet-name>
         <servlet-class>org.jboss.mjolnir.server.LoginServiceImpl</servlet-class>
@@ -14,7 +15,8 @@
         <servlet-name>loginService</servlet-name>
         <url-pattern>/mjolnir/LoginService</url-pattern>
     </servlet-mapping>
-    
+
+    <!-- Security -->
     <servlet>
         <servlet-name>xsrf</servlet-name>
         <servlet-class>com.google.gwt.user.server.rpc.XsrfTokenServiceServlet</servlet-class>
@@ -23,6 +25,17 @@
     <servlet-mapping>
         <servlet-name>xsrf</servlet-name>
         <url-pattern>/mjolnir/xsrf</url-pattern>
+    </servlet-mapping>
+
+    <!-- Remote logging -->
+    <servlet>
+        <servlet-name>remoteLogging</servlet-name>
+        <servlet-class>com.google.gwt.logging.server.RemoteLoggingServiceImpl</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>remoteLogging</servlet-name>
+        <url-pattern>/mjolnir/logging</url-pattern>
     </servlet-mapping>
     
     <context-param>

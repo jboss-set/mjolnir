@@ -29,6 +29,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.logging.client.SimpleRemoteLogHandler;
+import com.google.gwt.logging.shared.RemoteLoggingService;
+import com.google.gwt.logging.shared.RemoteLoggingServiceAsync;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.HasRpcToken;
@@ -47,12 +50,17 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
 
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+
 /**
  * @author: navssurtani
  * @since: 0.1
  */
 
 public class LoginPage implements EntryPoint {
+
+    private static final String JSESSIONID = "JSESSIONID";
 
     @Override
     public void onModuleLoad() {
@@ -62,6 +70,7 @@ public class LoginPage implements EntryPoint {
         final TextBox nameField = new TextBox();
         final TextBox githubName = new TextBox();
         final PasswordTextBox passwordField = new PasswordTextBox();
+        final SimpleRemoteLogHandler logHandler = new SimpleRemoteLogHandler();
 
         nameField.setTitle("Kerberos ID");
         githubName.setTitle("Github ID");
@@ -103,7 +112,9 @@ public class LoginPage implements EntryPoint {
             }
         });
 
-        Cookies.setCookie("JSESSIONID", "testCookie");
+        Cookies.setCookie(JSESSIONID, "testCookie");
+        logHandler.publish(new LogRecord(Level.INFO, "Message from Client: Created cookie for + " + JSESSIONID + " "
+                + Cookies.getCookie("JSESSIONID")));
 
         // Handler for the login phase.
         class LoginHandler implements ClickHandler, KeyUpHandler {
@@ -111,13 +122,16 @@ public class LoginPage implements EntryPoint {
 
             @Override
             public void onClick(ClickEvent clickEvent) {
+                logHandler.publish(new LogRecord(Level.INFO, "Message from Client: Login button hit."));
                 makeSecureLogin(nameField.getText(), githubName.getText(), passwordField.getText());
             }
 
             @Override
             public void onKeyUp(KeyUpEvent keyUpEvent) {
-                if (keyUpEvent.getNativeKeyCode() == KeyCodes.KEY_ENTER)
+                if (keyUpEvent.getNativeKeyCode() == KeyCodes.KEY_ENTER){
                     makeSecureLogin(nameField.getText(), githubName.getText(), passwordField.getText());
+                    logHandler.publish(new LogRecord(Level.INFO, "Message from Client: Login button hit."));
+                }
             }
 
             private void makeSecureLogin(final String krb5Name, final String githubName, final String pwd) {
@@ -128,16 +142,17 @@ public class LoginPage implements EntryPoint {
                     public void onFailure(Throwable throwable) {
                         dialogBox.setText("Remote call failed");
                         responseLabel.setHTML(throwable.getMessage());
+                        logHandler.publish(new LogRecord(Level.INFO, "Generating XSRF token failed from GWT internals."));
                         dialogBox.center();
                     }
 
                     @Override
                     public void onSuccess(XsrfToken xsrfToken) {
+                        logHandler.publish(new LogRecord(Level.INFO, "Message from Client: XSRF Token received."));
                         ((HasRpcToken) loginService).setRpcToken(xsrfToken);
                         loginService.login(krb5Name, githubName, pwd, getLoginCallback());
                     }
                 });
-
             }
 
             private AsyncCallback<KerberosUser> getLoginCallback() {
