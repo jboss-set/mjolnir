@@ -27,6 +27,17 @@
         <url-pattern>/mjolnir/xsrf</url-pattern>
     </servlet-mapping>
 
+    <!-- Session hack -->
+    <servlet>
+        <servlet-name>session</servlet-name>
+        <servlet-class>org.jboss.mjolnir.server.SessionServiceServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>session</servlet-name>
+        <url-pattern>/mjolnir/session</url-pattern>
+    </servlet-mapping>
+
     <context-param>
         <param-name>gwt.xsrf.session_cookie_name</param-name>
         <param-value>JSESSIONID</param-value>

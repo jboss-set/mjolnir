@@ -61,9 +61,8 @@ public class LoginPage implements EntryPoint {
     @Override
     public void onModuleLoad() {
 
-        // Make the remote call to set the Session ID.
-        final LoginServiceAsync loginService = (LoginServiceAsync) GWT.create(LoginService.class);
-        setSessionIdFromClient(loginService);
+        final SessionServiceAsync sessionServiceAsync = (SessionServiceAsync) GWT.create(SessionService.class);
+        generateSession(sessionServiceAsync);
 
         final Button loginButton = new Button("Login");
         loginButton.setEnabled(true);
@@ -114,7 +113,7 @@ public class LoginPage implements EntryPoint {
 
         // Handler for the login phase.
         class LoginHandler implements ClickHandler, KeyUpHandler {
-
+            final LoginServiceAsync loginService = (LoginServiceAsync) GWT.create(LoginService.class);
             @Override
             public void onClick(ClickEvent clickEvent) {
                 makeSecureLogin(nameField.getText(), githubName.getText(), passwordField.getText());
@@ -186,17 +185,16 @@ public class LoginPage implements EntryPoint {
         passwordField.addKeyUpHandler(handler);
     }
 
-    private void setSessionIdFromClient(LoginServiceAsync loginService) {
-        // Empty hack in order to get the server to do some work and sort out the session management.
-        loginService.setSession(new AsyncCallback<Void>() {
+    private void generateSession(SessionServiceAsync sessionServiceAsync) {
+        sessionServiceAsync.createSession(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                // Do nothing here since we will pick up any issue with the session id from the XSRF Token part.
+                // No-op.
             }
 
             @Override
             public void onSuccess(Void result) {
-                // Again we don't need to actually do anything here.
+                // No-op.
             }
         });
 
