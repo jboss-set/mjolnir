@@ -189,12 +189,12 @@ public class LoginPage implements EntryPoint {
         sessionServiceAsync.createSession(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                // No-op.
+                return;
             }
 
             @Override
             public void onSuccess(Void result) {
-                // No-op.
+                return;
             }
         });
 
