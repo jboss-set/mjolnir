@@ -61,9 +61,6 @@ public class LoginPage implements EntryPoint {
     @Override
     public void onModuleLoad() {
 
-        final SessionServiceAsync sessionServiceAsync = (SessionServiceAsync) GWT.create(SessionService.class);
-        generateSession(sessionServiceAsync);
-
         final Button loginButton = new Button("Login");
         loginButton.setEnabled(true);
         final TextBox nameField = new TextBox();
@@ -185,18 +182,4 @@ public class LoginPage implements EntryPoint {
         passwordField.addKeyUpHandler(handler);
     }
 
-    private void generateSession(SessionServiceAsync sessionServiceAsync) {
-        sessionServiceAsync.createSession(new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                return;
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                return;
-            }
-        });
-
-    }
 }
