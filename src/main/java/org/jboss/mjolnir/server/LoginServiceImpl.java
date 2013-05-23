@@ -103,12 +103,16 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
             log("URISyntaxException caught. Big problem here.");
             throw new LoginFailedException();
         }
-        KerberosUser toReturn = cache.get(krb5Name);
-        if (toReturn.getGithubName().equals(githubName)) {
+
+        // The key in the cache is the Kerberos username with the corresponding KerberosUser as the value for each
+        // entry.
+        if (cache.containsKey(krb5Name)) {
+            // The user has registered already. We can just return.
             log("User " + krb5Name + " exists in cache.");
-            return toReturn;
+            return cache.get(krb5Name);
         }
 
+        KerberosUser toReturn;
         if (registerToGitHub(githubName)) {
             toReturn = register(krb5Name, githubName);
             log("KerberosUser has been verified with github and has been registered in the cache");
