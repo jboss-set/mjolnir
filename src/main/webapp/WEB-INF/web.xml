@@ -31,6 +31,12 @@
         <param-name>gwt.xsrf.session_cookie_name</param-name>
         <param-value>JSESSIONID</param-value>
     </context-param>
+
+    <env-entry>
+        <env-entry-name>INFINISPAN_STORE</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>/opt/infinispan.store/</env-entry-value>
+    </env-entry>
     
     <welcome-file-list>
         <welcome-file>LoginPage.jsp</welcome-file>

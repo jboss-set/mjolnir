@@ -40,6 +40,9 @@ import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.client.LoginService;
 import org.mindrot.jbcrypt.BCrypt;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -67,12 +70,18 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
     private Set<GithubOrganization> orgs;
 
     public LoginServiceImpl() {
+        String cacheStoreLocation = null;
+        try {
+            cacheStoreLocation = getCacheStoreLocation();
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
         GlobalConfigurationBuilder global = new GlobalConfigurationBuilder();
         global.globalJmxStatistics()
                 .allowDuplicateDomains(true).jmxDomain("org.jboss.mjolnir");
         ConfigurationBuilder builder = new ConfigurationBuilder();
         builder.loaders().preload(true)
-                .addFileCacheStore().location("/tmp/infinispan.store")
+                .addFileCacheStore().location(cacheStoreLocation)
                 .eviction().maxEntries(50);
         Configuration config = builder.build(true);
         EmbeddedCacheManager cacheManager = new DefaultCacheManager(config);
@@ -94,6 +103,7 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
             boolean validPwd = BCrypt.checkpw(password, hashedPwd);
             if (validPwd) {
                 log("Checked password with value in cache. Password is valid.");
+                log("Returning");
                 return toReturn;
             } else {
                 throw new LoginFailedException("Wrong password. Your username is in the cache however.");
@@ -225,5 +235,11 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
             }
         }
         return false;
+    }
+
+    public String getCacheStoreLocation() throws NamingException {
+        // Get the environment naming context
+        Context ctx = (Context) new InitialContext().lookup("java:comp/env");
+        return (String) ctx.lookup("INFINISPAN_STORE");
     }
 }
