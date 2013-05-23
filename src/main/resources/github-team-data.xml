@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <github-team-data>
     <organizations>
-        <organization>jbossas</organization>
-        <token>b8a45a51959310dd46a29705a46bf38d7e75034a</token>
-        <teams>
-            <team>
-                <name>EAP View</name>
-                <id>338123</id>
-            </team>
+        <!--<organization>jbossas</organization>-->
+        <!--<token>??</token>-->
+        <!--<teams>-->
+            <!--<team>-->
+                <!--<name>EAP View</name>-->
+                <!--<id>338123</id>-->
+            <!--</team>-->
 
-            <team>
-                <name>Owners</name>
-                <id>5536</id>
-            </team>
-        </teams>
+            <!--<team>-->
+                <!--<name>Owners</name>-->
+                <!--<id>5536</id>-->
+            <!--</team>-->
+        <!--</teams>-->
 
         <organization>uselessorg</organization>
-        <token>c8787f71ec38d72f12358fda667201fe6dd8e853</token>
+        <token>??</token>
         <teams>
             <team>
                 <name>Owners</name>
