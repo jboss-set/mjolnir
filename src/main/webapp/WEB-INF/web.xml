@@ -16,24 +16,13 @@
         <url-pattern>/mjolnir/LoginService</url-pattern>
     </servlet-mapping>
 
-    <!-- Security -->
-    <servlet>
-        <servlet-name>xsrf</servlet-name>
-        <servlet-class>com.google.gwt.user.server.rpc.XsrfTokenServiceServlet</servlet-class>
-    </servlet>
-    
-    <servlet-mapping>
-        <servlet-name>xsrf</servlet-name>
-        <url-pattern>/mjolnir/xsrf</url-pattern>
-    </servlet-mapping>
-
     <context-param>
         <param-name>gwt.xsrf.session_cookie_name</param-name>
         <param-value>JSESSIONID</param-value>
     </context-param>
     
     <welcome-file-list>
-        <welcome-file>LoginPage.html</welcome-file>
+        <welcome-file>LoginPage.jsp</welcome-file>
     </welcome-file-list>
 
 </web-app>

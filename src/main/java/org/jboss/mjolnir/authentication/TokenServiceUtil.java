@@ -20,41 +20,27 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
+package org.jboss.mjolnir.authentication;
 
-package org.jboss.mjolnir.client;
-
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.Dictionary;
 import com.google.gwt.user.client.rpc.HasRpcToken;
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.google.gwt.user.server.rpc.XsrfProtect;
-import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.authentication.LoginFailedException;
-import org.jboss.mjolnir.authentication.TokenServiceUtil;
+import com.google.gwt.user.client.rpc.XsrfToken;
 
 /**
  * @author: navssurtani
  * @since: 0.1
  */
 
-@RemoteServiceRelativePath("LoginService")
-@XsrfProtect
-public interface LoginService extends RemoteService {
+public class TokenServiceUtil {
 
-    KerberosUser login (String krb5Name, String githubName, String password) throws LoginFailedException;
-    KerberosUser loginFromSession();
-    void logout();
-    void setSession();
+    private static XsrfToken token;
 
-    public static class Util {
-        private static LoginServiceAsync instance;
-
-        public static LoginServiceAsync getInstance() {
-            if (instance == null) {
-                instance = (LoginServiceAsync) GWT.create(LoginService.class);
-                TokenServiceUtil.add( (HasRpcToken) instance);
-            }
-            return instance;
+    public static void add(final HasRpcToken remoteService) {
+        if (token.equals(null)) {
+            final Dictionary info = Dictionary.getDictionary("info");
+            token = new XsrfToken(info.get("xsrf"));
         }
+        remoteService.setRpcToken(token);
     }
+
 }

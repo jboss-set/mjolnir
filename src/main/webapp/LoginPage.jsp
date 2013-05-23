@@ -1,8 +1,15 @@
 <!DOCTYPE html>
+<%@ page session="true"%>
+<%@ page import="org.jboss.mjolnir.server.TokenUtil" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link type="text/css" rel="stylesheet" href="mjolnir.css">
+    <script type="text/javascript">
+        var info = {
+            "xsrf": "<%=TokenUtil.getToken(request.getSession().getId())%>"
+        };
+    </script>
     <title>Mjolnir web-app</title>
     <script type="text/javascript" language="javascript" src="mjolnir/mjolnir.nocache.js"></script>
 </head>

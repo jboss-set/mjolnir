@@ -46,6 +46,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
+import org.jboss.mjolnir.authentication.TokenServiceUtil;
 
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -57,6 +58,8 @@ import java.util.logging.LogRecord;
 
 public class LoginPage implements EntryPoint {
 
+    /** Singleton remote service */
+    private final LoginServiceAsync loginService = LoginService.Util.getInstance();
 
     @Override
     public void onModuleLoad() {
@@ -110,7 +113,6 @@ public class LoginPage implements EntryPoint {
 
         // Handler for the login phase.
         class LoginHandler implements ClickHandler, KeyUpHandler {
-            final LoginServiceAsync loginService = (LoginServiceAsync) GWT.create(LoginService.class);
             @Override
             public void onClick(ClickEvent clickEvent) {
                 makeSecureLogin(nameField.getText(), githubName.getText(), passwordField.getText());
