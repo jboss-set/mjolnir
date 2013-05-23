@@ -86,9 +86,6 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
     public KerberosUser login(String krb5Name, String githubName, String password) throws LoginFailedException {
         log("login called with username " + krb5Name + " and github username " + githubName);
 
-        String cookie = Cookies.getCookie("JSESSIONID");
-        log("Cookie found as: " + cookie);
-
         KerberosUser toReturn = cache.get(krb5Name);
 
         if (toReturn != null) {
