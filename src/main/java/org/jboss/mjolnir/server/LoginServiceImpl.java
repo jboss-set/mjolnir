@@ -94,22 +94,6 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
     @Override
     public KerberosUser login(String krb5Name, String githubName, String password) throws LoginFailedException {
         log("login called with username " + krb5Name + " and github username " + githubName);
-
-        KerberosUser toReturn = cache.get(krb5Name);
-
-        if (toReturn != null) {
-            log("User " + krb5Name + " exists in cache.");
-            String hashedPwd = toReturn.getPwd();
-            boolean validPwd = BCrypt.checkpw(password, hashedPwd);
-            if (validPwd) {
-                log("Checked password with value in cache. Password is valid.");
-                log("Returning");
-                return toReturn;
-            } else {
-                throw new LoginFailedException("Wrong password. Your username is in the cache however.");
-            }
-        }
-
         try {
             validateCredentials(krb5Name, password);
         } catch (LoginException e) {
@@ -119,9 +103,14 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
             log("URISyntaxException caught. Big problem here.");
             throw new LoginFailedException();
         }
+        KerberosUser toReturn = cache.get(krb5Name);
+        if (toReturn.getGithubName().equals(githubName)) {
+            log("User " + krb5Name + " exists in cache.");
+            return toReturn;
+        }
 
         if (registerToGitHub(githubName)) {
-            toReturn = register(krb5Name, githubName, password);
+            toReturn = register(krb5Name, githubName);
             log("KerberosUser has been verified with github and has been registered in the cache");
         } else {
             throw new LoginFailedException("Failed to register with GitHub. Please contact jboss-set@redhat.com");
@@ -158,14 +147,11 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         log("Session ID cookie set as: " + cookieValue);
     }
 
-    private KerberosUser register(String krb5Name, String githubName, String password) {
+    private KerberosUser register(String krb5Name, String githubName) {
         log("Registering user of " + githubName + " to cache.");
         KerberosUser kerberosUser = new KerberosUser();
         kerberosUser.setName(krb5Name);
         kerberosUser.setGithubName(githubName);
-        String hash = BCrypt.hashpw(password, BCrypt.gensalt());
-        log("Password has been hashed to: " + hash);
-        kerberosUser.setPwd(hash);
         cache.put(krb5Name, kerberosUser);
         storeInSession(kerberosUser);
         return kerberosUser;
@@ -194,7 +180,7 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
                 .getResource("/jaas.config").toURI());
         final LoginContext loginContext = new LoginContext("Kerberos", subject, callbackHandler, loginConfiguration);
         loginContext.login();
-        log("Successful login for " + krb5Name);
+        log("Kerberos credentials ok for " + krb5Name);
     }
 
     private void storeInSession(KerberosUser kerberosUser) {
@@ -212,7 +198,8 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         // For now here we just want to deal with jboss-eap
 
         for (GithubOrganization org : orgs) {
-            if (org.getName().equals("uselessorg")) {
+            //TODO: Clean this up so we know which organization to look for in a cleaner manner.
+            if (org.getName().equals("jbossas")) {
                 log("The organization " + org.getName() + " has been found");
                 GitHubClient client = new GitHubClient();
                 client.setOAuth2Token(org.getToken());
@@ -221,7 +208,7 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
                 int teamId = 0;
                 // We want to add to EAP View only
                 for (GithubTeam t : org.getTeams()) {
-                    if (t.getName().equals("Trial")) teamId = t.getId();
+                    if (t.getName().equals("EAP View")) teamId = t.getId();
                 }
 
                 try {
@@ -229,7 +216,7 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
                     log("Member of " + githubName + " successfully added to team " + teamId);
                     return true;
                 } catch (IOException e) {
-                    log("IOException thrown while trying to contact github");
+                    log("Unable to register " + githubName + " to team # " + teamId);
                     e.printStackTrace();
                 }
             }

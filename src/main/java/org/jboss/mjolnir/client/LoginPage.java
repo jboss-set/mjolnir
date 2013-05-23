@@ -165,7 +165,8 @@ public class LoginPage implements EntryPoint {
                     @Override
                     public void onSuccess(KerberosUser kerberosUser) {
                         dialogBox.setText("Remote call successful");
-                        responseLabel.setText("Login for " + kerberosUser.getGithubName() + " succeeded.");
+                        responseLabel.setHTML("Login for " + kerberosUser.getName() + " succeeded. <br /> " +
+                                "Your github username of " + kerberosUser.getGithubName() + " was put to the eap team.");
                         dialogBox.center();
                     }
                 };

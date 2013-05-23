@@ -35,7 +35,6 @@ public class KerberosUser implements Serializable {
 
     private String krb5Name;
     private String githubName;
-    private String pwd;
 
     public String getName() {
         return krb5Name;
@@ -43,18 +42,6 @@ public class KerberosUser implements Serializable {
 
     public void setName(String krb5Name) {
         this.krb5Name = krb5Name;
-    }
-
-    /**
-     * @return The hashed password using BCrypt.
-     */
-
-    public String getPwd() {
-        return pwd;
-    }
-
-    public void setPwd(String pwd) {
-        this.pwd = pwd;
     }
 
     public String getGithubName() {

@@ -1,31 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <github-team-data>
     <organizations>
-        <!--<organization>jbossas</organization>-->
-        <!--<token>??</token>-->
-        <!--<teams>-->
-            <!--<team>-->
-                <!--<name>EAP View</name>-->
-                <!--<id>338123</id>-->
-            <!--</team>-->
-
-            <!--<team>-->
-                <!--<name>Owners</name>-->
-                <!--<id>5536</id>-->
-            <!--</team>-->
-        <!--</teams>-->
-
-        <organization>uselessorg</organization>
+        <organization>jbossas</organization>
         <token>??</token>
         <teams>
             <team>
-                <name>Owners</name>
-                <id>403752</id>
+                <name>EAP View</name>
+                <id>338123</id>
             </team>
+
             <team>
-                <name>Trial</name>
-                <id>405212</id>
+                <name>Owners</name>
+                <id>5536</id>
             </team>
         </teams>
+
     </organizations>
 </github-team-data>
