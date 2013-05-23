@@ -93,6 +93,7 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
             String hashedPwd = toReturn.getPwd();
             boolean validPwd = BCrypt.checkpw(password, hashedPwd);
             if (validPwd) {
+                log("Checked password with value in cache. Password is valid.");
                 return toReturn;
             } else {
                 throw new LoginFailedException("Wrong password. Your username is in the cache however.");
