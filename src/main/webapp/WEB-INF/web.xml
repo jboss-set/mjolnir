@@ -35,7 +35,7 @@
     <env-entry>
         <env-entry-name>INFINISPAN_STORE</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>/home/jbossci/infinispan.store</env-entry-value>
+        <env-entry-value>/home/jboss/infinispan.store</env-entry-value>
     </env-entry>
     
     <welcome-file-list>
