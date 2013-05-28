@@ -34,11 +34,9 @@ import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.client.LoginService;
-import org.mindrot.jbcrypt.BCrypt;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -55,6 +53,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -64,10 +66,11 @@ import java.util.Set;
 
 public class LoginServiceImpl extends XsrfProtectedServiceServlet implements LoginService {
 
-    private static final String XML_DATA = "/github-team-data.xml";
 
     private Cache<String, KerberosUser> cache;
-    private Set<GithubOrganization> orgs;
+    private Map<String, GithubOrganization> orgs;
+
+    private TeamService teamService = null;
 
     public LoginServiceImpl() {
         String cacheStoreLocation = null;
@@ -87,52 +90,47 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         EmbeddedCacheManager cacheManager = new DefaultCacheManager(config);
         cache = cacheManager.getCache();
 
-        // Now do the parsing work.
-        parse();
+        orgs = new HashMap<String, GithubOrganization>();
+        // TODO: Should the Parser be returning a Map?
+        for (GithubOrganization o : GithubParser.getOrganizations()) {
+            orgs.put(o.getName(), o);
+        }
+
     }
 
     @Override
-    public KerberosUser login(String krb5Name, String githubName, String password) throws LoginFailedException {
-        log("login called with username " + krb5Name + " and github username " + githubName);
+    public boolean login(String krb5Name, String password) throws LoginFailedException {
+        log("login() called on servlet with username " + krb5Name);
         try {
             validateCredentials(krb5Name, password);
         } catch (LoginException e) {
             log("LoginException caught from JaaS");
+            log(e.getMessage());
             throw new LoginFailedException("Error with login credentials.");
         } catch (URISyntaxException e) {
             log("URISyntaxException caught. Big problem here.");
             throw new LoginFailedException();
         }
-
-        // The key in the cache is the Kerberos username with the corresponding KerberosUser as the value for each
-        // entry.
-        if (cache.containsKey(krb5Name)) {
-            // The user has registered already. We can just return.
-            log("User " + krb5Name + " exists in cache.");
-            return cache.get(krb5Name);
-        }
-
-        KerberosUser toReturn;
-        if (registerToGitHub(githubName)) {
-            toReturn = register(krb5Name, githubName);
-            log("KerberosUser has been verified with github and has been registered in the cache");
-        } else {
-            throw new LoginFailedException("Failed to register with GitHub. Please contact jboss-set@redhat.com");
-        }
-
-        log("Returning");
+        boolean toReturn = cache.containsKey(krb5Name);
+        log("Login succeeded. Checked cache if user exists, result is " + toReturn);
         return toReturn;
     }
 
     @Override
-    public KerberosUser loginFromSession() {
-        KerberosUser kerberosUser = null;
-        HttpServletRequest request = this.getThreadLocalRequest();
-        HttpSession session = request.getSession();
-        Object userObject = session.getAttribute("kerberosUser");
-        if (userObject != null && userObject instanceof KerberosUser) {
-            kerberosUser = (KerberosUser) userObject;
-        }
+    public KerberosUser getKerberosUser(String krb5Name) {
+        KerberosUser toReturn = cache.get(krb5Name);
+        log("User to return:" + toReturn.toString());
+        return toReturn;
+    }
+
+    @Override
+    public KerberosUser registerKerberosUser(String krb5Name, String githubName) {
+        log("Registering user of " + krb5Name + ", " + githubName + " to cache.");
+        KerberosUser kerberosUser = new KerberosUser();
+        kerberosUser.setName(krb5Name);
+        kerberosUser.setGithubName(githubName);
+        cache.put(krb5Name, kerberosUser);
+        log("User to return back to client is: " + kerberosUser.toString());
         return kerberosUser;
     }
 
@@ -151,14 +149,34 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         log("Session ID cookie set as: " + cookieValue);
     }
 
-    private KerberosUser register(String krb5Name, String githubName) {
-        log("Registering user of " + githubName + " to cache.");
-        KerberosUser kerberosUser = new KerberosUser();
-        kerberosUser.setName(krb5Name);
-        kerberosUser.setGithubName(githubName);
-        cache.put(krb5Name, kerberosUser);
-        storeInSession(kerberosUser);
-        return kerberosUser;
+    @Override
+    public void subscribe(String orgName, int teamId, String githubName) {
+        TeamService teamService = obtainTeamService(orgName);
+        try {
+            teamService.addMember(teamId, githubName);
+            log("Successfully added " + githubName + " to team.");
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to subscribe user " + githubName
+                    + " to team #" + teamId + " of organization " + orgName);
+        }
+    }
+
+    @Override
+    public void unsubscribe(String orgName, int teamId, String githubName) {
+        TeamService teamService = obtainTeamService(orgName);
+        try {
+            teamService.removeMember(teamId, githubName);
+            log("Successfully removed " + githubName + " from team.");
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to unsubscribe user " + githubName
+                    + " to team #" + teamId + " of organization " + orgName);
+        }
+    }
+
+    @Override
+    public Set<GithubOrganization> getAvailableOrganizations() {
+        log("Returning organizations. The collection has " + orgs.size() + " entries");
+        return new HashSet<GithubOrganization>(orgs.values());
     }
 
     // Method that will only be called if someone tries to log into the application for the first time.
@@ -187,50 +205,19 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         log("Kerberos credentials ok for " + krb5Name);
     }
 
-    private void storeInSession(KerberosUser kerberosUser) {
-        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-        HttpSession session = httpServletRequest.getSession();
-        session.setAttribute("kerberosUser", kerberosUser);
-    }
+//    private void registerToGitHub(String githubName) throws RuntimeException {
 
-    private void parse() {
-        GithubParser parser = GithubParser.getInstance();
-        orgs = parser.parse(XML_DATA);
-    }
-
-    private boolean registerToGitHub(String githubName) {
-        // For now here we just want to deal with jboss-eap
-
-        for (GithubOrganization org : orgs) {
-            //TODO: Clean this up so we know which organization to look for in a cleaner manner.
-            if (org.getName().equals("jbossas")) {
-                log("The organization " + org.getName() + " has been found");
-                GitHubClient client = new GitHubClient();
-                client.setOAuth2Token(org.getToken());
-                log("Setting OAuthToken as " + org.getToken());
-                TeamService teamService = new TeamService(client);
-                int teamId = 0;
-                // We want to add to EAP View only
-                for (GithubTeam t : org.getTeams()) {
-                    if (t.getName().equals("EAP View")) teamId = t.getId();
-                }
-
-                try {
-                    teamService.addMember(teamId, githubName);
-                    log("Member of " + githubName + " successfully added to team " + teamId);
-                    return true;
-                } catch (IOException e) {
-                    log("Unable to register " + githubName + " to team # " + teamId);
-                    e.printStackTrace();
-                }
-            }
-        }
-        return false;
-    }
 
     public String getCacheStoreLocation() throws NamingException {
         // Get the environment naming context
         Context ctx = (Context) new InitialContext().lookup("java:comp/env");
         return (String) ctx.lookup("INFINISPAN_STORE");
+    }
+    private TeamService obtainTeamService(String orgName) {
+        GithubOrganization organization = orgs.get(orgName);
+        GitHubClient client = new GitHubClient();
+        client.setOAuth2Token(organization.getToken());
+        log("Returning TeamService object for organization " + orgName);
+        return new TeamService(client);
     }
 }

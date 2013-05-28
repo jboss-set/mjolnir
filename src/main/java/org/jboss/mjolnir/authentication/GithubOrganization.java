@@ -22,6 +22,7 @@
 
 package org.jboss.mjolnir.authentication;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,7 @@ import java.util.List;
  * @since: 0.1
  */
 
-public class GithubOrganization {
+public class GithubOrganization implements Serializable {
 
     private String name;
     private List<GithubTeam> teams;
@@ -41,6 +42,9 @@ public class GithubOrganization {
     public GithubOrganization(String name) {
         this.name = name;
         this.teams = new ArrayList<GithubTeam>();
+    }
+
+    public GithubOrganization() {
     }
 
     public void addTeam(GithubTeam t) {

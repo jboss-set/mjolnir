@@ -28,9 +28,12 @@ import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
+import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.authentication.TokenServiceUtil;
+
+import java.util.Set;
 
 /**
  * @author: navssurtani
@@ -41,10 +44,14 @@ import org.jboss.mjolnir.authentication.TokenServiceUtil;
 @XsrfProtect
 public interface LoginService extends RemoteService {
 
-    KerberosUser login (String krb5Name, String githubName, String password) throws LoginFailedException;
-    KerberosUser loginFromSession();
+    boolean login (String krb5Name, String password) throws LoginFailedException;
+    KerberosUser getKerberosUser(String krb5Name);
+    KerberosUser registerKerberosUser(String krb5Name, String githubName) throws RuntimeException;
     void logout();
     void setSession();
+    void subscribe(String orgName, int teamId, String githubName);
+    void unsubscribe(String orgName, int teamId, String githubName);
+    Set<GithubOrganization> getAvailableOrganizations();
 
     public static class Util {
         private static LoginServiceAsync instance;

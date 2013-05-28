@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <github-team-data>
+    <!-- TODO: This XML is broken! -->
     <organizations>
         <organization>jbossas</organization>
         <token>??</token>
@@ -12,6 +13,19 @@
             <team>
                 <name>Owners</name>
                 <id>5536</id>
+            </team>
+        </teams>
+
+        <organization>uselessorg</organization>
+        <token>??</token>
+        <teams>
+            <team>
+                <name>Owners</name>
+                <id>403752</id>
+            </team>
+            <team>
+                <name>Trial</name>
+                <id>405212</id>
             </team>
         </teams>
 

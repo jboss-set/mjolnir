@@ -27,20 +27,10 @@
 
     <table align="center">
         <tr>
-            <td colspan="2" style="font-weight:bold;">Please enter your Kerberos login details:</td>
+            <td id="loginPanelContainer"></td>
         </tr>
         <tr>
-            <td style="color: black;">Kerberos ID:</td>
-            <td style="color: black;">GitHub ID:</td>
-            <td style="color: black;">Kerberos Password:</td>
-        </tr>
-        <tr>
-            <td id="nameFieldContainer"></td>
-            <td id="githubFieldContainer"></td>
-            <td id="passwordFieldContainer"></td>
-        </tr>
-        <tr>
-            <td colspan="3" id="loginButtonContainer"></td>
+            <td id="subscriptionPanelContainer"></td>
         </tr>
     </table>
 

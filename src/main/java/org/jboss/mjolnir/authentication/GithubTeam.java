@@ -22,6 +22,8 @@
 
 package org.jboss.mjolnir.authentication;
 
+import java.io.Serializable;
+
 /**
  * Wrapper class that holds basic information of each team in the github-team-data.xml file.
  *
@@ -29,7 +31,7 @@ package org.jboss.mjolnir.authentication;
  * @since: 0.1
  */
 
-public class GithubTeam {
+public class GithubTeam implements Serializable {
 
     private String name;
     private int id;
@@ -38,6 +40,9 @@ public class GithubTeam {
         if (name == null || id == 0) throw new NullPointerException("Null params");
         this.name = name;
         this.id = id;
+    }
+
+    public GithubTeam() {
     }
 
     public String getName() {
