@@ -31,6 +31,7 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,9 +48,10 @@ public class GithubParser {
     private static final String XML_DATA = "/github-team-data.xml";
     private static final String ORGANIZATIONS = "organizations";
     private static final String ORGANIZATION = "organization";
+    private static final String ORG_NAME = "org-name";
     private static final String TOKEN = "token";
     private static final String TEAM = "team";
-    private static final String NAME = "name";
+    private static final String TEAM_NAME = "team-name";
     private static final String ID = "id";
 
     private static final Logger log = Logger.getLogger(GithubParser.class);
@@ -60,7 +62,7 @@ public class GithubParser {
     private GithubParser() {
     }
 
-    public static Set<GithubOrganization> getOrganizations() {
+    public static Set<GithubOrganization> getOrganizations() throws IOException{
         if (organizations == null) {
             log.info("Local set of organizations is null within parser. Will have to parse before returning.");
             organizations = parse(XML_DATA);
@@ -69,7 +71,7 @@ public class GithubParser {
         return organizations;
     }
 
-    private static Set<GithubOrganization> parse(String xmlFile) {
+    private static Set<GithubOrganization> parse(String xmlFile) throws IOException {
         log.info("parse() called within GithubParser.");
         Set<GithubOrganization> orgs = null;
         try {
@@ -92,37 +94,53 @@ public class GithubParser {
                 }
 
                 if (checkEventType(event, ORGANIZATION)) {
-                    data = reader.nextEvent().asCharacters().getData();
-                    log.debug("Found a new GithubOrganization, creating it.");
-                    org = new GithubOrganization(data);
-                }
+                    log.info("Found a new organization in file.");
 
-                // The OAuth token part.
-                if (checkEventType(event, TOKEN)) {
-                    data = reader.nextEvent().asCharacters().getData();
-                    org.setToken(data);
-                }
-
-                if (checkEventType(event, TEAM)) {
-                    // We have found a team. Now we will extract the team name.
-                    String teamName = null;
-                    int teamId;
                     while (reader.hasNext()) {
-                        event = reader.nextTag();
-                        if (checkEventType(event, NAME)) {
-                            teamName = reader.nextEvent().asCharacters().getData();
-                        } else {
-                            if (checkEventType(event, ID)) {
-                                teamId = Integer.parseInt(reader.nextEvent().asCharacters().getData());
-                                org.addTeam(new GithubTeam(teamName, teamId));
-                                orgs.add(org);
-                                log.info("Team of " + teamName + " and " + teamId + " added to " + org.getName());
-                                // We now have all the information for this team - so we will break from this while block.
-                                break;
+                        event = reader.nextEvent();
+                        if (checkEventType(event, ORG_NAME)) {
+                            data = reader.nextEvent().asCharacters().getData();
+                            log.info("Found a name for the organization. Name found is " + data);
+                            org = new GithubOrganization(data);
+                        }
+
+                        // The OAuth token part.
+                        if (checkEventType(event, TOKEN)) {
+                            data = reader.nextEvent().asCharacters().getData();
+                            if (org != null) {
+                                org.setToken(data);
+                            } else {
+                                throw new IOException("You haven't found a name for the organization yet. " +
+                                        "There is a problem with your xml at line: " +
+                                        event.getLocation().getLineNumber() +
+                                        ". You need to specify the name of your organization before the OAuth token.");
                             }
                         }
+
+                        if (checkEventType(event, TEAM)) {
+                            // We have found a team. Now we will extract the team name.
+                            String teamName = null;
+                            int teamId;
+                            while (reader.hasNext()) {
+                                event = reader.nextTag();
+                                if (checkEventType(event, TEAM_NAME)) {
+                                    teamName = reader.nextEvent().asCharacters().getData();
+                                } else {
+                                    if (checkEventType(event, ID)) {
+                                        teamId = Integer.parseInt(reader.nextEvent().asCharacters().getData());
+                                        org.addTeam(new GithubTeam(teamName, teamId));
+                                        orgs.add(org);
+                                        log.info("Team of " + teamName + " and " + teamId + " added to " + org.getName());
+                                        // We now have all the information for this team - so we will break from this while block.
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
                     }
                 }
+
             }
 
         } catch (XMLStreamException e) {
@@ -132,20 +150,15 @@ public class GithubParser {
     }
 
     private static boolean checkEventType(XMLEvent event, String constant) {
-        log.trace("Checking event type inside the Github Parser.");
-        if (event.isStartElement()) {
-            return event.asStartElement().getName().getLocalPart().equals(constant);
-        } else {
-            return false;
-        }
+        log.trace("Checking event type inside the Github Parser. Constant string to check is " + constant);
+        return event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(constant);
     }
 
     private static InputStream getAndCheckFile(String xmlFile) {
         InputStream stream = GithubParser.class.getResourceAsStream(xmlFile);
         if (stream != null) {
             if (log.isTraceEnabled()) log.trace("XML file of name " + xmlFile + " found. All good to return.");
-        }
-        else throw new NullPointerException("Null InputStream from file " + xmlFile);
+        } else throw new NullPointerException("Null InputStream from file " + xmlFile);
         return stream;
     }
 }
