@@ -11,6 +11,7 @@
 
      <!--Inherit the default GWT style sheet.-->
     <inherits name='com.google.gwt.user.theme.clean.Clean'/>
+    <inherits name="com.google.gwt.rpc.RPC"/>
 
     <!-- Specify the app entry point class.-->
     <entry-point class='org.jboss.mjolnir.client.LoginPage'/>

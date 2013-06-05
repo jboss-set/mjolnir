@@ -31,11 +31,7 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -48,6 +44,7 @@ import java.util.Set;
 public class GithubParser {
 
     /* Constant Strings */
+    private static final String XML_DATA = "/github-team-data.xml";
     private static final String ORGANIZATIONS = "organizations";
     private static final String ORGANIZATION = "organization";
     private static final String TOKEN = "token";
@@ -57,24 +54,27 @@ public class GithubParser {
 
     private static final Logger log = Logger.getLogger(GithubParser.class);
 
-    private static final GithubParser INSTANCE = new GithubParser();
+    private static Set<GithubOrganization> organizations = null;
 
-    public static GithubParser getInstance() {
-        log.info("getInstance() called on GithubParser");
-        return INSTANCE;
-    }
-
+    // So that nobody can instantiate this class.
     private GithubParser() {
-        log.info("Parser instantiated.");
-        // Singleton.
     }
 
-    public Set<GithubOrganization> parse(String xmlFile) {
+    public static Set<GithubOrganization> getOrganizations() {
+        if (organizations == null) {
+            log.info("Local set of organizations is null within parser. Will have to parse before returning.");
+            organizations = parse(XML_DATA);
+        }
+        log.info("Parser returned " + organizations.size() + " github organizations.");
+        return organizations;
+    }
+
+    private static Set<GithubOrganization> parse(String xmlFile) {
         log.info("parse() called within GithubParser.");
         Set<GithubOrganization> orgs = null;
         try {
             GithubOrganization org = null;
-            InputStream in = getAndCheckFile(xmlFile);;
+            InputStream in = getAndCheckFile(xmlFile);
 
             // Create the XML Input Factory.
             XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -84,7 +84,7 @@ public class GithubParser {
             // Now we do stuff.
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
-                String data = null;
+                String data;
 
                 if (checkEventType(event, ORGANIZATIONS)) {
                     log.debug("Creating Set for GithubOrganizations.");
@@ -131,7 +131,7 @@ public class GithubParser {
         return orgs;
     }
 
-    private boolean checkEventType(XMLEvent event, String constant) {
+    private static boolean checkEventType(XMLEvent event, String constant) {
         log.trace("Checking event type inside the Github Parser.");
         if (event.isStartElement()) {
             return event.asStartElement().getName().getLocalPart().equals(constant);
@@ -140,7 +140,7 @@ public class GithubParser {
         }
     }
 
-    private InputStream getAndCheckFile(String xmlFile) {
+    private static InputStream getAndCheckFile(String xmlFile) {
         InputStream stream = GithubParser.class.getResourceAsStream(xmlFile);
         if (stream != null) {
             if (log.isTraceEnabled()) log.trace("XML file of name " + xmlFile + " found. All good to return.");

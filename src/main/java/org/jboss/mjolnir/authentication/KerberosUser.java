@@ -51,4 +51,9 @@ public class KerberosUser implements Serializable {
     public void setGithubName(String githubName) {
         this.githubName = githubName;
     }
+
+    @Override
+    public String toString() {
+        return "{ krb5Name " + krb5Name + ": githubName " + githubName + " }";
+    }
 }

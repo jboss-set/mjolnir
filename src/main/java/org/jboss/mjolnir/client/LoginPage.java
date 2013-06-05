@@ -23,28 +23,8 @@
 package org.jboss.mjolnir.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.HasRpcToken;
-import com.google.gwt.user.client.rpc.RpcTokenException;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.rpc.XsrfToken;
-import com.google.gwt.user.client.rpc.XsrfTokenService;
-import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.authentication.LoginFailedException;
 
 /**
  * @author: navssurtani
@@ -53,131 +33,26 @@ import org.jboss.mjolnir.authentication.LoginFailedException;
 
 public class LoginPage implements EntryPoint {
 
-    /** Singleton remote service */
-    private final LoginServiceAsync loginService = LoginService.Util.getInstance();
+    /** Singleton LoginPage **/
+    private static LoginPage instance;
+
+    public static LoginPage getInstance() {
+        return instance;
+    }
 
     @Override
     public void onModuleLoad() {
+        setLoginScreen();
+    }
 
-        final Button loginButton = new Button("Login");
-        loginButton.setEnabled(true);
-        final TextBox nameField = new TextBox();
-        final TextBox githubName = new TextBox();
-        final PasswordTextBox passwordField = new PasswordTextBox();
+    private void setLoginScreen() {
+        LoginScreen loginScreen = new LoginScreen();
+        RootPanel.get().add(loginScreen);
+    }
 
-        nameField.setTitle("Kerberos ID");
-        githubName.setTitle("Github ID");
-        passwordField.setTitle("Password");
-
-        RootPanel.get("nameFieldContainer").add(nameField);
-        RootPanel.get("githubFieldContainer").add(githubName);
-        RootPanel.get("passwordFieldContainer").add(passwordField);
-        RootPanel.get("loginButtonContainer").add(loginButton);
-
-        // Dialog box stuff post authentication.
-        final DialogBox dialogBox = new DialogBox();
-        dialogBox.setText("Checking login credentials.");
-
-        // Response labels.
-        final HTML responseLabel = new HTML();
-
-
-        final Button closeButton = new Button("Close");
-        closeButton.getElement().setId("close");
-
-        // Sort out the paneling for the Dialog Box.
-        VerticalPanel verticalPanel = new VerticalPanel();
-        verticalPanel.setStyleName("dialogVPanel");
-        verticalPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
-        verticalPanel.add(responseLabel);
-        verticalPanel.add(closeButton);
-
-        // Set the widget
-        dialogBox.setWidget(verticalPanel);
-
-        // Handler for the close button.
-        closeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                dialogBox.hide();
-                loginButton.setEnabled(true);
-                loginButton.setFocus(true);
-            }
-        });
-
-
-        // Handler for the login phase.
-        class LoginHandler implements ClickHandler, KeyUpHandler {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                makeSecureLogin(nameField.getText(), githubName.getText(), passwordField.getText());
-            }
-
-            @Override
-            public void onKeyUp(KeyUpEvent keyUpEvent) {
-                if (keyUpEvent.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    makeSecureLogin(nameField.getText(), githubName.getText(), passwordField.getText());
-                }
-            }
-
-            private void makeSecureLogin(final String krb5Name, final String githubName, final String pwd) {
-                XsrfTokenServiceAsync xsrf = (XsrfTokenServiceAsync) GWT.create(XsrfTokenService.class);
-                ((ServiceDefTarget) xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
-                xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        dialogBox.setText("Remote call failed");
-
-                        try {
-                            throw throwable;
-                        } catch (RpcTokenException rpcException) {
-                            responseLabel.setHTML("RPC Token could not be generated.");
-                        } catch (Throwable other) {
-                            responseLabel.setHTML(other.getMessage());
-                        }
-                        dialogBox.center();
-                    }
-
-                    @Override
-                    public void onSuccess(XsrfToken xsrfToken) {
-                        ((HasRpcToken) loginService).setRpcToken(xsrfToken);
-                        loginService.login(krb5Name, githubName, pwd, getLoginCallback());
-                    }
-                });
-            }
-
-            private AsyncCallback<KerberosUser> getLoginCallback() {
-
-                AsyncCallback toReturn = new AsyncCallback<KerberosUser>() {
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        dialogBox.setText("Remote call failed");
-                        try {
-                            throw throwable;
-                        } catch (LoginFailedException lfe) {
-                            responseLabel.setText(lfe.getSymbol());
-                        } catch (Throwable other) {
-                            responseLabel.setText(other.getMessage());
-                        }
-                        dialogBox.center();
-                    }
-
-                    @Override
-                    public void onSuccess(KerberosUser kerberosUser) {
-                        dialogBox.setText("Remote call successful");
-                        responseLabel.setHTML("Login for " + kerberosUser.getName() + " succeeded. <br /> " +
-                                "Your github username of " + kerberosUser.getGithubName() + " was put to the eap team.");
-                        dialogBox.center();
-                    }
-                };
-                return toReturn;
-            }
-        }
-
-        // Create the handler and make sure that it can deal with the fields.
-        LoginHandler handler = new LoginHandler();
-        loginButton.addClickHandler(handler);
-        passwordField.addKeyUpHandler(handler);
+    public void setSuccessScreen(KerberosUser user) {
+        SubscriptionScreen subscriptionScreen = new SubscriptionScreen(user);
+        RootPanel.get().add(subscriptionScreen);
     }
 
 }
