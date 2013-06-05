@@ -70,14 +70,13 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
     private Cache<String, KerberosUser> cache;
     private Map<String, GithubOrganization> orgs;
 
-    private TeamService teamService = null;
-
     public LoginServiceImpl() {
-        String cacheStoreLocation = null;
+        String cacheStoreLocation;
         try {
             cacheStoreLocation = getCacheStoreLocation();
         } catch (NamingException e) {
             e.printStackTrace();
+            throw new InstantiationError("Could not instantiate servlet due to error with cache store location.");
         }
         GlobalConfigurationBuilder global = new GlobalConfigurationBuilder();
         global.globalJmxStatistics()
@@ -92,8 +91,13 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
 
         orgs = new HashMap<String, GithubOrganization>();
         // TODO: Should the Parser be returning a Map?
-        for (GithubOrganization o : GithubParser.getOrganizations()) {
-            orgs.put(o.getName(), o);
+        try {
+            for (GithubOrganization o : GithubParser.getOrganizations()) {
+                orgs.put(o.getName(), o);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new InstantiationError("Could not instantiate servlet due to error with GithubParser.");
         }
 
     }
@@ -204,9 +208,6 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         loginContext.login();
         log("Kerberos credentials ok for " + krb5Name);
     }
-
-//    private void registerToGitHub(String githubName) throws RuntimeException {
-
 
     public String getCacheStoreLocation() throws NamingException {
         // Get the environment naming context
