@@ -161,7 +161,7 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
             log("Successfully added " + githubName + " to team.");
         } catch (IOException e) {
             throw new RuntimeException("Unable to subscribe user " + githubName
-                    + " to team #" + teamId + " of organization " + orgName);
+                    + " to team #" + teamId + " of organization " + orgName, e);
         }
     }
 
@@ -173,7 +173,7 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
             log("Successfully removed " + githubName + " from team.");
         } catch (IOException e) {
             throw new RuntimeException("Unable to unsubscribe user " + githubName
-                    + " to team #" + teamId + " of organization " + orgName);
+                    + " to team #" + teamId + " of organization " + orgName, e);
         }
     }
 
