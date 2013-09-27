@@ -24,19 +24,18 @@ package org.jboss.mjolnir.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.RootPanel;
-import org.jboss.mjolnir.authentication.KerberosUser;
 
 /**
  * @author: navssurtani
  * @since: 0.1
  */
 
-public class LoginPage implements EntryPoint {
+public class EntryPage implements EntryPoint {
 
-    /** Singleton LoginPage **/
-    private static LoginPage instance;
+    /** Singleton EntryPage **/
+    private static EntryPage instance = new EntryPage();
 
-    public static LoginPage getInstance() {
+    public static EntryPage getInstance() {
         return instance;
     }
 
@@ -50,9 +49,13 @@ public class LoginPage implements EntryPoint {
         RootPanel.get().add(loginScreen);
     }
 
-    public void setSuccessScreen(KerberosUser user) {
-        SubscriptionScreen subscriptionScreen = new SubscriptionScreen(user);
+    public void moveToSubscriptionScreen(final String krb5Name) {
+        SubscriptionScreen subscriptionScreen = new SubscriptionScreen(krb5Name);
         RootPanel.get().add(subscriptionScreen);
     }
 
+    public void moveToGithubRegistrationScreen(String krb5Name) {
+        AbstractGithubNameScreen registerScreen = new RegisterGithubNameScreen(krb5Name);
+        RootPanel.get().add(registerScreen);
+    }
 }
