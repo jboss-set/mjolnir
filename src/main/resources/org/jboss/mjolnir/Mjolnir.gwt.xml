@@ -14,7 +14,7 @@
     <inherits name="com.google.gwt.rpc.RPC"/>
 
     <!-- Specify the app entry point class.-->
-    <entry-point class='org.jboss.mjolnir.client.LoginPage'/>
+    <entry-point class='org.jboss.mjolnir.client.EntryPage'/>
 
      <!--Specify the paths for translatable code -->
     <source path='client'/>

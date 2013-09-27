@@ -32,6 +32,9 @@
         <tr>
             <td id="subscriptionPanelContainer"></td>
         </tr>
+        <tr>
+            <td id="registerPanelContainer"></td>
+        </tr>
     </table>
 
 </body>
