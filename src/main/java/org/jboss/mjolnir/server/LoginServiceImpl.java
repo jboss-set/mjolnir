@@ -104,20 +104,37 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
 
     @Override
     public boolean login(String krb5Name, String password) throws LoginFailedException {
+        // This will always be the first method called by the user upon hitting the web-app.
+        // We will return true if the kerberos password is correct. Regardless of whether or not their details
+        // already exist in the cache.
+
         log("login() called on servlet with username " + krb5Name);
         try {
             validateCredentials(krb5Name, password);
         } catch (LoginException e) {
-            log("LoginException caught from JaaS");
+            log("LoginException caught from JaaS. Problem with login credentials.");
             log(e.getMessage());
-            throw new LoginFailedException("Error with login credentials.");
+
+            // The user-password combination is not correct. We should simply return false and allow the user to
+            // re-enter their password.
+            return false;
+
         } catch (URISyntaxException e) {
+            // Here there is a problem, so the onFailure() part will be called on the client side
             log("URISyntaxException caught. Big problem here.");
-            throw new LoginFailedException();
+            throw new LoginFailedException("There is a problem with the login on the server. Please contact " +
+                    "jboss-set@redhat.com");
         }
+        log("Login succeeded. Returning 'true'");
+        return true;
+    }
+
+    @Override
+    public boolean isRegistered(String krb5Name) {
+        // As long as the cache contains the String, we return true.
         boolean toReturn = cache.containsKey(krb5Name);
-        log("Login succeeded. Checked cache if user exists, result is " + toReturn);
-        return toReturn;
+        log("Value whether or not " + krb5Name + " is registered: " + toReturn);
+        return cache.containsKey(krb5Name);
     }
 
     @Override

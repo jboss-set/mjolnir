@@ -44,7 +44,8 @@ import java.util.Set;
 @XsrfProtect
 public interface LoginService extends RemoteService {
 
-    boolean login (String krb5Name, String password) throws LoginFailedException;
+    boolean login(String krb5Name, String password) throws LoginFailedException;
+    boolean isRegistered(String krb5Name);
     KerberosUser getKerberosUser(String krb5Name);
     KerberosUser registerKerberosUser(String krb5Name, String githubName) throws RuntimeException;
     void logout();
