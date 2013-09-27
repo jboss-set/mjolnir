@@ -43,7 +43,6 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
 
 /**
@@ -55,11 +54,9 @@ public class LoginScreen extends Composite {
 
     private TextBox krb5NameField;
     private PasswordTextBox pwdField;
-    private TextBox githubNameField;
     private Button loginButton;
 
     private Grid loginGrid;
-    private Grid githubGrid;
 
     private RootPanel loginPanel;
 
@@ -91,62 +88,23 @@ public class LoginScreen extends Composite {
         pwdField.addKeyUpHandler(handler);
     }
 
-    private void generateGithubGrid(final LoginPage loginPage) {
-        githubNameField = new TextBox();
-        githubNameField.setTitle("Github username");
-
-        final Button submitButton = generateSubmitButton(loginPage);
-
-        githubGrid = new Grid(3,2);
-        githubGrid.setWidget(0, 0, new Label("Looks like we need your github username"));
-        githubGrid.setWidget(1, 0, new Label("Enter your github username"));
-        githubGrid.setWidget(1, 1, githubNameField);
-        githubGrid.setWidget(2, 1, submitButton);
-
-        loginPanel.add(githubGrid);
-    }
-
-    private Button generateSubmitButton(final LoginPage loginPage) {
-        Button submitButton = new Button("Submit");
-        submitButton.setEnabled(true);
-        submitButton.getElement().setId("submit");
-
-        submitButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                registerOnServer(loginPage);
-            }
-        });
-        return submitButton;
-    }
-
-    private void registerOnServer(final LoginPage loginPage) {
-        loginService.registerKerberosUser(krb5NameField.getText(), githubNameField.getText(), new AsyncCallback<KerberosUser>() {
+    private void checkIsRegistered(final String krb5Name) {
+        loginService.isRegistered(krb5Name, new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
-                displayErrorBox("Could not register github username", caught.getMessage());
+                displayErrorBox("Error checking if user exists on server.", caught.getMessage());
             }
 
             @Override
-            public void onSuccess(KerberosUser kerberosUser) {
-                // This part will only be called if the github grid login part was successful. We will detach that.
-                loginPanel.remove(githubGrid);
-                loginPage.setSuccessScreen(kerberosUser);
-            }
-        });
+            public void onSuccess(Boolean isRegistered) {
+                if (isRegistered) {
+                    // Move to subscription screen.
+                    EntryPage.getInstance().moveToSubscriptionScreen(krb5Name);
 
-    }
-
-    private void getGithubNameFromServer(final LoginPage loginPage) {
-        loginService.getKerberosUser(krb5NameField.getText(), new AsyncCallback<KerberosUser>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                displayErrorBox("Could not get Github name from server", caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(KerberosUser kerberosUser) {
-                loginPage.setSuccessScreen(kerberosUser);
+                } else {
+                    // Move to add github name screen.
+                    EntryPage.getInstance().moveToGithubRegistrationScreen(krb5Name);
+                }
             }
         });
     }
@@ -204,39 +162,46 @@ public class LoginScreen extends Composite {
                 public void onSuccess(XsrfToken result) {
                     // Now we can get the login service.
                     loginService = LoginService.Util.getInstance();
-                    loginService.login(krb5Name, password, new AsyncCallback<Boolean>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            // We want to check whether or not we have a LoginFailedException first.
-                            try {
-                                throw caught;
-                            } catch (LoginFailedException lfe) {
-                                displayErrorBox("Error with login", lfe.getSymbol());
-                            } catch (Throwable other) {
-                                displayErrorBox("Error with login", "There has been an unexpected error with your login." +
-                                        " Please email jboss-set@redhat.com");
-                            }
-                        }
-
-                        @Override
-                        public void onSuccess(Boolean result) {
-                            // We know that the kerberos login was successful now so we can detach that.
-                            loginPanel.remove(loginGrid);
-                            final LoginPage loginPage = LoginPage.getInstance();
-                            if (result) {
-                                // We just have to get the github name from the cache.
-                                getGithubNameFromServer(loginPage);
-                            } else {
-                                // We have to make the registration call.
-                                generateGithubGrid(loginPage);
-                            }
-                        }
-                    });
+                    performLoginCall(krb5Name, password);
                 }
             });
 
         }
 
+        private void performLoginCall(final String krb5Name, String password) {
+            loginService.login(krb5Name, password, new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    // We want to check whether or not we have a LoginFailedException first.
+                    try {
+                        throw caught;
+                    } catch (LoginFailedException lfe) {
+                        displayErrorBox("Error with login", lfe.getSymbol());
+                    } catch (Throwable other) {
+                        displayErrorBox("Error with login", "There has been an unexpected error with your login." +
+                                " Please email jboss-set@redhat.com");
+                    }
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    // Based off of the result, we either forward off to a new screen or we just display a
+                    // pop-up stating that the password is incorrect and allow for a retry.
+                    if (result) {
+                        loginPanel.remove(loginGrid);
+                        // Now we should make a check to see if the user exists or not. If that is true,
+                        // we will either move to the RegisterGithubNameScreen or the SubscriptionScreen.
+                        checkIsRegistered(krb5Name);
+                    } else {
+                        // Just display an error box with a close button that should allow us to come back to the
+                        // same screen. Hopefully.
+                        displayErrorBox("Incorrect password", "Your username-password combination is wrong. Please " +
+                                "check and try again.");
+                    }
+                }
+            });
+
+        }
     }
 
 }

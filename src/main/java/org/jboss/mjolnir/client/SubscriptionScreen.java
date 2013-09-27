@@ -52,12 +52,19 @@ public class SubscriptionScreen extends Composite {
     private LoginServiceAsync loginService;
     private RootPanel successPanel = RootPanel.get("subscriptionPanelContainer");
 
-    public SubscriptionScreen(KerberosUser user) {
-        this.user = user;
+    public SubscriptionScreen(String krb5Name) {
         loginService = LoginService.Util.getInstance();
+        loginService.getKerberosUser(krb5Name, new AsyncCallback<KerberosUser>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                displayPopupBox("Could not retrieve user details", caught.getMessage());
+            }
 
-        String introductionString = "Organizations and teams subscribed to for " + user.getGithubName();
-        successPanel.add(new Label(introductionString));
+            @Override
+            public void onSuccess(KerberosUser result) {
+                SubscriptionScreen.this.user = result;
+            }
+        });
         loadOrgsFromSubscriptionService();
     }
 
@@ -70,7 +77,6 @@ public class SubscriptionScreen extends Composite {
 
             @Override
             public void onSuccess(Set<GithubOrganization> result) {
-                successPanel.add(new Label("Result size from server is " + result.size()));
                 generateGrids(result);
             }
         });
@@ -115,18 +121,19 @@ public class SubscriptionScreen extends Composite {
     }
 
     private Button generateSubscribeButton(final String orgName, final int teamId) {
-        Button subscribeButton = crreateOperationButton("Subscribe");
+        Button subscribeButton = createOperationButton("Subscribe");
         subscribeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                loginService.subscribe(orgName, teamId, user.getGithubName(), getCallBack("subscirbe", orgName, teamId));
+                loginService.subscribe(orgName, teamId, user.getGithubName(),
+                      getCallBack("subscribe", orgName, teamId));
             }
         });
         return subscribeButton;
     }
 
     private Button generateUnsubscribeButton(final String orgName, final int teamId) {
-        Button unsubscribeButton = crreateOperationButton("Unsubscribe");
+        Button unsubscribeButton = createOperationButton("Unsubscribe");
         unsubscribeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -154,7 +161,7 @@ public class SubscriptionScreen extends Composite {
         return toReturn;
     }
 
-    private Button crreateOperationButton(String buttonName) {
+    private Button createOperationButton(String buttonName) {
         Button b = new Button(buttonName);
         b.setEnabled(true);
         b.getElement().setId(buttonName);

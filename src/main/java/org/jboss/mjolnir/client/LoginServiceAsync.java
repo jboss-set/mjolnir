@@ -23,4 +23,6 @@ public interface  LoginServiceAsync {
     void unsubscribe(String orgName, int teamId, String githubName, AsyncCallback<Void> async);
 
     void subscribe(String orgName, int teamId, String githubName, AsyncCallback<Void> async);
+
+    void isRegistered(String krb5Name, AsyncCallback<Boolean> async);
 }
