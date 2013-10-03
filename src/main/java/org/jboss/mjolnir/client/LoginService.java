@@ -48,6 +48,7 @@ public interface LoginService extends RemoteService {
     boolean isRegistered(String krb5Name);
     KerberosUser getKerberosUser(String krb5Name);
     KerberosUser registerKerberosUser(String krb5Name, String githubName) throws RuntimeException;
+    KerberosUser modifyGithubName(String krb5Name, String newGithubName);
     void logout();
     void setSession();
     void subscribe(String orgName, int teamId, String githubName);
