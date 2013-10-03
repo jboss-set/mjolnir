@@ -1,6 +1,8 @@
 package org.jboss.mjolnir.client;
 
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
@@ -34,14 +36,31 @@ public class ModifyGithubNameScreen extends AbstractGithubNameScreen {
         Button submitButton = buildSubmitButton();
         submitButton.addClickHandler(handler);
 
-        formGrid = new Grid(5, 4);
+        Button returnButton = buildReturnToSelection();
+
+        formGrid = new Grid(6, 5);
         formGrid.setWidget(0, 0, new Label("Hello there: "));
         formGrid.setWidget(0, 2, new Label(krb5Name));
         formGrid.setWidget(2, 0, new Label("Enter your correct github username."));
         formGrid.setWidget(2, 2, new Label("Note: It should NOT be an email address"));
         formGrid.setWidget(4, 0, nameField);
         formGrid.setWidget(4, 2, submitButton);
+        formGrid.setWidget(5, 4, returnButton);
 
         githubNamePanel.add(formGrid);
+    }
+
+    private Button buildReturnToSelection() {
+        final Button returnButton = new Button("Return to Selection");
+        returnButton.setEnabled(true);
+        returnButton.getElement().setId("Return");
+        returnButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                githubNamePanel.remove(formGrid);
+                EntryPage.getInstance().moveToSelectionScreen(krb5Name);
+            }
+        });
+        return returnButton;
     }
 }
