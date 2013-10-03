@@ -25,4 +25,6 @@ public interface  LoginServiceAsync {
     void subscribe(String orgName, int teamId, String githubName, AsyncCallback<Void> async);
 
     void isRegistered(String krb5Name, AsyncCallback<Boolean> async);
+
+    void modifyGithubName(String krb5Name, String newGithubName, AsyncCallback<KerberosUser> async);
 }
