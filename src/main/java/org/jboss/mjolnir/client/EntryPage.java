@@ -43,6 +43,10 @@ public class EntryPage implements EntryPoint {
     /** Singleton EntryPage **/
     private static EntryPage instance = new EntryPage();
 
+    // Constructor made private.
+    private EntryPage() {
+    }
+
     public static EntryPage getInstance() {
         return instance;
     }
