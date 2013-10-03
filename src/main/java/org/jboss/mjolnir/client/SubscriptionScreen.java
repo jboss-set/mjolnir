@@ -50,7 +50,7 @@ public class SubscriptionScreen extends Composite {
     private KerberosUser user;
 
     private LoginServiceAsync loginService;
-    private RootPanel successPanel = RootPanel.get("subscriptionPanelContainer");
+    private RootPanel subscriptionPanel = RootPanel.get("subscriptionPanelContainer");
 
     public SubscriptionScreen(String krb5Name) {
         loginService = LoginService.Util.getInstance();
@@ -91,7 +91,7 @@ public class SubscriptionScreen extends Composite {
             // For each organization, we want the number of teams + 2.
             List<GithubTeam> teams = o.getTeams();
             int teamSize = teams.size();
-            int gridRows = teamSize + 2;
+            int gridRows = teamSize + 3;
 
             Grid orgGrid = new Grid(gridRows, gridCols);
             populateBasicContent(orgGrid, o.getName());
@@ -106,7 +106,9 @@ public class SubscriptionScreen extends Composite {
 
                 // TODO: Find a way to generate the live status of the user here.
             }
-            successPanel.add(orgGrid);
+            Button returnToSelection = buildReturnToSelection(orgGrid);
+            orgGrid.setWidget(gridRows - 1, gridCols - 1, returnToSelection);
+            subscriptionPanel.add(orgGrid);
         }
     }
 
@@ -195,4 +197,17 @@ public class SubscriptionScreen extends Composite {
         return closeButton;
     }
 
+    private Button buildReturnToSelection(final Grid orgGrid) {
+        final Button returnButton = new Button("Return to Selection");
+        returnButton.setEnabled(true);
+        returnButton.getElement().setId("Return");
+        returnButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                subscriptionPanel.remove(orgGrid);
+                EntryPage.getInstance().moveToSelectionScreen(user.getName());
+            }
+        });
+        return returnButton;
+    }
 }
