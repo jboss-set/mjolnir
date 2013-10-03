@@ -30,7 +30,13 @@
             <td id="loginPanelContainer"></td>
         </tr>
         <tr>
+            <td id="selectionPanelContainer"></td>
+        </tr>
+        <tr>
             <td id="subscriptionPanelContainer"></td>
+        </tr>
+        <tr>
+            <td id="modifyPanelContainer"></td>
         </tr>
         <tr>
             <td id="registerPanelContainer"></td>

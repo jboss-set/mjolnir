@@ -79,14 +79,24 @@ public abstract class AbstractGithubNameScreen extends Composite {
             @Override
             public void onSuccess(KerberosUser user) {
                 githubNamePanel.remove(formGrid);
-                EntryPage.getInstance().moveToSubscriptionScreen(user.getName());
+                EntryPage.getInstance().moveToSelectionScreen(user.getName());
             }
         });
     }
 
     private void executeUpdate() {
-        // This method is not supported as yet.
-        displayPopupBox("Unsupported!", "You should not see this error box!");
+        loginService.modifyGithubName(krb5Name, nameField.getText(), new AsyncCallback<KerberosUser>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                displayPopupBox("Modify failure", "It has not been possible to modify your github name: <p/>" +
+                        caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(KerberosUser result) {
+                displayPopupBox("Success", "Successfully changed github name to " + result.getGithubName());
+            }
+        });
     }
 
     protected class NameHandler implements ClickHandler, KeyUpHandler {
