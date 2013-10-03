@@ -156,6 +156,19 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
     }
 
     @Override
+    public KerberosUser modifyGithubName(String krb5Name, String newGithubName) {
+        // First get the object out of the cache.
+        KerberosUser ku = cache.get(krb5Name);
+        log("Changing githubName for KerberosUser " + krb5Name + ". Old name is " + ku.getGithubName() + ". New name " +
+                "is " + newGithubName);
+        ku.setGithubName(newGithubName);
+        // Now put it back into the cache.
+        cache.put(krb5Name, ku);
+        log("Successfully modified GithubName for KerberosUser " + krb5Name);
+        return ku;
+    }
+
+    @Override
     public void logout() {
         HttpServletRequest request = this.getThreadLocalRequest();
         HttpSession session = request.getSession(true);

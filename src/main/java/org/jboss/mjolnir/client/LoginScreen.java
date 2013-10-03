@@ -99,7 +99,7 @@ public class LoginScreen extends Composite {
             public void onSuccess(Boolean isRegistered) {
                 if (isRegistered) {
                     // Move to subscription screen.
-                    EntryPage.getInstance().moveToSubscriptionScreen(krb5Name);
+                    EntryPage.getInstance().moveToGithubModifyScreen(krb5Name);
 
                 } else {
                     // Move to add github name screen.

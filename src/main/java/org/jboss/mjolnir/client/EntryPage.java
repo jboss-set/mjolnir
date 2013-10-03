@@ -23,9 +23,17 @@
 package org.jboss.mjolnir.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
+ * NOTE: Changed from <b>LoginPage</b> to <b>EntryPage</b> from v 0.3.
+ *
  * @author: navssurtani
  * @since: 0.1
  */
@@ -57,5 +65,15 @@ public class EntryPage implements EntryPoint {
     public void moveToGithubRegistrationScreen(String krb5Name) {
         AbstractGithubNameScreen registerScreen = new RegisterGithubNameScreen(krb5Name);
         RootPanel.get().add(registerScreen);
+    }
+
+    public void moveToGithubModifyScreen(String krb5Name) {
+        AbstractGithubNameScreen modifyScreen = new ModifyGithubNameScreen(krb5Name);
+        RootPanel.get().add(modifyScreen);
+    }
+
+    public void moveToSelectionScreen(final String krb5Name) {
+        SelectionScreen selectionScreen = new SelectionScreen(krb5Name);
+        RootPanel.get().add(selectionScreen);
     }
 }
