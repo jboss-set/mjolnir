@@ -25,7 +25,7 @@ public class GitHubClientTest {
 	private static String TOKEN = "408af3afceec32628057e6cc6c8eda738c4a8951";
 	private static int TEAM_ID = 1223195;
 	private static String ORG_NAME = "thofmantestorg";
-	private static String USERNAME = "TomasHofman";
+	private static String USERNAME = "testtest22";
 
 	private GitHubClient gitHubClient = new GitHubClient();
 	private ExtendedTeamService teamService = new ExtendedTeamService(gitHubClient);
