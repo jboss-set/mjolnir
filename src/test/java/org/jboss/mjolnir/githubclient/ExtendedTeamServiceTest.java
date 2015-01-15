@@ -12,22 +12,22 @@ import java.io.IOException;
  */
 public class ExtendedTeamServiceTest {
 
-	private static String USERNAME = "username";
-	private static int TEAM_ID = 1;
+    private static String USERNAME = "username";
+    private static int TEAM_ID = 1;
 
-	private GitHubClient gitHubClient;
-	private ExtendedTeamService teamService;
+    private GitHubClient gitHubClient;
+    private ExtendedTeamService teamService;
 
-	@Before
-	public void setUp() {
-		gitHubClient = Mockito.mock(GitHubClient.class);
-		teamService = new ExtendedTeamService(gitHubClient);
-	}
+    @Before
+    public void setUp() {
+        gitHubClient = Mockito.mock(GitHubClient.class);
+        teamService = new ExtendedTeamService(gitHubClient);
+    }
 
-	@Test
-	public void testAddMembership() throws IOException {
-		teamService.addMembership(TEAM_ID, USERNAME);
-		Mockito.verify(gitHubClient).put("/teams/" + TEAM_ID + "/memberships/" + USERNAME);
-		Mockito.verifyNoMoreInteractions(gitHubClient);
-	}
+    @Test
+    public void testAddMembership() throws IOException {
+        teamService.addMembership(TEAM_ID, USERNAME);
+        Mockito.verify(gitHubClient).put("/teams/" + TEAM_ID + "/memberships/" + USERNAME);
+        Mockito.verifyNoMoreInteractions(gitHubClient);
+    }
 }

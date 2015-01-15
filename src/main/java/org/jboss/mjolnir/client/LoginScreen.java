@@ -163,7 +163,7 @@ public class LoginScreen extends Composite {
                 public void onSuccess(XsrfToken result) {
                     // Now we can get the login service.
                     loginService = LoginService.Util.getInstance();
-					((HasRpcToken) loginService).setRpcToken(result);
+                    ((HasRpcToken) loginService).setRpcToken(result);
                     performLoginCall(krb5Name, password);
                 }
             });
