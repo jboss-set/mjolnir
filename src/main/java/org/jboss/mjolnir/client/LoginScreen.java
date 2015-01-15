@@ -29,6 +29,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.rpc.XsrfToken;
 import com.google.gwt.user.client.rpc.XsrfTokenService;
@@ -162,6 +163,7 @@ public class LoginScreen extends Composite {
                 public void onSuccess(XsrfToken result) {
                     // Now we can get the login service.
                     loginService = LoginService.Util.getInstance();
+                    ((HasRpcToken) loginService).setRpcToken(result);
                     performLoginCall(krb5Name, password);
                 }
             });

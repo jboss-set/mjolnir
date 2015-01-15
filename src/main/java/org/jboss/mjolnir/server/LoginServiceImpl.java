@@ -37,6 +37,7 @@ import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.client.LoginService;
+import org.jboss.mjolnir.githubclient.ExtendedTeamService;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -53,7 +54,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -185,9 +185,9 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
 
     @Override
     public void subscribe(String orgName, int teamId, String githubName) {
-        TeamService teamService = obtainTeamService(orgName);
+        ExtendedTeamService teamService = obtainTeamService(orgName);
         try {
-            teamService.addMember(teamId, githubName);
+            teamService.addMembership(teamId, githubName);
             log("Successfully added " + githubName + " to team.");
         } catch (IOException e) {
             throw new RuntimeException("Unable to subscribe user " + githubName
@@ -244,11 +244,11 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         Context ctx = (Context) new InitialContext().lookup("java:comp/env");
         return (String) ctx.lookup("INFINISPAN_STORE");
     }
-    private TeamService obtainTeamService(String orgName) {
+    private ExtendedTeamService obtainTeamService(String orgName) {
         GithubOrganization organization = orgs.get(orgName);
         GitHubClient client = new GitHubClient();
         client.setOAuth2Token(organization.getToken());
         log("Returning TeamService object for organization " + orgName);
-        return new TeamService(client);
+        return new ExtendedTeamService(client);
     }
 }
