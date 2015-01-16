@@ -22,6 +22,10 @@
         <servlet-class>com.google.gwt.user.server.rpc.XsrfTokenServiceServlet</servlet-class>
     </servlet>
 
+    <listener>
+        <listener-class>org.jboss.mjolnir.server.CacheContextListener</listener-class>
+    </listener>
+
     <servlet-mapping>
         <servlet-name>xsrf</servlet-name>
         <url-pattern>/mjolnir/xsrf</url-pattern>

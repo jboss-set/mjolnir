@@ -50,6 +50,8 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
@@ -66,31 +68,19 @@ import java.util.Set;
 
 public class LoginServiceImpl extends XsrfProtectedServiceServlet implements LoginService {
 
-
     private Cache<String, KerberosUser> cache;
     private Map<String, GithubOrganization> orgs;
 
-    public LoginServiceImpl() {
-        String cacheStoreLocation;
-        try {
-            cacheStoreLocation = getCacheStoreLocation();
-        } catch (NamingException e) {
-            e.printStackTrace();
-            throw new InstantiationError("Could not instantiate servlet due to error with cache store location.");
-        }
-        GlobalConfigurationBuilder global = new GlobalConfigurationBuilder();
-        global.globalJmxStatistics()
-                .allowDuplicateDomains(true).jmxDomain("org.jboss.mjolnir");
-        ConfigurationBuilder builder = new ConfigurationBuilder();
-        builder.loaders().preload(true)
-                .addFileCacheStore().location(cacheStoreLocation)
-                .eviction().maxEntries(50);
-        Configuration config = builder.build(true);
-        EmbeddedCacheManager cacheManager = new DefaultCacheManager(config);
-        cache = cacheManager.getCache();
+    @SuppressWarnings("unchecked")
+    @Override
+    public void init() throws ServletException {
+        super.init();
 
+        // retrieve cache instance from context
+        cache = (Cache<String, KerberosUser>) getServletContext().getAttribute("cache");
+
+        // read and parse configuration
         orgs = new HashMap<String, GithubOrganization>();
-        // TODO: Should the Parser be returning a Map?
         try {
             for (GithubOrganization o : GithubParser.getOrganizations()) {
                 orgs.put(o.getName(), o);
@@ -99,7 +89,6 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
             e.printStackTrace();
             throw new InstantiationError("Could not instantiate servlet due to error with GithubParser.");
         }
-
     }
 
     @Override
@@ -239,11 +228,6 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         log("Kerberos credentials ok for " + krb5Name);
     }
 
-    public String getCacheStoreLocation() throws NamingException {
-        // Get the environment naming context
-        Context ctx = (Context) new InitialContext().lookup("java:comp/env");
-        return (String) ctx.lookup("INFINISPAN_STORE");
-    }
     private ExtendedTeamService obtainTeamService(String orgName) {
         GithubOrganization organization = orgs.get(orgName);
         GitHubClient client = new GitHubClient();
