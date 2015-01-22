@@ -27,28 +27,32 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
+import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.authentication.LoginFailedException;
+
+import java.util.Set;
 
 /**
- * @author: navssurtani
- * @since: 0.1
+ * @author navssurtani
+ * @author Tomas Hofman (thofman@redhat.com)
  */
 
-@RemoteServiceRelativePath("LoginService")
+@RemoteServiceRelativePath("GitHubService")
 @XsrfProtect
-public interface LoginService extends RemoteService {
+public interface GitHubService extends RemoteService {
 
-    KerberosUser login(String krb5Name, String password) throws LoginFailedException;
-    KerberosUser getLoggedUser();
-    void logout();
+    KerberosUser modifyGithubName(String newGithubName);
+    String subscribe(int teamId);
+    void unsubscribe(int teamId);
+    Set<GithubOrganization> getAvailableOrganizations();
+    Set<GithubOrganization> getSubscriptions();
 
     public static class Util {
-        private static LoginServiceAsync instance;
+        private static GitHubServiceAsync instance;
 
-        public static LoginServiceAsync getInstance() {
+        public static GitHubServiceAsync getInstance() {
             if (instance == null) {
-                instance = (LoginServiceAsync) GWT.create(LoginService.class);
+                instance = GWT.create(GitHubService.class);
             }
             return instance;
         }

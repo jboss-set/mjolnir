@@ -23,188 +23,121 @@
 package org.jboss.mjolnir.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.rpc.XsrfToken;
 import com.google.gwt.user.client.rpc.XsrfTokenService;
 import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import org.jboss.mjolnir.authentication.LoginFailedException;
+import org.jboss.mjolnir.authentication.KerberosUser;
 
 /**
- * @author: navssurtani
- * @since: 0.2
+ * Login form.
+ *
+ * @author navsurtani
+ * @author Tomas Hofman (thofman@redhat.com)
  */
 
-public class LoginScreen extends Composite {
+public abstract class LoginScreen extends Composite {
 
-    private TextBox krb5NameField;
-    private PasswordTextBox pwdField;
-    private Button loginButton;
-
-    private Grid loginGrid;
-
-    private RootPanel loginPanel;
-
-    // The service to make RPC calls.
-    private LoginServiceAsync loginService = null;
+    private LoginServiceAsync loginService = LoginService.Util.getInstance();
+    private Label feedback;
 
     public LoginScreen() {
-        krb5NameField = new TextBox();
-        pwdField = new PasswordTextBox();
-        loginButton = new Button("Login");
+        final HTMLPanel panel = new HTMLPanel("");
+        panel.setStyleName("login-panel");
+        panel.setWidth("400px");
+        panel.getElement().getStyle().setProperty("margin", "0 auto");
+        panel.getElement().getStyle().setPaddingTop(5, Style.Unit.EM);
 
-        krb5NameField.setTitle("Kerberos username");
-        pwdField.setTitle("Kerberos password");
+        final FormPanel form = new FormPanel();
+        panel.add(form);
+
+        final TextBox nameField = new TextBox();
+        final PasswordTextBox passwordField = new PasswordTextBox();
+        final SubmitButton loginButton = new SubmitButton("Login");
+
+        nameField.setTitle("Kerberos usernaame");
+        passwordField.setTitle("Kerberos password");
         loginButton.setEnabled(true);
 
-        loginGrid = new Grid(3, 2);
+        final Grid loginGrid = new Grid(3, 2);
         loginGrid.setWidget(0, 0, new Label("Kerberos Username"));
-        loginGrid.setWidget(0, 1, krb5NameField);
+        loginGrid.setWidget(0, 1, nameField);
         loginGrid.setWidget(1, 0, new Label("Kerberos Password"));
-        loginGrid.setWidget(1, 1, pwdField);
+        loginGrid.setWidget(1, 1, passwordField);
         loginGrid.setWidget(2, 1, loginButton);
+        form.setWidget(loginGrid);
 
-        loginPanel = RootPanel.get("loginPanelContainer");
-        loginPanel.add(loginGrid);
+        feedback = new Label();
+        panel.add(feedback);
 
-        LoginHandler handler = new LoginHandler();
-        loginButton.addClickHandler(handler);
-        krb5NameField.addKeyUpHandler(handler);
-        pwdField.addKeyUpHandler(handler);
+        initWidget(panel);
+
+        form.addSubmitHandler(new FormPanel.SubmitHandler() {
+            @Override
+            public void onSubmit(FormPanel.SubmitEvent submitEvent) {
+                final XsrfTokenServiceAsync xsrf = GWT.create(XsrfTokenService.class);
+                ((ServiceDefTarget) xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
+
+                xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        showMessage("Could not generate token: " + caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(XsrfToken result) {
+                        // Now we can get the login service.
+                        loginService = LoginService.Util.getInstance();
+                        ((HasRpcToken) loginService).setRpcToken(result);
+                        performLoginCall(nameField.getText(), passwordField.getText());
+                    }
+                });
+                submitEvent.cancel(); // prevent form from submitting, since it was handled by Ajax
+            }
+        });
     }
 
-    private void checkIsRegistered(final String krb5Name) {
-        loginService.isRegistered(krb5Name, new AsyncCallback<Boolean>() {
+    private void showMessage(String message) {
+        feedback.setText(message);
+    }
+
+    private void performLoginCall(final String krb5Name, String password) {
+        loginService.login(krb5Name, password, new AsyncCallback<KerberosUser>() {
             @Override
             public void onFailure(Throwable caught) {
-                displayErrorBox("Error checking if user exists on server.", caught.getMessage());
+                showMessage("Login failed: " + caught.getMessage());
             }
 
             @Override
-            public void onSuccess(Boolean isRegistered) {
-                if (isRegistered) {
-                    // Move to subscription screen.
-                    EntryPage.getInstance().moveToSelectionScreen(krb5Name);
-
+            public void onSuccess(KerberosUser user) {
+                if (user != null) {
+                    onSuccessfulLogin(user);
                 } else {
-                    // Move to add github name screen.
-                    EntryPage.getInstance().moveToGithubRegistrationScreen(krb5Name);
+                    showMessage("Login failure: wrong credentials.");
                 }
             }
         });
     }
 
-    private void displayErrorBox(String errorHeader, String message) {
-        final DialogBox errorBox = new DialogBox();
-        errorBox.setText(errorHeader);
-        final HTML errorLabel = new HTML();
-        errorLabel.setHTML(message);
-        VerticalPanel verticalPanel = new VerticalPanel();
-        verticalPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
-        final Button closeButton = new Button("Close");
-        closeButton.setEnabled(true);
-        closeButton.getElement().setId("close");
-        closeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                errorBox.hide();
-                loginButton.setFocus(true);
-                loginButton.setEnabled(true);
-            }
-        });
-        verticalPanel.add(errorLabel);
-        verticalPanel.add(closeButton);
-        errorBox.setWidget(verticalPanel);
-        errorBox.center();
-    }
-
-    class LoginHandler implements ClickHandler, KeyUpHandler {
-
-        @Override
-        public void onClick(ClickEvent event) {
-            makeSecureLogin(krb5NameField.getText(), pwdField.getText());
-        }
-
-        @Override
-        public void onKeyUp(KeyUpEvent event) {
-            if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
-                makeSecureLogin(krb5NameField.getText(), pwdField.getText());
-        }
-
-        private void makeSecureLogin(final String krb5Name, final String password) {
-            // First make sure that we can get our token sorted out.
-            XsrfTokenServiceAsync xsrf = (XsrfTokenServiceAsync) GWT.create(XsrfTokenService.class);
-            ((ServiceDefTarget) xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
-
-
-            xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    displayErrorBox("Could not generate token", caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(XsrfToken result) {
-                    // Now we can get the login service.
-                    loginService = LoginService.Util.getInstance();
-                    ((HasRpcToken) loginService).setRpcToken(result);
-                    performLoginCall(krb5Name, password);
-                }
-            });
-
-        }
-
-        private void performLoginCall(final String krb5Name, String password) {
-            loginService.login(krb5Name, password, new AsyncCallback<Boolean>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    // We want to check whether or not we have a LoginFailedException first.
-                    try {
-                        throw caught;
-                    } catch (LoginFailedException lfe) {
-                        displayErrorBox("Error with login", lfe.getSymbol());
-                    } catch (Throwable other) {
-                        displayErrorBox("Error with login", "There has been an unexpected error with your login." +
-                                " Please email jboss-set@redhat.com");
-                    }
-                }
-
-                @Override
-                public void onSuccess(Boolean result) {
-                    // Based off of the result, we either forward off to a new screen or we just display a
-                    // pop-up stating that the password is incorrect and allow for a retry.
-                    if (result) {
-                        loginPanel.remove(loginGrid);
-                        // Now we should make a check to see if the user exists or not. If that is true,
-                        // we will either move to the RegisterGithubNameScreen or the SubscriptionScreen.
-                        checkIsRegistered(krb5Name);
-                    } else {
-                        // Just display an error box with a close button that should allow us to come back to the
-                        // same screen. Hopefully.
-                        displayErrorBox("Incorrect password", "Your username-password combination is wrong. Please " +
-                                "check and try again.");
-                    }
-                }
-            });
-
-        }
-    }
+    /**
+     * Method which is called on successful login.
+     *
+     * To be implemented by caller.
+     *
+     * @param user logged user
+     */
+    protected abstract void onSuccessfulLogin(KerberosUser user);
 
 }
 

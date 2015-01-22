@@ -22,27 +22,14 @@
 
 package org.jboss.mjolnir.server;
 
-import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sun.security.auth.login.ConfigFile;
-import org.eclipse.egit.github.core.client.GitHubClient;
-import org.eclipse.egit.github.core.service.TeamService;
-import org.infinispan.Cache;
-import org.infinispan.configuration.cache.Configuration;
-import org.infinispan.configuration.cache.ConfigurationBuilder;
-import org.infinispan.configuration.global.GlobalConfigurationBuilder;
-import org.infinispan.manager.DefaultCacheManager;
-import org.infinispan.manager.EmbeddedCacheManager;
-import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.client.LoginService;
-import org.jboss.mjolnir.githubclient.ExtendedTeamService;
+import org.jboss.mjolnir.server.bean.UserRepository;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.security.auth.Subject;
+import javax.ejb.EJB;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
@@ -50,111 +37,62 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.sql.SQLException;
 
 /**
- * @author: navssurtani
- * @since: 0.1
+ * Provides authentication methods.
+ *
+ * @author navssurtani
+ * @author Tomas Hofman (thofman@redhat.com)
  */
 
-public class LoginServiceImpl extends XsrfProtectedServiceServlet implements LoginService {
+public class LoginServiceImpl extends RemoteServiceServlet implements LoginService {
 
-    private Cache<String, KerberosUser> cache;
-    private Map<String, GithubOrganization> orgs;
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void init() throws ServletException {
-        super.init();
-
-        // retrieve cache instance from context
-        cache = (Cache<String, KerberosUser>) getServletContext().getAttribute("cache");
-
-        // read and parse configuration
-        orgs = new HashMap<String, GithubOrganization>();
-        try {
-            for (GithubOrganization o : GithubParser.getOrganizations()) {
-                orgs.put(o.getName(), o);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new InstantiationError("Could not instantiate servlet due to error with GithubParser.");
-        }
-    }
+    @EJB
+    private UserRepository userRepository;
 
     @Override
-    public boolean login(String krb5Name, String password) throws LoginFailedException {
+    public KerberosUser login(String krb5Name, String password) throws LoginFailedException {
         // This will always be the first method called by the user upon hitting the web-app.
         // We will return true if the kerberos password is correct. Regardless of whether or not their details
         // already exist in the cache.
 
         log("login() called on servlet with username " + krb5Name);
+        final KerberosUser user;
         try {
             validateCredentials(krb5Name, password);
+            user = userRepository.getOrCreateUser(krb5Name);
+            getSession().setAttribute(AuthenticationFilter.AUTHENTICATED_USER_SESSION_KEY, user);
         } catch (LoginException e) {
             log("LoginException caught from JaaS. Problem with login credentials.");
             log(e.getMessage());
 
             // The user-password combination is not correct. We should simply return false and allow the user to
             // re-enter their password.
-            return false;
-
+            return null;
         } catch (URISyntaxException e) {
             // Here there is a problem, so the onFailure() part will be called on the client side
             log("URISyntaxException caught. Big problem here.");
             throw new LoginFailedException("There is a problem with the login on the server. Please contact " +
                     "jboss-set@redhat.com");
+        } catch (SQLException e) {
+            throw new LoginFailedException(e.getMessage());
         }
         log("Login succeeded. Returning 'true'");
-        return true;
+        return user;
     }
 
     @Override
-    public boolean isRegistered(String krb5Name) {
-        // As long as the cache contains the String, we return true.
-        boolean toReturn = cache.containsKey(krb5Name);
-        log("Value whether or not " + krb5Name + " is registered: " + toReturn);
-        return cache.containsKey(krb5Name);
-    }
-
-    @Override
-    public KerberosUser getKerberosUser(String krb5Name) {
-        KerberosUser toReturn = cache.get(krb5Name);
-        log("User to return:" + toReturn.toString());
-        return toReturn;
-    }
-
-    @Override
-    public KerberosUser registerKerberosUser(String krb5Name, String githubName) {
-        log("Registering user of " + krb5Name + ", " + githubName + " to cache.");
-        KerberosUser kerberosUser = new KerberosUser();
-        kerberosUser.setName(krb5Name);
-        kerberosUser.setGithubName(githubName);
-        cache.put(krb5Name, kerberosUser);
-        log("User to return back to client is: " + kerberosUser.toString());
-        return kerberosUser;
-    }
-
-    @Override
-    public KerberosUser modifyGithubName(String krb5Name, String newGithubName) {
-        // First get the object out of the cache.
-        KerberosUser ku = cache.get(krb5Name);
-        log("Changing githubName for KerberosUser " + krb5Name + ". Old name is " + ku.getGithubName() + ". New name " +
-                "is " + newGithubName);
-        ku.setGithubName(newGithubName);
-        // Now put it back into the cache.
-        cache.put(krb5Name, ku);
-        log("Successfully modified GithubName for KerberosUser " + krb5Name);
-        return ku;
+    public KerberosUser getLoggedUser() {
+        final Object user = getSession().getAttribute(AuthenticationFilter.AUTHENTICATED_USER_SESSION_KEY);
+        if (user instanceof KerberosUser) {
+            return (KerberosUser) user;
+        }
+        return null;
     }
 
     @Override
@@ -162,51 +100,13 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         HttpServletRequest request = this.getThreadLocalRequest();
         HttpSession session = request.getSession(true);
         session.removeAttribute("kerberosUser");
-    }
-
-    @Override
-    public void setSession() {
-        log("setSession() called.");
-        String cookieValue = getThreadLocalRequest().getRequestedSessionId();
-        Cookies.setCookie("JSESSIONID", cookieValue);
-        log("Session ID cookie set as: " + cookieValue);
-    }
-
-    @Override
-    public void subscribe(String orgName, int teamId, String githubName) {
-        ExtendedTeamService teamService = obtainTeamService(orgName);
-        try {
-            teamService.addMembership(teamId, githubName);
-            log("Successfully added " + githubName + " to team.");
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to subscribe user " + githubName
-                    + " to team #" + teamId + " of organization " + orgName, e);
-        }
-    }
-
-    @Override
-    public void unsubscribe(String orgName, int teamId, String githubName) {
-        TeamService teamService = obtainTeamService(orgName);
-        try {
-            teamService.removeMember(teamId, githubName);
-            log("Successfully removed " + githubName + " from team.");
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to unsubscribe user " + githubName
-                    + " to team #" + teamId + " of organization " + orgName, e);
-        }
-    }
-
-    @Override
-    public Set<GithubOrganization> getAvailableOrganizations() {
-        log("Returning organizations. The collection has " + orgs.size() + " entries");
-        return new HashSet<GithubOrganization>(orgs.values());
+        getSession().setAttribute(AuthenticationFilter.AUTHENTICATED_USER_SESSION_KEY, Boolean.FALSE);
     }
 
     // Method that will only be called if someone tries to log into the application for the first time.
     private void validateCredentials(final String krb5Name, final String password)
             throws LoginException, URISyntaxException {
         log("Validating credentials.");
-        final Subject subject = null;
         final CallbackHandler callbackHandler = new CallbackHandler() {
             @Override
             public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
@@ -223,16 +123,12 @@ public class LoginServiceImpl extends XsrfProtectedServiceServlet implements Log
         };
         final javax.security.auth.login.Configuration loginConfiguration = new ConfigFile(this.getClass()
                 .getResource("/jaas.config").toURI());
-        final LoginContext loginContext = new LoginContext("Kerberos", subject, callbackHandler, loginConfiguration);
+        final LoginContext loginContext = new LoginContext("Kerberos", null, callbackHandler, loginConfiguration);
         loginContext.login();
         log("Kerberos credentials ok for " + krb5Name);
     }
 
-    private ExtendedTeamService obtainTeamService(String orgName) {
-        GithubOrganization organization = orgs.get(orgName);
-        GitHubClient client = new GitHubClient();
-        client.setOAuth2Token(organization.getToken());
-        log("Returning TeamService object for organization " + orgName);
-        return new ExtendedTeamService(client);
+    private HttpSession getSession() {
+        return getThreadLocalRequest().getSession(true);
     }
 }

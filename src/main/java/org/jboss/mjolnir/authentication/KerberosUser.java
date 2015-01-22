@@ -35,6 +35,7 @@ public class KerberosUser implements Serializable {
 
     private String krb5Name;
     private String githubName;
+    private boolean admin;
 
     public String getName() {
         return krb5Name;
@@ -50,6 +51,14 @@ public class KerberosUser implements Serializable {
 
     public void setGithubName(String githubName) {
         this.githubName = githubName;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 
     @Override
