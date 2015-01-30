@@ -20,14 +20,16 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.mjolnir.server;
+package org.jboss.mjolnir.server.service;
 
-import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
+import com.google.gwt.user.client.rpc.SerializationException;
+import com.google.gwt.user.server.rpc.RPC;
+import com.google.gwt.user.server.rpc.RPCRequest;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.GitHubService;
+import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.GitHubRepository;
@@ -45,7 +47,7 @@ import java.util.Set;
 /**
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public class GitHubServiceImpl extends XsrfProtectedServiceServlet implements GitHubService {
+public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubService {
 
     private static String TOKEN_PARAMETER_NAME = "github.token";
 
@@ -75,8 +77,12 @@ public class GitHubServiceImpl extends XsrfProtectedServiceServlet implements Gi
     @Override
     public KerberosUser modifyGithubName(String newGithubName) {
         try {
-            final String krb5Name = getCurrentUser().getName();
+            // reload authenticated user form database
+            final String krb5Name = getAuthenticatedUser().getName();
             final KerberosUser user = userRepository.getUser(krb5Name);
+            setAuthenticatedUser(user);
+
+            // update github name
             log("Changing githubName for KerberosUser " + krb5Name + ". Old name is " + user.getGithubName() + ". New name " +
                     "is " + newGithubName);
             user.setGithubName(newGithubName);
@@ -153,18 +159,24 @@ public class GitHubServiceImpl extends XsrfProtectedServiceServlet implements Gi
         }
     }
 
-    private KerberosUser getCurrentUser() {
-        return  (KerberosUser) getThreadLocalRequest().getSession()
-                .getAttribute(AuthenticationFilter.AUTHENTICATED_USER_SESSION_KEY);
-    }
-
     private String getCurrentUserGitHubName() {
-        final KerberosUser user = getCurrentUser();
+        final KerberosUser user = getAuthenticatedUser();
         final String gitHubName = user.getGithubName();
         if (gitHubName == null) {
             throw new ApplicationException("Operation failed, user must set GitHub name first.");
         }
         return gitHubName;
+    }
+
+    @Override
+    public String processCall(RPCRequest rpcRequest) throws SerializationException {
+        // verify that user is authenticated
+        final KerberosUser loggedUser = getAuthenticatedUser();
+        if (loggedUser == null) {
+            return RPC.encodeResponseForFailedRequest(rpcRequest, new ApplicationException("User not authenticated."));
+        }
+
+        return super.processCall(rpcRequest);
     }
 
 }

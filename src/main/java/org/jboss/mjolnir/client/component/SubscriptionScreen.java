@@ -18,8 +18,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
-import org.jboss.mjolnir.client.GitHubService;
-import org.jboss.mjolnir.client.GitHubServiceAsync;
+import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.client.CurrentUser;
+import org.jboss.mjolnir.client.service.GitHubService;
+import org.jboss.mjolnir.client.service.GitHubServiceAsync;
 import org.jboss.mjolnir.server.github.MembershipState;
 
 import java.util.Set;
@@ -31,40 +33,60 @@ import java.util.logging.Logger;
  */
 public class SubscriptionScreen extends Composite {
 
+    private final static String GITHUB_NAME_DIALOG_MESSAGE = "Before you can manage your subscriptions, please specify your GitHub name.";
+
     private static Logger logger = Logger.getLogger("");
 
     private GitHubServiceAsync gitHubService = GitHubService.Util.getInstance();
+    private VerticalPanel panel = new VerticalPanel();
 
     public SubscriptionScreen() {
-        final VerticalPanel panel = new VerticalPanel();
         initWidget(panel);
 
-        panel.add(new GitHubNamePanel());
+        panel.add(new HTMLPanel("h2", "Subscribe to GitHub Teams"));
+        checkGitHubNameAndCreateContent();
+    }
 
-        final XsrfTokenServiceAsync xsrf = GWT.create(XsrfTokenService.class);
-        ((ServiceDefTarget) xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
-        xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                logger.log(Level.SEVERE, caught.getMessage(), caught);
-            }
+    private void checkGitHubNameAndCreateContent() {
+        final String githubName = CurrentUser.get().getGithubName();
+        if (githubName == null || "".equals(githubName)) {
+            // if github name is not set, show popup
+            final ModifyGitHubNamePopup popup = new ModifyGitHubNamePopup(false, GITHUB_NAME_DIALOG_MESSAGE) {
+                @Override
+                protected void onSaved(KerberosUser modifiedUser) {
+                    checkGitHubNameAndCreateContent();
+                }
+            };
+            popup.center();
+        } else {
+            // get subscription information
+            final XsrfTokenServiceAsync xsrf = GWT.create(XsrfTokenService.class);
+            ((ServiceDefTarget) xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
+            xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    logger.log(Level.SEVERE, caught.getMessage(), caught);
+                }
 
-            @Override
-            public void onSuccess(XsrfToken result) {
-                ((HasRpcToken) gitHubService).setRpcToken(result);
-                gitHubService.getSubscriptions(new AsyncCallback<Set<GithubOrganization>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        logger.log(Level.SEVERE, "Can't load organizations.", caught);
-                    }
+                @Override
+                public void onSuccess(XsrfToken result) {
+                    ((HasRpcToken) gitHubService).setRpcToken(result);
+                    gitHubService.getSubscriptions(new AsyncCallback<Set<GithubOrganization>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            logger.log(Level.SEVERE, "Can't load organizations.", caught);
+                        }
 
-                    @Override
-                    public void onSuccess(Set<GithubOrganization> result) {
-                        panel.add(createSubscriptionTable(result));
-                    }
-                });
-            }
-        });
+                        @Override
+                        public void onSuccess(Set<GithubOrganization> result) {
+                            // add subscription table
+                            panel.add(new GitHubNamePanel());
+                            panel.add(createSubscriptionTable(result));
+                        }
+                    });
+                }
+            });
+        }
     }
 
     private Widget createSubscriptionTable(Set<GithubOrganization> organizations) {

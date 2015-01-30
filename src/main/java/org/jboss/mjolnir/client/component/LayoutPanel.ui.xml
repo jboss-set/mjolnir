@@ -10,11 +10,14 @@
             padding: 1em;
         }
     </ui:style>
-    <g:DockLayoutPanel unit="EM">
-        <g:north size="20">
+    <g:DockLayoutPanel unit="EM" width="800px" styleName="contentBox">
+        <g:north size="7">
             <g:HTMLPanel styleName="{style.northPanel}">
                 <h1>Mjolnir</h1>
-                <g:Anchor ui:field="logoutLink" text="Logout">Logout</g:Anchor>
+                <div style="position: absolute; right: 1em; bottom: 1em;">
+                    <b><g:InlineLabel ui:field="usernameLabel"/></b>
+                    <g:Anchor ui:field="logoutLink" text="Logout">Logout</g:Anchor>
+                </div>
             </g:HTMLPanel>
         </g:north>
         <g:west size="15">

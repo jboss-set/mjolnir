@@ -20,13 +20,12 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.mjolnir.server;
+package org.jboss.mjolnir.server.service;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sun.security.auth.login.ConfigFile;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
-import org.jboss.mjolnir.client.LoginService;
+import org.jboss.mjolnir.client.service.LoginService;
 import org.jboss.mjolnir.server.bean.UserRepository;
 
 import javax.ejb.EJB;
@@ -37,8 +36,6 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -50,7 +47,7 @@ import java.sql.SQLException;
  * @author Tomas Hofman (thofman@redhat.com)
  */
 
-public class LoginServiceImpl extends RemoteServiceServlet implements LoginService {
+public class LoginServiceImpl extends AbstractServiceServlet implements LoginService {
 
     @EJB
     private UserRepository userRepository;
@@ -66,7 +63,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
         try {
             validateCredentials(krb5Name, password);
             user = userRepository.getOrCreateUser(krb5Name);
-            getSession().setAttribute(AuthenticationFilter.AUTHENTICATED_USER_SESSION_KEY, user);
+            setAuthenticatedUser(user);
         } catch (LoginException e) {
             log("LoginException caught from JaaS. Problem with login credentials.");
             log(e.getMessage());
@@ -88,19 +85,12 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
 
     @Override
     public KerberosUser getLoggedUser() {
-        final Object user = getSession().getAttribute(AuthenticationFilter.AUTHENTICATED_USER_SESSION_KEY);
-        if (user instanceof KerberosUser) {
-            return (KerberosUser) user;
-        }
-        return null;
+        return getAuthenticatedUser();
     }
 
     @Override
     public void logout() {
-        HttpServletRequest request = this.getThreadLocalRequest();
-        HttpSession session = request.getSession(true);
-        session.removeAttribute("kerberosUser");
-        getSession().setAttribute(AuthenticationFilter.AUTHENTICATED_USER_SESSION_KEY, Boolean.FALSE);
+        setAuthenticatedUser(null);
     }
 
     // Method that will only be called if someone tries to log into the application for the first time.
@@ -128,7 +118,4 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
         log("Kerberos credentials ok for " + krb5Name);
     }
 
-    private HttpSession getSession() {
-        return getThreadLocalRequest().getSession(true);
-    }
 }

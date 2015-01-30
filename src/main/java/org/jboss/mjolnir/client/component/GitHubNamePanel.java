@@ -1,10 +1,14 @@
 package org.jboss.mjolnir.client.component;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.CurrentUser;
 
@@ -15,30 +19,36 @@ import org.jboss.mjolnir.client.CurrentUser;
  */
 public class GitHubNamePanel extends Composite {
 
-    public GitHubNamePanel() {
-        final HTMLPanel gitHubNamePanel = new HTMLPanel("Your GitHub name is: <b>" + getGitHubName() + "</b> ");
+    interface Binder extends UiBinder<Widget, GitHubNamePanel> {}
+    private static Binder uiBinder = GWT.create(Binder.class);
 
-        final Anchor modifyLink = new Anchor("Change it");
-        modifyLink.addClickHandler(new ClickHandler() {
+    @UiField
+    Label gitHubNameLabel;
+
+    @UiField
+    Button changeButton;
+
+    public GitHubNamePanel() {
+        initWidget(uiBinder.createAndBindUi(this));
+
+        gitHubNameLabel.setText(CurrentUser.get().getGithubName());
+
+        changeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new ModifyGitHubNamePopup(true).show();
+                final ModifyGitHubNamePopup popup = new ModifyGitHubNamePopup(true) {
+                    @Override
+                    protected void onSaved(KerberosUser modifiedUser) {
+                        setGitHubName(modifiedUser.getGithubName());
+                    }
+                };
+                popup.center();
             }
         });
-        gitHubNamePanel.add(modifyLink);
-
-        initWidget(gitHubNamePanel);
     }
 
-    private String getGitHubName() {
-        final KerberosUser currentUser = CurrentUser.get();
-        final String gitHubName;
-        if (currentUser != null) {
-            gitHubName = currentUser.getGithubName();
-        } else {
-            gitHubName = "undefined";
-        }
-        return gitHubName;
+    public void setGitHubName(String gitHubName) {
+        gitHubNameLabel.setText(gitHubName);
     }
 
 }

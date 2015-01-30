@@ -1,5 +1,4 @@
 h1 {
-
 }
 
 a.active {
@@ -11,7 +10,10 @@ a.active {
     font-size: 16pt;
 }
 
-/** Most GWT widgets already have a style name defined */
+.contentBox {
+    box-shadow: 0px 0px 5px 5px #999;
+}
+
 .gwt-DialogBox {
     width: 400px;
 }

@@ -9,9 +9,8 @@
     <!-- Inherit the core Web Toolkit stuff.-->
     <inherits name='com.google.gwt.user.User'/>
 
-     <!--Inherit the default GWT style sheet.-->
+    <!--Inherit the default GWT style sheet.-->
     <inherits name='com.google.gwt.user.theme.clean.Clean'/>
-    <!--<inherits name="com.google.gwt.rpc.RPC"/>-->
     <inherits name="com.google.gwt.logging.Logging"/>
 
     <!-- Specify the app entry point class.-->
@@ -21,11 +20,7 @@
     <source path='client'/>
     <source path='authentication'/>
 
-    <!--<set-property name="gwt.logging.logLevel" value="INFO" />
-    <set-property name="gwt.logging.enabled" value="TRUE" />
-    <set-property name="gwt.logging.developmentModeHandler" value="ENABLED" />
-    <set-property name="gwt.logging.systemHandler" value="DISABLED" />
-    <set-property name="gwt.logging.popupHandler" value="DISABLED" />
-    <set-property name="gwt.logging.consoleHandler" value="ENABLED" />
-    <set-property name="gwt.logging.firebugHandler" value="ENABLED" />-->
+    <set-property name="compiler.stackMode" value="emulated" />
+    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>
+    <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>
 </module>

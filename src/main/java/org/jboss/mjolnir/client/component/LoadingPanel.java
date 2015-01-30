@@ -1,4 +1,4 @@
-package org.jboss.mjolnir.client;
+package org.jboss.mjolnir.client.component;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Composite;

@@ -8,7 +8,7 @@
     <!-- The LoginService servlet -->
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>org.jboss.mjolnir.server.LoginServiceImpl</servlet-class>
+        <servlet-class>org.jboss.mjolnir.server.service.LoginServiceImpl</servlet-class>
     </servlet>
     
     <servlet-mapping>
@@ -18,7 +18,7 @@
 
     <servlet>
         <servlet-name>GitHubServlet</servlet-name>
-        <servlet-class>org.jboss.mjolnir.server.GitHubServiceImpl</servlet-class>
+        <servlet-class>org.jboss.mjolnir.server.service.GitHubServiceImpl</servlet-class>
     </servlet>
 
     <servlet-mapping>

@@ -30,8 +30,14 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.rpc.XsrfToken;
 import com.google.gwt.user.client.rpc.XsrfTokenService;
 import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.client.component.LayoutPanel;
+import org.jboss.mjolnir.client.component.LoadingPanel;
+import org.jboss.mjolnir.client.component.LoginScreen;
+import org.jboss.mjolnir.client.service.LoginService;
+import org.jboss.mjolnir.client.service.LoginServiceAsync;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,6 +68,7 @@ public class EntryPage implements EntryPoint {
 
     @Override
     public void onModuleLoad() {
+        RootLayoutPanel.get().getElement().getStyle().setBackgroundColor("#ECECEC");
         RootLayoutPanel.get().add(new LoadingPanel());
 
         final XsrfTokenServiceAsync xsrfService = GWT.create(XsrfTokenService.class);
@@ -100,14 +107,17 @@ public class EntryPage implements EntryPoint {
     }
 
     public void goToLoginScreen() {
-        RootLayoutPanel.get().clear();
-        RootLayoutPanel.get().add(new LoginScreen() {
+        final FlowPanel flowPanel = new FlowPanel();
+        flowPanel.add(new LoginScreen() {
             @Override
             protected void onSuccessfulLogin(KerberosUser user) {
                 CurrentUser.set(user);
                 goToMainPage();
             }
         });
+
+        RootLayoutPanel.get().clear();
+        RootLayoutPanel.get().add(flowPanel);
     }
 
     public void goToMainPage() {

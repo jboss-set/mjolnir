@@ -20,10 +20,11 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.mjolnir.client;
+package org.jboss.mjolnir.client.component;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -32,13 +33,13 @@ import com.google.gwt.user.client.rpc.XsrfTokenService;
 import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.client.service.LoginService;
+import org.jboss.mjolnir.client.service.LoginServiceAsync;
 
 /**
  * Login form.
@@ -50,42 +51,29 @@ import org.jboss.mjolnir.authentication.KerberosUser;
 public abstract class LoginScreen extends Composite {
 
     private LoginServiceAsync loginService = LoginService.Util.getInstance();
-    private Label feedback;
+
+    interface Binder extends UiBinder<Widget, LoginScreen> {}
+    private static Binder uiBinder = GWT.create(Binder.class);
+
+    @UiField
+    FormPanel form;
+
+    @UiField
+    TextBox usernameField;
+
+    @UiField
+    PasswordTextBox passwordField;
+
+    @UiField
+    Label feedbackLabel;
+
 
     public LoginScreen() {
-        final HTMLPanel panel = new HTMLPanel("");
-        panel.setStyleName("login-panel");
-        panel.setWidth("400px");
-        panel.getElement().getStyle().setProperty("margin", "0 auto");
-        panel.getElement().getStyle().setPaddingTop(5, Style.Unit.EM);
-
-        final FormPanel form = new FormPanel();
-        panel.add(form);
-
-        final TextBox nameField = new TextBox();
-        final PasswordTextBox passwordField = new PasswordTextBox();
-        final SubmitButton loginButton = new SubmitButton("Login");
-
-        nameField.setTitle("Kerberos usernaame");
-        passwordField.setTitle("Kerberos password");
-        loginButton.setEnabled(true);
-
-        final Grid loginGrid = new Grid(3, 2);
-        loginGrid.setWidget(0, 0, new Label("Kerberos Username"));
-        loginGrid.setWidget(0, 1, nameField);
-        loginGrid.setWidget(1, 0, new Label("Kerberos Password"));
-        loginGrid.setWidget(1, 1, passwordField);
-        loginGrid.setWidget(2, 1, loginButton);
-        form.setWidget(loginGrid);
-
-        feedback = new Label();
-        panel.add(feedback);
-
-        initWidget(panel);
+        initWidget(uiBinder.createAndBindUi(this));
 
         form.addSubmitHandler(new FormPanel.SubmitHandler() {
             @Override
-            public void onSubmit(FormPanel.SubmitEvent submitEvent) {
+            public void onSubmit(FormPanel.SubmitEvent event) {
                 final XsrfTokenServiceAsync xsrf = GWT.create(XsrfTokenService.class);
                 ((ServiceDefTarget) xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
 
@@ -100,16 +88,15 @@ public abstract class LoginScreen extends Composite {
                         // Now we can get the login service.
                         loginService = LoginService.Util.getInstance();
                         ((HasRpcToken) loginService).setRpcToken(result);
-                        performLoginCall(nameField.getText(), passwordField.getText());
+                        performLoginCall(usernameField.getText(), passwordField.getText());
                     }
                 });
-                submitEvent.cancel(); // prevent form from submitting, since it was handled by Ajax
             }
         });
     }
 
     private void showMessage(String message) {
-        feedback.setText(message);
+        feedbackLabel.setText(message);
     }
 
     private void performLoginCall(final String krb5Name, String password) {

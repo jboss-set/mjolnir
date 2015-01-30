@@ -21,7 +21,7 @@
  */
 
 
-package org.jboss.mjolnir.client;
+package org.jboss.mjolnir.client.service;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;

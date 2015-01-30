@@ -12,6 +12,8 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
+ * Servlet filter checking that user is signed in.
+ *
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class AuthenticationFilter implements Filter {
