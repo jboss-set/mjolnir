@@ -1,26 +1,47 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:style>
-        .westPanel {
+        .westPanel a {
+            display: block;
             padding: 1em;
+            border-bottom: 0 1px 1px 1px solid #bbb;
+            background: #ddd;
+        }
+        .westPanel a.active {
+            background: white;
+            border-right: 0;
         }
         .northPanel {
-            padding: 1em;
+            background: #cc0000 url('images/rh-logo.png') 10px center no-repeat;
+            height: 42px;
+            padding: 10px 0 10px 62px;
+            color: white;
+        }
+        .northPanel h1 {
+            font-weight: bold;
+            font-size: 1.3em;
+            line-height: 42px;
+            margin: 0;
+            padding: 0;
+        }
+        .northPanel a {
+            font-weight: bold;
+            color: white;
         }
         .centerPanel {
             padding: 1em;
         }
     </ui:style>
-    <g:DockLayoutPanel unit="EM" width="800px" styleName="contentBox">
-        <g:north size="7">
-            <g:HTMLPanel styleName="{style.northPanel}">
+    <g:DockLayoutPanel unit="PX" width="800px" styleName="contentBox">
+        <g:north size="62">
+            <g:HTMLPanel styleName="{style.northPanel} menuPanel">
                 <h1>Mjolnir</h1>
                 <div style="position: absolute; right: 1em; bottom: 1em;">
-                    <b><g:InlineLabel ui:field="usernameLabel"/></b>
+                    <g:InlineLabel ui:field="usernameLabel"/> |
                     <g:Anchor ui:field="logoutLink" text="Logout">Logout</g:Anchor>
                 </div>
             </g:HTMLPanel>
         </g:north>
-        <g:west size="15">
+        <g:west size="200">
             <g:VerticalPanel ui:field="menuPanel" styleName="{style.westPanel}"/>
         </g:west>
         <g:center>

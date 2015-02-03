@@ -20,19 +20,29 @@ import java.sql.SQLException;
 @Stateless
 public class UserRepositoryBean implements UserRepository {
 
-    private static String GET_USER_SQL = "select id, krb_name, github_name, admin from users where krb_name = ?";
-    private static String UPDATE_USER_SQL = "update users set github_name = ? where krb_name = ?";
-    private static String INSERT_USER_SQL = "insert into users (github_name, krb_name) values (?, ?)";
+    private final static String GET_USER_SQL = "select id, krb_name, github_name, admin from users where krb_name = ?";
+    private final static String GET_USER_BY_GITHUB_NAME_SQL = "select id, krb_name, github_name, admin from users where github_name = ?";
+    private final static String UPDATE_USER_SQL = "update users set github_name = ? where krb_name = ?";
+    private final static String INSERT_USER_SQL = "insert into users (github_name, krb_name) values (?, ?)";
 
     @Resource(lookup = "java:jboss/datasources/MjolnirDS")
     private DataSource dataSource;
 
     @Override
     public KerberosUser getUser(String kerberosName) throws SQLException {
+        return getUser(GET_USER_SQL, kerberosName);
+    }
+
+    @Override
+    public KerberosUser getUserByGitHubName(String gitHubName) throws SQLException {
+        return getUser(GET_USER_BY_GITHUB_NAME_SQL, gitHubName);
+    }
+
+    private KerberosUser getUser(String sql, String param) throws SQLException {
         final Connection connection = dataSource.getConnection();
         try {
-            final PreparedStatement statement = connection.prepareStatement(GET_USER_SQL);
-            statement.setString(1, kerberosName);
+            final PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, param);
             final ResultSet resultSet = statement.executeQuery();
 
             KerberosUser user = null;

@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.mjolnir.client.CurrentUser;
 import org.jboss.mjolnir.client.EntryPage;
+import org.jboss.mjolnir.client.component.administration.SubscriptionSummaryScreen;
 import org.jboss.mjolnir.client.service.LoginService;
 import org.jboss.mjolnir.client.service.LoginServiceAsync;
 
@@ -24,6 +25,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Main panel defining UI layout.
+ *
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class LayoutPanel extends Composite {
@@ -47,7 +50,6 @@ public class LayoutPanel extends Composite {
 
     private List<Anchor> menuLinks = new ArrayList<Anchor>();
     private LoginServiceAsync loginService = LoginService.Util.getInstance();
-    private Widget subscriptionScreen = new SubscriptionScreen();
 
     public LayoutPanel() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -76,13 +78,22 @@ public class LayoutPanel extends Composite {
 
         usernameLabel.setText(CurrentUser.get().getName());
 
-        addLink(new Anchor("Subscribe to GitHub teams"), new MenuClickHandler(subscriptionScreen));
-        addLink(new Anchor("Test Page"), new MenuClickHandler(new HTMLPanel("h2", "Test Page")));
+        addLink(new Anchor("Subscribe to GitHub teams"), new MenuClickHandler() {
+            @Override
+            public Widget createWidget() {
+                return new SubscriptionScreen();
+            }
+        });
         if (CurrentUser.get().isAdmin()) {
-            addLink(new Anchor("Administration"), new MenuClickHandler(subscriptionScreen));
+            addLink(new Anchor("Administration"), new MenuClickHandler() {
+                @Override
+                public Widget createWidget() {
+                    return new SubscriptionSummaryScreen();
+                }
+            });
         }
 
-        mainPanel.add(subscriptionScreen);
+        mainPanel.add(new SubscriptionScreen());
     }
 
     private void addLink(Anchor link, MenuClickHandler clickHandler) {
@@ -92,14 +103,9 @@ public class LayoutPanel extends Composite {
         menuPanel.add(link);
     }
 
-    private class MenuClickHandler implements ClickHandler {
+    private abstract class MenuClickHandler implements ClickHandler {
 
-        private Widget widget;
         private Anchor currentLink;
-
-        private MenuClickHandler(Widget widget) {
-            this.widget = widget;
-        }
 
         public void setCurrentLink(Anchor link) {
             currentLink = link;
@@ -114,7 +120,10 @@ public class LayoutPanel extends Composite {
             currentLink.setStyleName("active");
             currentLink.setEnabled(false);
             mainPanel.clear();
-            mainPanel.add(widget);
+            mainPanel.add(createWidget());
         }
+
+        public abstract Widget createWidget();
+
     }
 }

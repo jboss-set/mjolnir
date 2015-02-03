@@ -12,12 +12,20 @@ import java.sql.SQLException;
 public interface UserRepository {
 
     /**
-     * Returns user by its krb name.
+     * Returns user by his krb name.
      *
      * @param kerberosName krb name
      * @return user instance or null
      */
     KerberosUser getUser(String kerberosName) throws SQLException;
+
+    /**
+     * Returns user by his GitHub name.
+     *
+     * @param gitHubName krb name
+     * @return user instance or null
+     */
+    KerberosUser getUserByGitHubName(String gitHubName) throws SQLException;
 
     /**
      * Updates existing user.

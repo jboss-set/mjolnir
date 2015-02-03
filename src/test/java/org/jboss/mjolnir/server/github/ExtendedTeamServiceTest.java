@@ -1,4 +1,4 @@
-package org.jboss.mjolnir.githubclient;
+package org.jboss.mjolnir.server.github;
 
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.GitHubRequest;

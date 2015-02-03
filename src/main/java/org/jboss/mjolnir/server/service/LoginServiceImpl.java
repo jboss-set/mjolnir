@@ -118,4 +118,8 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
         log("Kerberos credentials ok for " + krb5Name);
     }
 
+    @Override
+    protected boolean performAuthorization() {
+        return true; // everyone is authorized
+    }
 }

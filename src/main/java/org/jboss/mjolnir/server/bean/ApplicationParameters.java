@@ -7,6 +7,11 @@ package org.jboss.mjolnir.server.bean;
  */
 public interface ApplicationParameters {
 
+    public final static String GITHUB_TOKEN_KEY = "github.token";
+
+    public final static String LDAP_URL_KEY = "ldap.url";
+
+
     String getParameter(String name);
 
 }

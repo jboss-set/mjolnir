@@ -1,16 +1,28 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:style>
         .loginPanel {
-            padding: 1em;
             background: white;
             margin: 0 auto;
-            width: 350px;
+            width: 380px;
             position: relative;
             top: 40%;
         }
+        .loginForm {
+            padding: 1em;
+        }
+        .headerPanel {
+            background: #cc0000 url('images/rh-logo.png') 10px center no-repeat;
+            height: 42px;
+            padding: 10px 0 10px 62px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.3em;
+            line-height: 42px;
+        }
     </ui:style>
     <g:HTMLPanel styleName="{style.loginPanel} contentBox">
-        <g:FormPanel ui:field="form">
+        <div class="{style.headerPanel}">Mjolnir</div>
+        <g:FormPanel ui:field="form" styleName="{style.loginForm}">
             <g:HTMLPanel>
                 <table>
                     <tr>

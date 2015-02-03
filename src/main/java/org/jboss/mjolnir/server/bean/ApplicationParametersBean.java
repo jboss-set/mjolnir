@@ -1,5 +1,7 @@
 package org.jboss.mjolnir.server.bean;
 
+import org.jboss.mjolnir.client.exception.ApplicationException;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Local;
@@ -13,6 +15,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 /**
  * {@inheritDoc}
  *
@@ -23,7 +27,7 @@ import java.util.Map;
 @Local(ApplicationParameters.class)
 public class ApplicationParametersBean implements ApplicationParameters, ApplicationParametersRemote {
 
-    private static String READ_PARAMS_SQL = "select param_name, param_value from application_parameters";
+    private final static String READ_PARAMS_SQL = "select param_name, param_value from application_parameters";
 
     @Resource(lookup = "java:jboss/datasources/MjolnirDS")
     private DataSource dataSource;
@@ -54,6 +58,11 @@ public class ApplicationParametersBean implements ApplicationParameters, Applica
 
     @Override
     public String getParameter(String name) {
-        return parameters.get(name);
+        final String value = parameters.get(name);
+        if (!isEmpty(value)) {
+            return value;
+        }
+        throw new ApplicationException("Application parameter '" + name
+                + "' is not set in database.");
     }
 }

@@ -26,11 +26,26 @@
         <url-pattern>/mjolnir/GitHubService</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>AdministrationServlet</servlet-name>
+        <servlet-class>org.jboss.mjolnir.server.service.AdministrationServiceImpl</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>AdministrationServlet</servlet-name>
+        <url-pattern>/mjolnir/AdministrationService</url-pattern>
+    </servlet-mapping>
+
     <!-- Security -->
     <servlet>
         <servlet-name>xsrf</servlet-name>
         <servlet-class>com.google.gwt.user.server.rpc.XsrfTokenServiceServlet</servlet-class>
     </servlet>
+
+    <servlet-mapping>
+        <servlet-name>xsrf</servlet-name>
+        <url-pattern>/mjolnir/xsrf</url-pattern>
+    </servlet-mapping>
 
     <filter>
         <filter-name>AuthenticationFilter</filter-name>
@@ -47,11 +62,6 @@
     <!--<listener>
         <listener-class>org.jboss.mjolnir.server.CacheContextListener</listener-class>
     </listener>-->
-
-    <servlet-mapping>
-        <servlet-name>xsrf</servlet-name>
-        <url-pattern>/mjolnir/xsrf</url-pattern>
-    </servlet-mapping>
 
     <context-param>
         <param-name>gwt.xsrf.session_cookie_name</param-name>

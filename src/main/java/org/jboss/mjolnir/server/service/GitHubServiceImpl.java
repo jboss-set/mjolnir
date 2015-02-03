@@ -22,15 +22,12 @@
 
 package org.jboss.mjolnir.server.service;
 
-import com.google.gwt.user.client.rpc.SerializationException;
-import com.google.gwt.user.server.rpc.RPC;
-import com.google.gwt.user.server.rpc.RPCRequest;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.client.exception.ApplicationException;
+import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.GitHubRepository;
 import org.jboss.mjolnir.server.bean.UserRepository;
@@ -49,8 +46,6 @@ import java.util.Set;
  */
 public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubService {
 
-    private static String TOKEN_PARAMETER_NAME = "github.token";
-
     @EJB
     private GitHubRepository gitHubRepository;
     @EJB
@@ -64,12 +59,9 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     public void init() throws ServletException {
         super.init();
 
+        final String token = applicationParameters.getParameter(ApplicationParameters.GITHUB_TOKEN_KEY);
+
         final GitHubClient client = new GitHubClient();
-        final String token = applicationParameters.getParameter(TOKEN_PARAMETER_NAME);
-        if (token == null) {
-            throw new ServletException("Application parameter '" + TOKEN_PARAMETER_NAME
-                    + "' must be present in database.");
-        }
         client.setOAuth2Token(token);
         teamService = new ExtendedTeamService(client);
     }
@@ -169,14 +161,10 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     }
 
     @Override
-    public String processCall(RPCRequest rpcRequest) throws SerializationException {
-        // verify that user is authenticated
+    protected boolean performAuthorization() {
+        // user must be authenticated
         final KerberosUser loggedUser = getAuthenticatedUser();
-        if (loggedUser == null) {
-            return RPC.encodeResponseForFailedRequest(rpcRequest, new ApplicationException("User not authenticated."));
-        }
-
-        return super.processCall(rpcRequest);
+        return loggedUser != null;
     }
 
 }
