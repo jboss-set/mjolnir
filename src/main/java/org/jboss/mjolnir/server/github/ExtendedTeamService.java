@@ -70,7 +70,7 @@ public class ExtendedTeamService extends TeamService {
             response = client.get(request);
         } catch (RequestException e) {
             if (e.getStatus() == HttpURLConnection.HTTP_NOT_FOUND) {
-                return MembershipState.NONE;
+                return MembershipStates.NONE;
             }
             throw e;
         }

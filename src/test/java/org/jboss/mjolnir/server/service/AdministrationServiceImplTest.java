@@ -80,10 +80,10 @@ public class AdministrationServiceImplTest {
         Mockito.when(gitHubRepository.getOrganizations()).thenReturn(Collections.singleton(new GithubOrganization(ORG_NAME)));
         Mockito.when(organizationService.getMembers(ORG_NAME)).thenReturn(asList(gitHubUser));
         Mockito.when(userRepository.getUserByGitHubName(GITHUB_USERNAME)).thenReturn(appUser);
-        Mockito.when(ldapRepository.checkUserRecord(KRB_USERNAME)).thenReturn(Boolean.TRUE);
+        Mockito.when(ldapRepository.checkUsersExists(Mockito.anySet())).thenReturn(Collections.singletonMap(KRB_USERNAME, true));
 
         // perform a call
-        final List<SubscriptionSummary> subscriptionsSummary = administrationService.getSubscriptionsSummary();
+        final List<SubscriptionSummary> subscriptionsSummary = administrationService.getOrganizationMembers();
 
         // checks
         Assert.assertEquals("Expected different number of organizations.", 1, subscriptionsSummary.size());
@@ -123,7 +123,7 @@ public class AdministrationServiceImplTest {
         // overridden administration service that doesn't do anything is used in this test
         final AdministrationServiceImpl noOpAdministrationService = new AdministrationServiceImpl() {
             @Override
-            public List<SubscriptionSummary> getSubscriptionsSummary() {
+            public List<SubscriptionSummary> getOrganizationMembers() {
                 return null; // just return null to bypass serialization
             }
 
@@ -133,7 +133,7 @@ public class AdministrationServiceImplTest {
             }
         };
 
-        final Method method = AdministrationServiceImpl.class.getMethod("getSubscriptionsSummary", new Class[0]); // method to call
+        final Method method = AdministrationServiceImpl.class.getMethod("getOrganizationMembers", new Class[0]); // method to call
         final HashMap<Class<?>, Boolean> serializationWhitelist = new HashMap<Class<?>, Boolean>(); // classes to serialize
         serializationWhitelist.put(ApplicationException.class, true); // adding exception that is thrown when authorization fails
         final RPCRequest rpcRequest =

@@ -65,4 +65,21 @@ public class KerberosUser implements Serializable {
     public String toString() {
         return "{ krb5Name " + krb5Name + ": githubName " + githubName + " }";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        KerberosUser that = (KerberosUser) o;
+
+        if (!krb5Name.equals(that.krb5Name)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return krb5Name.hashCode();
+    }
 }

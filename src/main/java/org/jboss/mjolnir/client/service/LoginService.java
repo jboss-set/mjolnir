@@ -29,6 +29,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
+import org.jboss.mjolnir.client.exception.ApplicationException;
 
 /**
  * @author: navssurtani
@@ -40,8 +41,8 @@ import org.jboss.mjolnir.authentication.LoginFailedException;
 public interface LoginService extends RemoteService {
 
     KerberosUser login(String krb5Name, String password) throws LoginFailedException;
-    KerberosUser getLoggedUser();
-    void logout();
+    KerberosUser getLoggedUser() throws ApplicationException;
+    void logout() throws ApplicationException;
 
     public static class Util {
         private static LoginServiceAsync instance;

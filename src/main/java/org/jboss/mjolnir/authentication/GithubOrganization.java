@@ -49,6 +49,7 @@ public class GithubOrganization implements Serializable {
 
     public void addTeam(GithubTeam t) {
         teams.add(t);
+        t.setOrganization(this);
     }
 
     public void setToken(String token) {

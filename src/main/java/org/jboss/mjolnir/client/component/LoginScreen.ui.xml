@@ -2,10 +2,13 @@
     <ui:style>
         .loginPanel {
             background: white;
-            margin: 0 auto;
+            margin: 2em auto;
             width: 380px;
             position: relative;
-            top: 40%;
+            top: 30%;
+        }
+        .loginPanel .feedbackLabel {
+            text-align: center;
         }
         .loginForm {
             padding: 1em;
@@ -40,6 +43,7 @@
                 </table>
             </g:HTMLPanel>
         </g:FormPanel>
-        <p><g:InlineLabel ui:field="feedbackLabel"/></p>
+        <p class="feedbackLabel"><g:InlineLabel ui:field="feedbackLabel"/></p>
+        <div class="clear"></div>
     </g:HTMLPanel>
 </ui:UiBinder>

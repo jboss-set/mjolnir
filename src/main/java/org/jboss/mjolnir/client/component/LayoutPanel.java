@@ -15,14 +15,14 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.mjolnir.client.CurrentUser;
 import org.jboss.mjolnir.client.EntryPage;
+import org.jboss.mjolnir.client.ExceptionHandler;
+import org.jboss.mjolnir.client.component.administration.RegisteredUsersScreen;
 import org.jboss.mjolnir.client.component.administration.SubscriptionSummaryScreen;
 import org.jboss.mjolnir.client.service.LoginService;
 import org.jboss.mjolnir.client.service.LoginServiceAsync;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Main panel defining UI layout.
@@ -30,8 +30,6 @@ import java.util.logging.Logger;
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class LayoutPanel extends Composite {
-
-    private Logger logger = Logger.getLogger("");
 
     interface Binder extends UiBinder<Widget, LayoutPanel> {}
     private static Binder uiBinder = GWT.create(Binder.class);
@@ -65,7 +63,7 @@ public class LayoutPanel extends Composite {
                 loginService.logout(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        logger.log(Level.SEVERE, caught.getMessage(), caught);
+                        ExceptionHandler.handle(caught);
                     }
 
                     @Override
@@ -78,25 +76,43 @@ public class LayoutPanel extends Composite {
 
         usernameLabel.setText(CurrentUser.get().getName());
 
-        addLink(new Anchor("Subscribe to GitHub teams"), new MenuClickHandler() {
+        // create menu items
+
+        addMenuHeading("Your GitHub Settings");
+        addMenuLink(new Anchor("GitHub Subscriptions"), new MenuClickHandler() {
             @Override
             public Widget createWidget() {
                 return new SubscriptionScreen();
             }
         });
+
         if (CurrentUser.get().isAdmin()) {
-            addLink(new Anchor("Administration"), new MenuClickHandler() {
+            addMenuHeading("Administration");
+            addMenuLink(new Anchor("GitHub Organization Members"), new MenuClickHandler() {
                 @Override
                 public Widget createWidget() {
                     return new SubscriptionSummaryScreen();
                 }
             });
+            addMenuLink(new Anchor("Registered Users"), new MenuClickHandler() {
+                @Override
+                public Widget createWidget() {
+                    return new RegisteredUsersScreen();
+                }
+            });
         }
 
         mainPanel.add(new SubscriptionScreen());
+        menuLinks.get(0).setStyleName("active"); // set first link as active
     }
 
-    private void addLink(Anchor link, MenuClickHandler clickHandler) {
+    private void addMenuHeading(String name) {
+        final HTMLPanel heading = new HTMLPanel("div", name);
+        heading.setStyleName("heading");
+        menuPanel.add(heading);
+    }
+
+    private void addMenuLink(Anchor link, MenuClickHandler clickHandler) {
         link.addClickHandler(clickHandler);
         clickHandler.setCurrentLink(link);
         menuLinks.add(link);

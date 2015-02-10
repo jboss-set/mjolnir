@@ -33,6 +33,7 @@ import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.client.component.ErrorDialog;
 import org.jboss.mjolnir.client.component.LayoutPanel;
 import org.jboss.mjolnir.client.component.LoadingPanel;
 import org.jboss.mjolnir.client.component.LoginScreen;
@@ -51,12 +52,13 @@ import java.util.logging.Logger;
 
 public class EntryPage implements EntryPoint {
 
-    /** Singleton EntryPage **/
+    /**
+     * Singleton EntryPage *
+     */
     private static EntryPage instance = new EntryPage();
 
     private LoginServiceAsync loginService = LoginService.Util.getInstance();
     private Logger logger = Logger.getLogger("");
-    private KerberosUser currentUser;
 
     // Constructor made private.
     private EntryPage() {
@@ -71,9 +73,19 @@ public class EntryPage implements EntryPoint {
         RootLayoutPanel.get().getElement().getStyle().setBackgroundColor("#ECECEC");
         RootLayoutPanel.get().add(new LoadingPanel());
 
+        // setting uncaught exception handler
+        GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
+            @Override
+            public void onUncaughtException(Throwable e) {
+                logger.log(Level.SEVERE, "Uncaught exception: ", e);
+                final ErrorDialog errorDialog = new ErrorDialog(e);
+                errorDialog.center();
+            }
+        });
+
+        // verify that user is logged in and display appropriate page according to the result
         final XsrfTokenServiceAsync xsrfService = GWT.create(XsrfTokenService.class);
         ((ServiceDefTarget) xsrfService).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
-
         xsrfService.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -123,10 +135,6 @@ public class EntryPage implements EntryPoint {
     public void goToMainPage() {
         RootLayoutPanel.get().clear();
         RootLayoutPanel.get().add(new LayoutPanel());
-    }
-
-    public KerberosUser getCurrentUser() {
-        return currentUser;
     }
 
 }

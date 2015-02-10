@@ -36,6 +36,7 @@ public class GithubTeam implements Serializable {
     private String name;
     private int id;
     private String membershipState;
+    private GithubOrganization organization;
 
     public GithubTeam(String name, int id) {
         if (name == null || id == 0) throw new NullPointerException("Null params");
@@ -60,5 +61,13 @@ public class GithubTeam implements Serializable {
 
     public void setMembershipState(String membershipState) {
         this.membershipState = membershipState;
+    }
+
+    public GithubOrganization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(GithubOrganization organization) {
+        this.organization = organization;
     }
 }

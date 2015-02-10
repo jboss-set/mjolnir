@@ -1,14 +1,6 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:style>
-        .westPanel a {
-            display: block;
-            padding: 1em;
-            border-bottom: 0 1px 1px 1px solid #bbb;
-            background: #ddd;
-        }
-        .westPanel a.active {
-            background: white;
-            border-right: 0;
+        .westPanel {
         }
         .northPanel {
             background: #cc0000 url('images/rh-logo.png') 10px center no-repeat;
@@ -29,11 +21,12 @@
         }
         .centerPanel {
             padding: 1em;
+            border-left: 1px solid #CFCFCF;
         }
     </ui:style>
-    <g:DockLayoutPanel unit="PX" width="800px" styleName="contentBox">
+    <g:DockLayoutPanel unit="PX" width="1024px" styleName="contentBox">
         <g:north size="62">
-            <g:HTMLPanel styleName="{style.northPanel} menuPanel">
+            <g:HTMLPanel styleName="{style.northPanel}">
                 <h1>Mjolnir</h1>
                 <div style="position: absolute; right: 1em; bottom: 1em;">
                     <g:InlineLabel ui:field="usernameLabel"/> |
@@ -42,7 +35,7 @@
             </g:HTMLPanel>
         </g:north>
         <g:west size="200">
-            <g:VerticalPanel ui:field="menuPanel" styleName="{style.westPanel}"/>
+            <g:VerticalPanel ui:field="menuPanel" styleName="{style.westPanel} menuPanel"/>
         </g:west>
         <g:center>
             <g:HTMLPanel ui:field="mainPanel" styleName="{style.centerPanel}"/>

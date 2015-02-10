@@ -1,7 +1,6 @@
 package org.jboss.mjolnir.client.component;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -19,10 +18,10 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.CurrentUser;
+import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.client.service.GitHubServiceAsync;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -30,7 +29,7 @@ import java.util.logging.Logger;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public class ModifyGitHubNamePopup extends PopupPanel implements Editor<KerberosUser> {
+public class ModifyGitHubNamePopup extends PopupPanel {
 
     interface Binder extends UiBinder<Widget, ModifyGitHubNamePopup> {}
     private static Binder uiBinder = GWT.create(Binder.class);
@@ -89,7 +88,7 @@ public class ModifyGitHubNamePopup extends PopupPanel implements Editor<Kerberos
         xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
             @Override
             public void onFailure(Throwable caught) {
-                logger.log(Level.SEVERE, "Cant get XSRF token.", caught);
+                ExceptionHandler.handle("Cant get XSRF token.", caught);
             }
 
             @Override
@@ -98,7 +97,7 @@ public class ModifyGitHubNamePopup extends PopupPanel implements Editor<Kerberos
                 gitHubService.modifyGithubName(newName, new AsyncCallback<KerberosUser>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        logger.log(Level.SEVERE, "Cant modify GitHub name.", caught);
+                        ExceptionHandler.handle("Cant modify GitHub name.", caught);
                     }
 
                     @Override

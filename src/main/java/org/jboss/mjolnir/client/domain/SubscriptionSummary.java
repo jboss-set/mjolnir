@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Domain object representing list of users subscribed to given organization.
+ *
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class SubscriptionSummary implements Serializable {

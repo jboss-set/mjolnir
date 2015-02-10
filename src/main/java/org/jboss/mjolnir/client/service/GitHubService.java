@@ -29,10 +29,13 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.client.exception.ApplicationException;
 
 import java.util.Set;
 
 /**
+ * Service allowing user to modify his subscriptions.
+ *
  * @author navssurtani
  * @author Tomas Hofman (thofman@redhat.com)
  */
@@ -41,11 +44,11 @@ import java.util.Set;
 @XsrfProtect
 public interface GitHubService extends RemoteService {
 
-    KerberosUser modifyGithubName(String newGithubName);
-    String subscribe(int teamId);
-    void unsubscribe(int teamId);
-    Set<GithubOrganization> getAvailableOrganizations();
-    Set<GithubOrganization> getSubscriptions();
+    KerberosUser modifyGithubName(String newGithubName) throws ApplicationException;
+    String subscribe(int teamId) throws ApplicationException;
+    void unsubscribe(int teamId) throws ApplicationException;
+    Set<GithubOrganization> getAvailableOrganizations() throws ApplicationException;
+    Set<GithubOrganization> getSubscriptions() throws ApplicationException;
 
     public static class Util {
         private static GitHubServiceAsync instance;

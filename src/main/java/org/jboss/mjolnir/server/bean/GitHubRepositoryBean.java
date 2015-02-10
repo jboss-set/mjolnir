@@ -10,11 +10,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
+ * {@inheritDoc}
+ *
  * @author Tomas Hofman (thofman@redhat.com)
  */
 @Stateless
@@ -27,7 +30,7 @@ public class GitHubRepositoryBean implements GitHubRepository {
     private DataSource dataSource;
 
     @Override
-    public Collection<GithubOrganization> getOrganizations() throws SQLException {
+    public Set<GithubOrganization> getOrganizations() throws SQLException {
         final Connection connection = dataSource.getConnection();
         try {
             // load organizations into a map
@@ -53,7 +56,7 @@ public class GitHubRepositoryBean implements GitHubRepository {
                 }
             }
 
-            return orgMap.values();
+            return new HashSet<GithubOrganization>(orgMap.values());
         } finally {
             connection.close();
         }

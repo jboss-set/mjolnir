@@ -5,6 +5,8 @@ import org.jboss.mjolnir.authentication.KerberosUser;
 import java.io.Serializable;
 
 /**
+ * Domain object representing user subscribed to GitHub organization.
+ *
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class Subscription implements Serializable {

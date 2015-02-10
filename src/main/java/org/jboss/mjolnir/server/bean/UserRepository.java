@@ -3,6 +3,7 @@ package org.jboss.mjolnir.server.bean;
 import org.jboss.mjolnir.authentication.KerberosUser;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Manages registered users.
@@ -32,11 +33,27 @@ public interface UserRepository {
      *
      * @param kerberosUser user
      */
-    void updateUser(KerberosUser kerberosUser) throws SQLException;
+    void saveUser(KerberosUser kerberosUser) throws SQLException;
 
     /**
      * Returns user by its krb name. If user doesn't exists, creates new.
      */
     KerberosUser getOrCreateUser(String kerberosName) throws SQLException;
+
+    /**
+     * Retrieves all users in database.
+     *
+     * @return users
+     * @throws SQLException
+     */
+    List<KerberosUser> getAllUsers() throws SQLException;
+
+    /**
+     * Removes user from database.
+     *
+     * @param kerberosName krb name
+     * @throws SQLException
+     */
+    void deleteUser(String kerberosName) throws SQLException;
 
 }

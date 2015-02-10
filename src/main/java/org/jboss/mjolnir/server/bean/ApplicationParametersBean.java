@@ -35,8 +35,12 @@ public class ApplicationParametersBean implements ApplicationParameters, Applica
     private Map<String, String> parameters = new HashMap<String, String>();
 
     @PostConstruct
-    public void initBean() throws SQLException {
-        reloadParameters();
+    public void initBean() {
+        try {
+            reloadParameters();
+        } catch (SQLException e) {
+            throw new ApplicationException("Couldn't load application configuration.", e);
+        }
     }
 
     @Override

@@ -5,9 +5,9 @@ package org.jboss.mjolnir.server.github;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public final class MembershipState {
+public final class MembershipStates {
 
-    private MembershipState() {
+    private MembershipStates() {
     }
 
     public static final String ACTIVE = "active";

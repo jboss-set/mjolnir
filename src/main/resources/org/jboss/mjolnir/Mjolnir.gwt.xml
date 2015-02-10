@@ -13,6 +13,9 @@
     <inherits name='com.google.gwt.user.theme.clean.Clean'/>
     <inherits name="com.google.gwt.logging.Logging"/>
 
+    <!-- GWT Guava -->
+    <inherits name="com.google.common.collect.Collect"/>
+
     <!-- Specify the app entry point class.-->
     <entry-point class='org.jboss.mjolnir.client.EntryPage'/>
 

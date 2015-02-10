@@ -20,15 +20,17 @@ import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.CurrentUser;
+import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.client.service.GitHubServiceAsync;
-import org.jboss.mjolnir.server.github.MembershipState;
+import org.jboss.mjolnir.server.github.MembershipStates;
 
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Screen that allows user to (un)subscribe to GitHub teams.
+ *
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class SubscriptionScreen extends Composite {
@@ -65,7 +67,7 @@ public class SubscriptionScreen extends Composite {
             xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    logger.log(Level.SEVERE, caught.getMessage(), caught);
+                    ExceptionHandler.handle(caught);
                 }
 
                 @Override
@@ -74,7 +76,7 @@ public class SubscriptionScreen extends Composite {
                     gitHubService.getSubscriptions(new AsyncCallback<Set<GithubOrganization>>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            logger.log(Level.SEVERE, "Can't load organizations.", caught);
+                            ExceptionHandler.handle("Can't load organizations.", caught);
                         }
 
                         @Override
@@ -106,11 +108,11 @@ public class SubscriptionScreen extends Composite {
             final TextColumn<GithubTeam> subscribedColumn = new TextColumn<GithubTeam>() {
                 @Override
                 public String getValue(GithubTeam object) {
-                    if (MembershipState.NONE.equals(object.getMembershipState())) {
+                    if (MembershipStates.NONE.equals(object.getMembershipState())) {
                         return "no";
-                    } else if (MembershipState.ACTIVE.equals(object.getMembershipState())) {
+                    } else if (MembershipStates.ACTIVE.equals(object.getMembershipState())) {
                         return "yes";
-                    } else if (MembershipState.PENDING.equals(object.getMembershipState())) {
+                    } else if (MembershipStates.PENDING.equals(object.getMembershipState())) {
                         return "pending";
                     }
                     return "?"; // unknown state
@@ -122,18 +124,18 @@ public class SubscriptionScreen extends Composite {
             final Column<GithubTeam, String> actionColumn = new Column<GithubTeam, String>(cell) {
                 @Override
                 public String getValue(GithubTeam object) {
-                    return MembershipState.NONE.equals(object.getMembershipState())
+                    return MembershipStates.NONE.equals(object.getMembershipState())
                             ? "Subscribe" : "Unsubscribe";
                 }
             };
             actionColumn.setFieldUpdater(new FieldUpdater<GithubTeam, String>() {
                 @Override
                 public void update(int index, final GithubTeam object, String value) {
-                    if (MembershipState.NONE.equals(object.getMembershipState())) {
+                    if (MembershipStates.NONE.equals(object.getMembershipState())) {
                         gitHubService.subscribe(object.getId(), new AsyncCallback<String>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                logger.log(Level.SEVERE, caught.getMessage(), caught);
+                                ExceptionHandler.handle(caught);
                             }
 
                             @Override
@@ -146,12 +148,12 @@ public class SubscriptionScreen extends Composite {
                         gitHubService.unsubscribe(object.getId(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                logger.log(Level.SEVERE, caught.getMessage(), caught);
+                                ExceptionHandler.handle(caught);
                             }
 
                             @Override
                             public void onSuccess(Void result) {
-                                object.setMembershipState(MembershipState.NONE);
+                                object.setMembershipState(MembershipStates.NONE);
                                 cellTable.redraw();
                             }
                         });

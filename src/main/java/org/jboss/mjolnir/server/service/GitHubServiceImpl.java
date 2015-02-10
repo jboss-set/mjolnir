@@ -37,11 +37,12 @@ import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * {@inheritDoc}
+ *
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubService {
@@ -72,14 +73,14 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             // reload authenticated user form database
             final String krb5Name = getAuthenticatedUser().getName();
             final KerberosUser user = userRepository.getUser(krb5Name);
-            setAuthenticatedUser(user);
+            setAuthenticatedUser(user); // update session with current instance
 
             // update github name
             log("Changing githubName for KerberosUser " + krb5Name + ". Old name is " + user.getGithubName() + ". New name " +
                     "is " + newGithubName);
             user.setGithubName(newGithubName);
             // Now put it back into the cache.
-            userRepository.updateUser(user);
+            userRepository.saveUser(user);
             log("Successfully modified GithubName for KerberosUser " + krb5Name);
             return user;
         } catch (SQLException e) {
@@ -120,7 +121,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     @Override
     public Set<GithubOrganization> getAvailableOrganizations() {
         try {
-            final Collection<GithubOrganization> organizations = gitHubRepository.getOrganizations();
+            final Set<GithubOrganization> organizations = gitHubRepository.getOrganizations();
             return new HashSet<GithubOrganization>(organizations);
         } catch (SQLException e) {
             throw new ApplicationException("Couldn't load GitHub organizations: " + e.getMessage(), e);

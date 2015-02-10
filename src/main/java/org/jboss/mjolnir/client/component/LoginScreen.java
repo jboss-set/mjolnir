@@ -23,6 +23,7 @@
 package org.jboss.mjolnir.client.component;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -70,6 +71,12 @@ public abstract class LoginScreen extends Composite {
 
     public LoginScreen() {
         initWidget(uiBinder.createAndBindUi(this));
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand () {
+            public void execute () {
+                usernameField.setFocus(true);
+            }
+        });
 
         form.addSubmitHandler(new FormPanel.SubmitHandler() {
             @Override
