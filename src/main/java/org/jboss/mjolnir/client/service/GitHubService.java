@@ -30,6 +30,7 @@ import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.exception.ApplicationException;
+import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
 
 import java.util.Set;
 
@@ -44,7 +45,7 @@ import java.util.Set;
 @XsrfProtect
 public interface GitHubService extends RemoteService {
 
-    KerberosUser modifyGithubName(String newGithubName) throws ApplicationException;
+    KerberosUser modifyGithubName(String newGithubName) throws ApplicationException, GitHubNameAlreadyTakenException;
     String subscribe(int teamId) throws ApplicationException;
     void unsubscribe(int teamId) throws ApplicationException;
     Set<GithubOrganization> getAvailableOrganizations() throws ApplicationException;

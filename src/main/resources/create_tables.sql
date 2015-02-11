@@ -20,7 +20,7 @@ create sequence sq_users;
 create table users (
     id bigint default sq_users.nextval primary key,
     krb_name varchar(255) unique,
-    github_name varchar(255),
+    github_name varchar(255) unique,
     admin boolean not null default false
 );
 

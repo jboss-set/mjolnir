@@ -39,7 +39,7 @@ public class LdapRepositoryBean implements LdapRepository {
     @PostConstruct
     public void init() {
         // fetch ldap url
-        final String ldapUrl = applicationParameters.getParameter(ApplicationParameters.LDAP_URL_KEY);
+        final String ldapUrl = applicationParameters.getMandatoryParameter(ApplicationParameters.LDAP_URL_KEY);
 
         // prepare naming context
         final Hashtable<String, Object> env = new Hashtable<String, Object>();

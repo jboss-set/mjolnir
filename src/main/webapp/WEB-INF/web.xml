@@ -5,7 +5,9 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
-    <!-- The LoginService servlet -->
+
+    <!-- Servlets -->
+
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>org.jboss.mjolnir.server.service.LoginServiceImpl</servlet-class>
@@ -36,7 +38,6 @@
         <url-pattern>/mjolnir/AdministrationService</url-pattern>
     </servlet-mapping>
 
-    <!-- Security -->
     <servlet>
         <servlet-name>xsrf</servlet-name>
         <servlet-class>com.google.gwt.user.server.rpc.XsrfTokenServiceServlet</servlet-class>
@@ -47,33 +48,28 @@
         <url-pattern>/mjolnir/xsrf</url-pattern>
     </servlet-mapping>
 
+    <context-param>
+        <param-name>gwt.xsrf.session_cookie_name</param-name>
+        <param-value>JSESSIONID</param-value>
+    </context-param>
+
+
+    <!-- Security Filter -->
+
     <filter>
         <filter-name>AuthenticationFilter</filter-name>
         <filter-class>org.jboss.mjolnir.server.AuthenticationFilter</filter-class>
     </filter>
 
     <filter-mapping>
-        <filter-name>AuthenticationFilter</filter-name> <!-- mandatory -->
-        <!--<url-pattern>/*</url-pattern> &lt;!&ndash; either url-pattern or servlet-name is mandatory &ndash;&gt;-->
+        <filter-name>AuthenticationFilter</filter-name>
         <servlet-name>GitHubServlet</servlet-name>
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
 
-    <!--<listener>
-        <listener-class>org.jboss.mjolnir.server.CacheContextListener</listener-class>
-    </listener>-->
 
-    <context-param>
-        <param-name>gwt.xsrf.session_cookie_name</param-name>
-        <param-value>JSESSIONID</param-value>
-    </context-param>
+    <!-- Index file -->
 
-    <env-entry>
-        <env-entry-name>INFINISPAN_STORE</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>/tmp/infinispan.store</env-entry-value>
-    </env-entry>
-    
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>

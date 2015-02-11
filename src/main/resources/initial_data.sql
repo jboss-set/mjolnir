@@ -1,6 +1,6 @@
 insert into application_parameters (param_name, param_value) values ('github.token', '***');
 insert into application_parameters (param_name, param_value) values ('ldap.url', 'ldap://ldap.nrt.redhat.com');
-insert into application_parameters (param_name, param_value) values ('infinispan.path', '/tmp/infinispan.store');
+insert into application_parameters (param_name, param_value) values ('infinispan.path', '/home/jboss/infinispan.store');
 
 insert into github_orgs (name) values ('some org');
 

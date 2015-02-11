@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.CurrentUser;
 import org.jboss.mjolnir.client.ExceptionHandler;
+import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
 import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.client.service.GitHubServiceAsync;
 
@@ -48,6 +49,9 @@ public class ModifyGitHubNamePopup extends PopupPanel {
 
     @UiField
     Button cancelButton;
+
+    @UiField
+    Label feedbackLabel;
 
     /**
      * @param allowCancel can user close the popup without submitting?
@@ -97,6 +101,10 @@ public class ModifyGitHubNamePopup extends PopupPanel {
                 gitHubService.modifyGithubName(newName, new AsyncCallback<KerberosUser>() {
                     @Override
                     public void onFailure(Throwable caught) {
+                        if (caught instanceof GitHubNameAlreadyTakenException) {
+                            feedbackLabel.setText("Error: " + caught.getMessage());
+                            return;
+                        }
                         ExceptionHandler.handle("Cant modify GitHub name.", caught);
                     }
 

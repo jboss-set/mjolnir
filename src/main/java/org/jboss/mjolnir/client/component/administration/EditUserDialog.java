@@ -8,10 +8,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.ExceptionHandler;
+import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
 
@@ -38,6 +40,9 @@ public class EditUserDialog extends DialogBox {
 
     @UiField
     Button cancelButton;
+
+    @UiField
+    Label feedbackLabel;
 
     public EditUserDialog(final KerberosUser user) {
         setGlassEnabled(true);
@@ -68,6 +73,10 @@ public class EditUserDialog extends DialogBox {
                 administrationService.editUser(userToSave, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
+                        if (caught instanceof GitHubNameAlreadyTakenException) {
+                            feedbackLabel.setText("Error: " + caught.getMessage());
+                            return;
+                        }
                         ExceptionHandler.handle("Couldn't save user.", caught);
                     }
 

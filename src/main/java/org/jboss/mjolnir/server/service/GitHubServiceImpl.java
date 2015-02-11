@@ -27,6 +27,7 @@ import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.exception.ApplicationException;
+import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
 import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.GitHubRepository;
@@ -60,7 +61,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     public void init() throws ServletException {
         super.init();
 
-        final String token = applicationParameters.getParameter(ApplicationParameters.GITHUB_TOKEN_KEY);
+        final String token = applicationParameters.getMandatoryParameter(ApplicationParameters.GITHUB_TOKEN_KEY);
 
         final GitHubClient client = new GitHubClient();
         client.setOAuth2Token(token);
@@ -68,12 +69,17 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     }
 
     @Override
-    public KerberosUser modifyGithubName(String newGithubName) {
+    public KerberosUser modifyGithubName(String newGithubName) throws GitHubNameAlreadyTakenException {
         try {
             // reload authenticated user form database
             final String krb5Name = getAuthenticatedUser().getName();
             final KerberosUser user = userRepository.getUser(krb5Name);
             setAuthenticatedUser(user); // update session with current instance
+
+            final KerberosUser userByGitHubName = userRepository.getUserByGitHubName(newGithubName);
+            if (userByGitHubName != null && !userByGitHubName.equals(user)) {
+                throw new GitHubNameAlreadyTakenException("This GitHub name is already taken by different user.");
+            }
 
             // update github name
             log("Changing githubName for KerberosUser " + krb5Name + ". Old name is " + user.getGithubName() + ". New name " +

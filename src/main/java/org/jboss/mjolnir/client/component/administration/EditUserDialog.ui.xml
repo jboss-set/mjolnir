@@ -12,6 +12,7 @@
                 <td><g:TextBox ui:field="gitHubNameBox"/></td>
             </tr>
         </table>
+        <p class="error"><g:InlineLabel ui:field="feedbackLabel"/></p>
         <p style="text-align: right;">
             <g:Button ui:field="cancelButton">Cancel</g:Button>
             <g:Button ui:field="submitButton">Save</g:Button>

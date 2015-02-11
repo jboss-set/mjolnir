@@ -7,8 +7,11 @@
             position: relative;
             top: 30%;
         }
-        .loginPanel .feedbackLabel {
+        .feedbackLabel {
             text-align: center;
+            margin: 0;
+            padding: 1em;
+            color: red;
         }
         .loginForm {
             padding: 1em;
@@ -43,7 +46,6 @@
                 </table>
             </g:HTMLPanel>
         </g:FormPanel>
-        <p class="feedbackLabel"><g:InlineLabel ui:field="feedbackLabel"/></p>
-        <div class="clear"></div>
+        <p class="{style.feedbackLabel}"><g:InlineLabel ui:field="feedbackLabel"/></p>
     </g:HTMLPanel>
 </ui:UiBinder>

@@ -26,6 +26,7 @@ import com.sun.security.auth.login.ConfigFile;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.client.service.LoginService;
+import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.UserRepository;
 
 import javax.ejb.EJB;
@@ -49,8 +50,14 @@ import java.sql.SQLException;
 
 public class LoginServiceImpl extends AbstractServiceServlet implements LoginService {
 
+    private static final String KRB5_REALM_KEY = "krb5.realm";
+    private static final String KRB5_KDC_KEY = "krb5.kdc";
+
     @EJB
     private UserRepository userRepository;
+
+    @EJB
+    private ApplicationParameters applicationParameters;
 
     @Override
     public KerberosUser login(String krb5Name, String password) throws LoginFailedException {
@@ -111,6 +118,8 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
                 }
             }
         };
+
+        configureSystemProperties();
         final javax.security.auth.login.Configuration loginConfiguration = new ConfigFile(this.getClass()
                 .getResource("/jaas.config").toURI());
         final LoginContext loginContext = new LoginContext("Kerberos", null, callbackHandler, loginConfiguration);
@@ -121,5 +130,14 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
     @Override
     protected boolean performAuthorization() {
         return true; // everyone is authorized
+    }
+
+    private void configureSystemProperties() {
+        String realm = applicationParameters.getParameter(KRB5_REALM_KEY);
+        String kdc = applicationParameters.getParameter(KRB5_KDC_KEY);
+        if (realm != null && kdc != null) {
+            System.setProperty("java.security.krb5.realm", realm);
+            System.setProperty("java.security.krb5.kdc", kdc);
+        }
     }
 }

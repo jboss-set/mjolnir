@@ -9,6 +9,7 @@ import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.exception.ApplicationException;
+import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.GitHubRepository;
@@ -52,7 +53,7 @@ public class AdministrationServiceImpl extends AbstractServiceServlet implements
     public void init() throws ServletException {
         super.init();
 
-        final String token = applicationParameters.getParameter(ApplicationParameters.GITHUB_TOKEN_KEY);
+        final String token = applicationParameters.getMandatoryParameter(ApplicationParameters.GITHUB_TOKEN_KEY);
 
         final GitHubClient client = new GitHubClient();
         client.setOAuth2Token(token);
@@ -148,8 +149,13 @@ public class AdministrationServiceImpl extends AbstractServiceServlet implements
     }
 
     @Override
-    public void editUser(KerberosUser user) {
+    public void editUser(KerberosUser user) throws GitHubNameAlreadyTakenException {
         try {
+            final KerberosUser userByGitHubName = userRepository.getUserByGitHubName(user.getGithubName());
+            if (userByGitHubName != null && !userByGitHubName.equals(user)) {
+                throw new GitHubNameAlreadyTakenException("This GitHub name is already taken by different user.");
+            }
+
             userRepository.saveUser(user);
         } catch (SQLException e) {
             throw new ApplicationException(e);
