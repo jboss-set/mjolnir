@@ -1,0 +1,100 @@
+package org.jboss.mjolnir.server.report;
+
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.mjolnir.client.domain.Subscription;
+import org.jboss.mjolnir.client.domain.SubscriptionSummary;
+import org.jboss.mjolnir.server.bean.GitHubSubscriptionBean;
+
+import javax.ejb.EJB;
+import javax.ejb.Singleton;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Retrieves list of users subscribed to some GitHub organization, that are either not registered in Mjolnir
+ * or doesn't have active KRB account.
+ *
+ * @author Tomas Hofman (thofman@redhat.com)
+ */
+@Singleton
+public class UnknownMembersReportBean extends AbstractReportBean<List<SubscriptionSummary>> {
+
+    private static final String REPORT_NAME = "Unknown GitHub Subscribers";
+    private static final String[] TABLE_HEADERS = {"GitHub Name", "Registered As"};
+
+    @EJB
+    private GitHubSubscriptionBean gitHubSubscriptionBean;
+
+    protected UnknownMembersReportBean() {
+        super(REPORT_NAME);
+    }
+
+    @Override
+    protected List<SubscriptionSummary> loadData() {
+        final List<SubscriptionSummary> organizationMembers = gitHubSubscriptionBean.getOrganizationMembers();
+
+        // remove all that have active krb account
+        for (SubscriptionSummary summary : organizationMembers) {
+            List<Subscription> unknownUsers = new ArrayList<Subscription>(summary.getSubscriptions());
+            for (Subscription subscription : summary.getSubscriptions()) {
+                if (subscription.isActiveKerberosAccount()) {
+                    unknownUsers.remove(subscription);
+                }
+            }
+            summary.getSubscriptions().clear();
+            summary.getSubscriptions().addAll(unknownUsers);
+        }
+
+        // what remains are unknown members
+        return organizationMembers;
+    }
+
+    @Override
+    protected String createReportContent(List<SubscriptionSummary> data) {
+        final StringBuilder sb = new StringBuilder();
+
+        for (SubscriptionSummary summary : data) {
+            sb.append("Following users are subscribed to GitHub organization ")
+                    .append(summary.getOrganization().getName())
+                    .append(" but are either not registered in Mjolnir, or do not have valid Kerberos account:\n\n");
+
+            // calculate column sizes
+            int gitHubNameMaxLen = TABLE_HEADERS[0].length();
+            int registeredNameMaxLen = TABLE_HEADERS[1].length();
+            for (Subscription subscription : summary.getSubscriptions()) {
+                if (subscription.getGitHubName().length() > gitHubNameMaxLen) {
+                    gitHubNameMaxLen = subscription.getGitHubName().length();
+                }
+                if (subscription.getKerberosUser() != null && subscription.getKerberosName().length() > registeredNameMaxLen) {
+                    registeredNameMaxLen = subscription.getKerberosName().length();
+                }
+            }
+
+            // print table headers
+            sb.append(String.format("%" + gitHubNameMaxLen + "s", TABLE_HEADERS[0]))
+                    .append(" | ")
+                    .append(String.format("%" + registeredNameMaxLen + "s", TABLE_HEADERS[1]))
+                    .append("\n")
+                    .append(StringUtils.repeat('=', gitHubNameMaxLen + registeredNameMaxLen + 3))
+                    .append("\n");
+
+
+            // print table
+            for (Subscription subscription : summary.getSubscriptions()) {
+                final String krbName = subscription.getKerberosName() != null ? subscription.getKerberosName() : "-";
+                sb.append(String.format("%" + gitHubNameMaxLen + "s", subscription.getGitHubName()))
+                        .append(" | ")
+                        .append(String.format("%" + registeredNameMaxLen + "s", krbName))
+                        .append("\n");
+            }
+
+            sb.append("\n\n\n");
+        }
+
+        return sb.toString();
+    }
+
+    public void setGitHubSubscriptionBean(GitHubSubscriptionBean gitHubSubscriptionBean) {
+        this.gitHubSubscriptionBean = gitHubSubscriptionBean;
+    }
+}

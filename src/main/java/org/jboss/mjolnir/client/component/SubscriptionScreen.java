@@ -26,7 +26,6 @@ import org.jboss.mjolnir.client.service.GitHubServiceAsync;
 import org.jboss.mjolnir.server.github.MembershipStates;
 
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Screen that allows user to (un)subscribe to GitHub teams.
@@ -36,8 +35,6 @@ import java.util.logging.Logger;
 public class SubscriptionScreen extends Composite {
 
     private final static String GITHUB_NAME_DIALOG_MESSAGE = "Before you can manage your subscriptions, please specify your GitHub name.";
-
-    private static Logger logger = Logger.getLogger("");
 
     private GitHubServiceAsync gitHubService = GitHubService.Util.getInstance();
     private VerticalPanel panel = new VerticalPanel();

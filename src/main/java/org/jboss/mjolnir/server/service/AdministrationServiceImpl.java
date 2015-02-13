@@ -1,10 +1,6 @@
 package org.jboss.mjolnir.server.service;
 
-import org.eclipse.egit.github.core.User;
-import org.eclipse.egit.github.core.client.GitHubClient;
-import org.eclipse.egit.github.core.service.OrganizationService;
 import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
@@ -12,17 +8,11 @@ import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
-import org.jboss.mjolnir.server.bean.GitHubRepository;
-import org.jboss.mjolnir.server.bean.LdapRepository;
+import org.jboss.mjolnir.server.bean.GitHubSubscriptionBean;
 import org.jboss.mjolnir.server.bean.UserRepository;
-import org.jboss.mjolnir.server.github.ExtendedTeamService;
 
 import javax.ejb.EJB;
-import javax.servlet.ServletException;
-import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,111 +22,30 @@ import java.util.Set;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public class AdministrationServiceImpl extends AbstractServiceServlet implements AdministrationService {
-
-    @EJB
-    private LdapRepository ldapRepository;
+public class AdministrationServiceImpl extends AbstractAdminRestrictedService implements AdministrationService {
 
     @EJB
     private ApplicationParameters applicationParameters;
 
     @EJB
-    private GitHubRepository gitHubRepository;
-
-    @EJB
     private UserRepository userRepository;
 
-    private OrganizationService organizationService;
-    private ExtendedTeamService teamService;
+    @EJB
+    private GitHubSubscriptionBean gitHubSubscriptionBean;
 
-    @Override
-    public void init() throws ServletException {
-        super.init();
-
-        final String token = applicationParameters.getMandatoryParameter(ApplicationParameters.GITHUB_TOKEN_KEY);
-
-        final GitHubClient client = new GitHubClient();
-        client.setOAuth2Token(token);
-        organizationService = new OrganizationService(client);
-        teamService = new ExtendedTeamService(client);
+    /**
+     * @see org.jboss.mjolnir.server.bean.GitHubSubscriptionBean#getOrganizationMembers()
+     */
+    public List<SubscriptionSummary> getOrganizationMembers() {
+        return gitHubSubscriptionBean.getOrganizationMembers();
     }
 
     /**
-     * Provides list of all members of registered GitHub organizations together with information
-     * whether they have an LDAP record.
-     *
-     * @return subscription summaries for registered GitHub organizations
+     * @see org.jboss.mjolnir.server.bean.GitHubSubscriptionBean#getRegisteredUsers()
      */
-    public List<SubscriptionSummary> getOrganizationMembers() {
-        try {
-            final List<SubscriptionSummary> subscriptionSummaries = new ArrayList<SubscriptionSummary>();
-
-            // create single SubscriptionSummary for each organization
-            final Set<GithubOrganization> organizations = gitHubRepository.getOrganizations();
-            for (GithubOrganization organization : organizations) {
-                final SubscriptionSummary summary = new SubscriptionSummary();
-                summary.setOrganization(organization);
-
-                // for each organization member create Subscription object
-                final List<User> members = organizationService.getMembers(organization.getName());
-                final Map<String, Subscription> ldapUsersToCheck = new HashMap<String, Subscription>();
-                for (User member: members) {
-                    final String gitHubName = member.getLogin();
-
-                    final Subscription subscription = new Subscription();
-                    subscription.setGitHubName(gitHubName);
-                    summary.getSubscriptions().add(subscription);
-
-                    final KerberosUser appUser = userRepository.getUserByGitHubName(gitHubName);
-                    if (appUser != null) { // if user is registered, LDAP check will be done
-                        subscription.setKerberosUser(appUser);
-                        ldapUsersToCheck.put(appUser.getName(), subscription);
-                    }
-                }
-
-                // check LDAP records for retrieved users
-                final Map<String, Boolean> checkedLdapUsers = ldapRepository.checkUsersExists(ldapUsersToCheck.keySet());
-                for (Map.Entry<String, Boolean> checkedLdapUser: checkedLdapUsers.entrySet()) {
-                    if (checkedLdapUser.getValue()) {
-                        ldapUsersToCheck.get(checkedLdapUser.getKey()).setActiveKerberosAccount(true);
-                    }
-                }
-
-                subscriptionSummaries.add(summary);
-            }
-
-            return subscriptionSummaries;
-        } catch (Exception e) {
-            throw new ApplicationException(e);
-        }
-    }
-
     @Override
     public List<Subscription> getRegisteredUsers() {
-        try {
-            final List<KerberosUser> allUsers = userRepository.getAllUsers();
-
-            // fetch users and create Subscription objects
-            final Map<String, Subscription> subscriptionMap = new HashMap<String, Subscription>(allUsers.size());
-            for (KerberosUser user: allUsers) {
-                final Subscription subscription = new Subscription();
-                subscription.setKerberosUser(user);
-                subscription.setGitHubName(user.getGithubName());
-                subscriptionMap.put(user.getName(), subscription);
-            }
-
-            // check LDAP records for retrieved users
-            final Map<String, Boolean> checkedLdapUsers = ldapRepository.checkUsersExists(subscriptionMap.keySet());
-            for (Map.Entry<String, Boolean> checkedLdapUser: checkedLdapUsers.entrySet()) {
-                if (checkedLdapUser.getValue()) {
-                    subscriptionMap.get(checkedLdapUser.getKey()).setActiveKerberosAccount(true);
-                }
-            }
-
-            return new ArrayList<Subscription>(subscriptionMap.values());
-        } catch (SQLException e) {
-            throw new ApplicationException(e);
-        }
+        return gitHubSubscriptionBean.getRegisteredUsers();
     }
 
     @Override
@@ -162,78 +71,35 @@ public class AdministrationServiceImpl extends AbstractServiceServlet implements
         }
     }
 
+    /**
+     * @see org.jboss.mjolnir.server.bean.GitHubSubscriptionBean#getSubscriptions(String)
+     */
     @Override
     public Set<GithubOrganization> getSubscriptions(String gitHubName) {
-        try {
-            final Set<GithubOrganization> organizations = gitHubRepository.getOrganizations();
-            for (GithubOrganization organization: organizations) {
-                for (GithubTeam team: organization.getTeams()) {
-                    final String membershipState = teamService.getMembership(team.getId(), gitHubName);
-                    team.setMembershipState(membershipState);
-                }
-            }
-            return organizations;
-        } catch (SQLException e) {
-            throw new ApplicationException(e);
-        } catch (IOException e) {
-            throw new ApplicationException(e);
-        }
+        return gitHubSubscriptionBean.getSubscriptions(gitHubName);
     }
 
+    /**
+     * @see org.jboss.mjolnir.server.bean.GitHubSubscriptionBean#setSubscriptions(String, java.util.Map)
+     */
     @Override
     public void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions) {
-        try {
-            for (Map.Entry<Integer, Boolean> entry : subscriptions.entrySet()) {
-                final Integer teamId = entry.getKey();
-                if (entry.getValue()) {
-                    teamService.addMembership(teamId, gitHubName);
-                } else {
-                    teamService.removeMembership(teamId, gitHubName);
-                }
-            }
-        } catch (IOException e) {
-            throw new ApplicationException(e);
-        }
+        gitHubSubscriptionBean.setSubscriptions(gitHubName, subscriptions);
     }
 
-    @Override
-    public void removeFromAllOrganizations(String gitHubName) {
-        try {
-            final Set<GithubOrganization> organizations = gitHubRepository.getOrganizations();
-            for (GithubOrganization organization: organizations) {
-                organizationService.removeMember(organization.getName(), gitHubName);
-            }
-        } catch (IOException e) {
-            throw new ApplicationException(e);
-        } catch (SQLException e) {
-            throw new ApplicationException(e);
-        }
-    }
 
-    public void setLdapRepository(LdapRepository ldapRepository) {
-        this.ldapRepository = ldapRepository;
+    // setters
+
+    public void setGitHubSubscriptionBean(GitHubSubscriptionBean gitHubSubscriptionBean) {
+        this.gitHubSubscriptionBean = gitHubSubscriptionBean;
     }
 
     public void setApplicationParameters(ApplicationParameters applicationParameters) {
         this.applicationParameters = applicationParameters;
     }
 
-    public void setGitHubRepository(GitHubRepository gitHubRepository) {
-        this.gitHubRepository = gitHubRepository;
-    }
-
     public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public void setOrganizationService(OrganizationService organizationService) {
-        this.organizationService = organizationService;
-    }
-
-    @Override
-    protected boolean performAuthorization() {
-        // user must be admin
-        final KerberosUser user = getAuthenticatedUser();
-        return user != null && user.isAdmin();
-    }
 }

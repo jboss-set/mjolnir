@@ -30,7 +30,7 @@ import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
 import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
-import org.jboss.mjolnir.server.bean.GitHubRepository;
+import org.jboss.mjolnir.server.bean.OrganizationRepository;
 import org.jboss.mjolnir.server.bean.UserRepository;
 import org.jboss.mjolnir.server.github.ExtendedTeamService;
 
@@ -49,7 +49,7 @@ import java.util.Set;
 public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubService {
 
     @EJB
-    private GitHubRepository gitHubRepository;
+    private OrganizationRepository organizationRepository;
     @EJB
     private ApplicationParameters applicationParameters;
     @EJB
@@ -127,7 +127,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     @Override
     public Set<GithubOrganization> getAvailableOrganizations() {
         try {
-            final Set<GithubOrganization> organizations = gitHubRepository.getOrganizations();
+            final Set<GithubOrganization> organizations = organizationRepository.getOrganizations();
             return new HashSet<GithubOrganization>(organizations);
         } catch (SQLException e) {
             throw new ApplicationException("Couldn't load GitHub organizations: " + e.getMessage(), e);

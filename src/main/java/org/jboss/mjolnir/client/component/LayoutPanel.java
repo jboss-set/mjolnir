@@ -18,6 +18,7 @@ import org.jboss.mjolnir.client.EntryPage;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.component.administration.RegisteredUsersScreen;
 import org.jboss.mjolnir.client.component.administration.SubscriptionSummaryScreen;
+import org.jboss.mjolnir.client.domain.ReportType;
 import org.jboss.mjolnir.client.service.LoginService;
 import org.jboss.mjolnir.client.service.LoginServiceAsync;
 
@@ -98,6 +99,14 @@ public class LayoutPanel extends Composite {
                 @Override
                 public Widget createWidget() {
                     return new RegisteredUsersScreen();
+                }
+            });
+
+            addMenuHeading("Reports");
+            addMenuLink(new Anchor("Unknown Members"), new MenuClickHandler() {
+                @Override
+                public Widget createWidget() {
+                    return new ReportScreen(ReportType.UNKNOWN_MEMBERS, "Unknown GitHub Members");
                 }
             });
         }

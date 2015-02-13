@@ -21,7 +21,7 @@ import java.util.Set;
  * @author Tomas Hofman (thofman@redhat.com)
  */
 @Stateless
-public class GitHubRepositoryBean implements GitHubRepository {
+public class OrganizationRepositoryBean implements OrganizationRepository {
 
     private static String GET_ORGS_QUERY = "select id, name from github_orgs";
     private static String GET_TEAMS_QUERY = "select id, org_id, name, github_id from github_teams";

@@ -36,8 +36,6 @@ public interface AdministrationService extends RemoteService {
 
     void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions) throws ApplicationException;
 
-    void removeFromAllOrganizations(String gitHubName) throws ApplicationException;
-
     public static class Util {
         private static AdministrationServiceAsync instance;
 

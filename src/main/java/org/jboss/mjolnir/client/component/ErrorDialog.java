@@ -1,5 +1,6 @@
 package org.jboss.mjolnir.client.component;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -21,6 +22,7 @@ public class ErrorDialog extends DialogBox {
         setText("Error!");
 
         final HTMLPanel panel = new HTMLPanel("");
+        panel.getElement().getStyle().setBorderWidth(1, Style.Unit.PX);
         setWidget(panel);
 
         panel.add(new HTMLPanel("h3", "Something went terribly wrong:"));

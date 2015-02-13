@@ -10,7 +10,7 @@ import java.util.Set;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public interface GitHubRepository {
+public interface OrganizationRepository {
 
     /**
      * Retrieves configured organizations and their teams.

@@ -27,6 +27,4 @@ public interface AdministrationServiceAsync {
 
     void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions, AsyncCallback<Void> asyncCallback);
 
-    void removeFromAllOrganizations(String gitHubName, AsyncCallback<Void> asyncCallback);
-
 }

@@ -39,6 +39,16 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>ReportingServlet</servlet-name>
+        <servlet-class>org.jboss.mjolnir.server.service.ReportingServiceImpl</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ReportingServlet</servlet-name>
+        <url-pattern>/mjolnir/ReportingService</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>xsrf</servlet-name>
         <servlet-class>com.google.gwt.user.server.rpc.XsrfTokenServiceServlet</servlet-class>
     </servlet>
