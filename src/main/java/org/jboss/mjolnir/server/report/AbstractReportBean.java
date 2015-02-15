@@ -1,10 +1,15 @@
 package org.jboss.mjolnir.server.report;
 
 import org.jboss.mjolnir.client.domain.Report;
+import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.MailingBean;
 
 import javax.ejb.EJB;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -21,6 +26,7 @@ public abstract class AbstractReportBean<D> {
     private MailingBean mailingBean;
 
     private String reportName;
+    private Map<String, ReportAction<D>> reportActions = new HashMap<String, ReportAction<D>>();
 
     protected AbstractReportBean(String reportName) {
         this.reportName = reportName;
@@ -29,7 +35,7 @@ public abstract class AbstractReportBean<D> {
     public Report<D> generateReport() {
         final D data = loadData();
         final String content = createReportContent(data);
-        return new Report<D>(createUuid(), data, content);
+        return new Report<D>(createUuid(), data, content, getReportActions());
     }
 
     public void emailReport() {
@@ -41,8 +47,28 @@ public abstract class AbstractReportBean<D> {
         mailingBean.sendEmail(reportingEmail, reportingEmail, subject, body);
     }
 
+    public void performReportAction(String actionName, D data) {
+        final ReportAction<D> action = reportActions.get(actionName);
+        if (action == null) {
+            throw new ApplicationException("Unknown report action: " + actionName);
+        }
+
+        action.doAction(data);
+    }
+
     public String getReportName() {
         return reportName;
+    }
+
+    public List<String> getReportActions() {
+        return new ArrayList<String>(reportActions.keySet());
+    }
+
+    protected void addReportAction(String actionName, ReportAction<D> action) {
+        if (reportActions.containsKey(actionName)) {
+            throw new ApplicationException("Action with given name is already registered: " + actionName);
+        }
+        reportActions.put(actionName, action);
     }
 
     private String createUuid() {
@@ -53,4 +79,8 @@ public abstract class AbstractReportBean<D> {
 
     protected abstract String createReportContent(D data);
 
+
+    public interface ReportAction<D> {
+        void doAction(D data);
+    }
 }

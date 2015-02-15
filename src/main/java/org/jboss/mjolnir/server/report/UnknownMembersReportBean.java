@@ -9,6 +9,8 @@ import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Retrieves list of users subscribed to some GitHub organization, that are either not registered in Mjolnir
@@ -19,6 +21,10 @@ import java.util.List;
 @Singleton
 public class UnknownMembersReportBean extends AbstractReportBean<List<SubscriptionSummary>> {
 
+    private static final Logger logger = Logger.getLogger("");
+
+    public static final String UNSUBSCRIBE_USERS_ACTION_NAME = "Unsubscribe unknown users";
+
     private static final String REPORT_NAME = "Unknown GitHub Subscribers";
     private static final String[] TABLE_HEADERS = {"GitHub Name", "Registered As"};
 
@@ -27,6 +33,8 @@ public class UnknownMembersReportBean extends AbstractReportBean<List<Subscripti
 
     protected UnknownMembersReportBean() {
         super(REPORT_NAME);
+
+        addReportAction(UNSUBSCRIBE_USERS_ACTION_NAME, new UnsubscribeUnknownUsersAction());
     }
 
     @Override
@@ -96,5 +104,22 @@ public class UnknownMembersReportBean extends AbstractReportBean<List<Subscripti
 
     public void setGitHubSubscriptionBean(GitHubSubscriptionBean gitHubSubscriptionBean) {
         this.gitHubSubscriptionBean = gitHubSubscriptionBean;
+    }
+
+
+    /**
+     * Report action that unsubscribes reported unknown users from GitHub organizations.
+     */
+    private class UnsubscribeUnknownUsersAction implements ReportAction<List<SubscriptionSummary>> {
+
+        @Override
+        public void doAction(List<SubscriptionSummary> data) {
+            for (SubscriptionSummary summary: data) {
+                for (Subscription subscription: summary.getSubscriptions()) {
+                    logger.log(Level.WARNING, "Removing user " + subscription.getGitHubName() + " from organization " + summary.getOrganization().getName());
+                    gitHubSubscriptionBean.unsubscribeUser(summary.getOrganization().getName(), subscription.getGitHubName());
+                }
+            }
+        }
     }
 }

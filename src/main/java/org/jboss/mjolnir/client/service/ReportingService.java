@@ -6,6 +6,8 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.jboss.mjolnir.client.domain.Report;
 import org.jboss.mjolnir.client.domain.ReportType;
+import org.jboss.mjolnir.client.exception.ApplicationException;
+import org.jboss.mjolnir.client.exception.ReportDataNotAvailableException;
 
 import java.util.Map;
 
@@ -16,9 +18,11 @@ import java.util.Map;
 @XsrfProtect
 public interface ReportingService extends RemoteService {
 
-    Report generateReport(ReportType reportType);
+    Report generateReport(ReportType reportType) throws ApplicationException;
 
     Map<ReportType, String> getReportNames();
+
+    void performReportAction(ReportType reportType, String uuid, String actionName) throws ReportDataNotAvailableException, ApplicationException;
 
     public static class Util {
         private static ReportingServiceAsync instance;

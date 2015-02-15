@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import org.jboss.mjolnir.client.ExceptionHandler;
+import org.jboss.mjolnir.client.component.LoadingPanel;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.service.AdministrationService;
@@ -27,11 +28,13 @@ public class SubscriptionSummaryScreen extends Composite {
     private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
 
     private HTMLPanel panel = new HTMLPanel("");
+    private LoadingPanel loadingPanel = new LoadingPanel();
 
     public SubscriptionSummaryScreen() {
         initWidget(panel);
 
         panel.add(new HTMLPanel("h2", "GitHub Organization Members"));
+        panel.add(loadingPanel);
 
         final XsrfTokenServiceAsync xsrf = GWT.create(XsrfTokenService.class);
         ((ServiceDefTarget) xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
@@ -52,6 +55,7 @@ public class SubscriptionSummaryScreen extends Composite {
 
                     @Override
                     public void onSuccess(List<SubscriptionSummary> result) {
+                        loadingPanel.removeFromParent();
                         for (SubscriptionSummary summary : result) {
                             createSubscriptionTable(summary);
                         }

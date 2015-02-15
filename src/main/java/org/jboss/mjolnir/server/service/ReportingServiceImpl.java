@@ -3,6 +3,7 @@ package org.jboss.mjolnir.server.service;
 import org.jboss.mjolnir.client.domain.Report;
 import org.jboss.mjolnir.client.domain.ReportType;
 import org.jboss.mjolnir.client.exception.ApplicationException;
+import org.jboss.mjolnir.client.exception.ReportDataNotAvailableException;
 import org.jboss.mjolnir.client.service.ReportingService;
 import org.jboss.mjolnir.server.report.AbstractReportBean;
 import org.jboss.mjolnir.server.report.UnknownMembersReportBean;
@@ -32,13 +33,10 @@ public class ReportingServiceImpl extends AbstractAdminRestrictedService impleme
 
     @Override
     public Report generateReport(ReportType reportType) {
-        if (reportBeanMap.containsKey(reportType)) {
-            final AbstractReportBean<?> reportBean = reportBeanMap.get(reportType);
-            final Report<?> report = reportBean.generateReport();
-//            storeReportData(reportType, report);
-            return report;
-        }
-        throw new ApplicationException("Unknown report: " + reportType);
+        final AbstractReportBean<?> reportBean = getReportBean(reportType);
+        final Report<?> report = reportBean.generateReport();
+        storeReportData(reportType, report);
+        return report;
     }
 
     @Override
@@ -50,13 +48,32 @@ public class ReportingServiceImpl extends AbstractAdminRestrictedService impleme
         return reportNames;
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public void performReportAction(ReportType reportType, String uuid, String actionName) throws ReportDataNotAvailableException {
+        final Object reportData = getReportData(reportType, uuid);
+        if (reportData == null) {
+            throw new ReportDataNotAvailableException("Report data are not available for report " + uuid + " of type " + reportType.name());
+        }
+        final AbstractReportBean reportBean = getReportBean(reportType);
+        reportBean.performReportAction(actionName, reportData);
+    }
+
+    private AbstractReportBean getReportBean(ReportType reportType) {
+        if (reportBeanMap.containsKey(reportType)) {
+            return reportBeanMap.get(reportType);
+        }
+        throw new ApplicationException("Unknown report: " + reportType);
+    }
+
+
     /**
      * Stores result of last report of given type into session.
      *
      * @param reportType report type
      * @param report generated report
      */
-    /*@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     private void storeReportData(ReportType reportType, Report<?> report) {
         Map<ReportType, Map<String, Object>> reportTypeMap =
                 (Map<ReportType, Map<String, Object>>) getSession().getAttribute(REPORT_DATA_KEY);
@@ -73,7 +90,7 @@ public class ReportingServiceImpl extends AbstractAdminRestrictedService impleme
 
         reportDataMap.clear();
         reportDataMap.put(report.getUuid(), report.getData());
-    }*/
+    }
 
     /**
      * Retrieves data of the last report of given type, if they are still available.
@@ -82,7 +99,7 @@ public class ReportingServiceImpl extends AbstractAdminRestrictedService impleme
      * @param uuid report uuid
      * @return report data or null if not available
      */
-    /*@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     private Object getReportData(ReportType reportType, String uuid) {
         Map<ReportType, Map<String, Object>> reportTypeMap =
                 (Map<ReportType, Map<String, Object>>) getSession().getAttribute(REPORT_DATA_KEY);
@@ -96,6 +113,6 @@ public class ReportingServiceImpl extends AbstractAdminRestrictedService impleme
         }
 
         return reportDataMap.get(uuid);
-    }*/
+    }
 
 }

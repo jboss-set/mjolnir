@@ -15,4 +15,6 @@ public interface ReportingServiceAsync {
 
     void getReportNames(AsyncCallback<Map<ReportType, String>> callback);
 
+    void performReportAction(ReportType reportType, String uuid, String actionName, AsyncCallback<Void> callback);
+
 }

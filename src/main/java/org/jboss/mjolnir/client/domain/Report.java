@@ -1,6 +1,7 @@
 package org.jboss.mjolnir.client.domain;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)
@@ -10,17 +11,19 @@ public class Report<D> implements Serializable {
     private transient D data;
     private String content;
     private String uuid;
+    private List<String> actions;
 
     public Report() {
     }
 
-    public Report(String uuid, D data, String content) {
+    public Report(String uuid, D data, String content, List<String> actions) {
         this.uuid = uuid;
         this.data = data;
         this.content = content;
+        this.actions = actions;
     }
 
-    public Object getData() {
+    public D getData() {
         return data;
     }
 
@@ -31,4 +34,9 @@ public class Report<D> implements Serializable {
     public String getUuid() {
         return uuid;
     }
+
+    public List<String> getActions() {
+        return actions;
+    }
+
 }

@@ -180,6 +180,14 @@ public class GitHubSubscriptionBean {
         }
     }
 
+    public void unsubscribeUser(String organization, String gitHubName) {
+        try {
+            organizationService.removeMember(organization, gitHubName);
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
 
     // setters
 
