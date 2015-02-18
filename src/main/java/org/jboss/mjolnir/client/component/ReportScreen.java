@@ -97,23 +97,25 @@ public class ReportScreen extends Composite {
 
         @Override
         public void onClick(ClickEvent event) {
-            XsrfUtil.obtainToken(new XsrfUtil.Callback() {
-                @Override
-                public void onSuccess(XsrfToken token) {
-                    ((HasRpcToken) reportingService).setRpcToken(token);
-                    reportingService.performReportAction(reportType, report.getUuid(), actionName, new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            ExceptionHandler.handle("Action failed.", caught);
-                        }
+            if (Window.confirm("This might have far reaching consequences. Proceed?")) {
+                XsrfUtil.obtainToken(new XsrfUtil.Callback() {
+                    @Override
+                    public void onSuccess(XsrfToken token) {
+                        ((HasRpcToken) reportingService).setRpcToken(token);
+                        reportingService.performReportAction(reportType, report.getUuid(), actionName, new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                ExceptionHandler.handle("Action failed.", caught);
+                            }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            Window.alert("Action successful.");
-                        }
-                    });
-                }
-            });
+                            @Override
+                            public void onSuccess(Void result) {
+                                Window.alert("Action successful.");
+                            }
+                        });
+                    }
+                });
+            }
         }
     }
 }

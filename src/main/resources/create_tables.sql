@@ -2,7 +2,7 @@ create sequence sq_github_orgs;
 
 create table github_orgs (
     id bigint default sq_github_orgs.nextval primary key,
-    name varchar(255)
+    name varchar(255) unique
 );
 
 create sequence sq_github_teams;

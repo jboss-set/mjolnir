@@ -28,7 +28,7 @@ public abstract class AbstractReportBean<D> {
     private String reportName;
     private Map<String, ReportAction<D>> reportActions = new HashMap<String, ReportAction<D>>();
 
-    protected AbstractReportBean(String reportName) {
+    public AbstractReportBean(String reportName) {
         this.reportName = reportName;
     }
 

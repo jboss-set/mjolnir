@@ -31,10 +31,10 @@ public class UnknownMembersReportBean extends AbstractReportBean<List<Subscripti
     @EJB
     private GitHubSubscriptionBean gitHubSubscriptionBean;
 
-    protected UnknownMembersReportBean() {
+    public UnknownMembersReportBean() {
         super(REPORT_NAME);
 
-        addReportAction(UNSUBSCRIBE_USERS_ACTION_NAME, new UnsubscribeUnknownUsersAction());
+        addReportAction(UNSUBSCRIBE_USERS_ACTION_NAME, new UnsubscribeUnknownUsersAction()); // a bit too dangerous for now, someone could click it
     }
 
     @Override

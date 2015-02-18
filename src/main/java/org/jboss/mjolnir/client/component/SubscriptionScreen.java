@@ -6,6 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -146,6 +147,9 @@ public class SubscriptionScreen extends Composite {
                             }
                         });
                     } else {
+                        if (!Window.confirm("Are you sure? You will loose all forked private repositories!")) {
+                            return;
+                        }
                         gitHubService.unsubscribe(object.getId(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
