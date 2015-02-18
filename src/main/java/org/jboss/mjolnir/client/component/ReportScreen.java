@@ -97,7 +97,7 @@ public class ReportScreen extends Composite {
 
         @Override
         public void onClick(ClickEvent event) {
-            if (Window.confirm("This might have far reaching consequences. Proceed?")) {
+            if (Window.confirm("About to perform action '" + actionName + "'. Proceed?")) {
                 XsrfUtil.obtainToken(new XsrfUtil.Callback() {
                     @Override
                     public void onSuccess(XsrfToken token) {
