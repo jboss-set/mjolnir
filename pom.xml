@@ -14,32 +14,18 @@
         <gwt.version>2.7.0</gwt.version>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-
-            <dependency>
-                <groupId>org.jboss.spec</groupId>
-                <artifactId>jboss-javaee-7.0</artifactId>
-                <version>1.0.0.Final</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.3.2</version>
+        </dependency>
 
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava-gwt</artifactId>
             <version>18.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-codeserver</artifactId>
-            <version>${gwt.version}</version>
         </dependency>
 
         <dependency>
@@ -106,6 +92,13 @@
         <finalName>mjolnir</finalName>
 
         <plugins>
+
+            <plugin>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-codeserver</artifactId>
+                <version>${gwt.version}</version>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -113,18 +106,6 @@
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.jboss.as.plugins</groupId>
-                <artifactId>jboss-as-maven-plugin</artifactId>
-                <version>7.4.Final</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.wildfly.plugins</groupId>
-                <artifactId>wildfly-maven-plugin</artifactId>
-                <version>1.0.2.Final</version>
             </plugin>
 
             <plugin>
@@ -138,6 +119,18 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jboss.as.plugins</groupId>
+                <artifactId>jboss-as-maven-plugin</artifactId>
+                <version>7.4.Final</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.wildfly.plugins</groupId>
+                <artifactId>wildfly-maven-plugin</artifactId>
+                <version>1.0.2.Final</version>
             </plugin>
 
         </plugins>
