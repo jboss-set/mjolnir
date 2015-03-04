@@ -4,7 +4,6 @@ import com.google.common.base.Predicate;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CompositeCell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -23,8 +22,9 @@ import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.component.ConfirmationDialog;
 import org.jboss.mjolnir.client.component.table.ConditionalActionCell;
+import org.jboss.mjolnir.client.component.table.DropDownCell;
 import org.jboss.mjolnir.client.component.table.FilteringListDataProvider;
-import org.jboss.mjolnir.client.component.table.SubscriptionsTableHeaderBuilder;
+import org.jboss.mjolnir.client.component.table.TwoRowHeaderBuilder;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
@@ -33,27 +33,31 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Table composite displaying list of Subscriptions objects.
- *
+ * <p/>
  * Contains action button for editing and deleting related users. Allows filtering and sorting.
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class SubscriptionsTable extends Composite {
 
-    private static Logger logger = Logger.getLogger("");
-
     private static final int PAGE_SIZE = 50;
     private static final String DELETE_USER_TEXT = "Delete user from database?";
     private static final String DELETE_USER_SUBTEXT = "Note: this will not remove user's subscriptions on GitHub.";
+    private static final List<String> KRB_ACCOUNT_FILTER_OPTIONS = new ArrayList<String>();
+
+    static {
+        KRB_ACCOUNT_FILTER_OPTIONS.add("-");
+        KRB_ACCOUNT_FILTER_OPTIONS.add("yes");
+        KRB_ACCOUNT_FILTER_OPTIONS.add("no");
+    }
+
 
     private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
     protected ListDataProvider<Subscription> dataProvider;
-    private SearchPredicate searchPredicate;
+    protected SearchPredicate searchPredicate;
 
     public SubscriptionsTable(List<Subscription> subscriptions) {
         final HTMLPanel panel = new HTMLPanel("");
@@ -128,7 +132,7 @@ public class SubscriptionsTable extends Composite {
         // filtering
 
         final List<Header<?>> filterHeaders = createFilterHeaders();
-        subscriptionTable.setHeaderBuilder(new SubscriptionsTableHeaderBuilder(subscriptionTable, false, filterHeaders));
+        subscriptionTable.setHeaderBuilder(new TwoRowHeaderBuilder(subscriptionTable, false, filterHeaders));
     }
 
     /**
@@ -152,7 +156,6 @@ public class SubscriptionsTable extends Composite {
             public void update(String value) {
                 searchPredicate.setKrbNameExpression(value);
                 dataProvider.refresh();
-                logger.log(Level.SEVERE, "Updated value: " + value);
             }
         });
         filterHeaders.add(krbNameFilterHeader);
@@ -174,8 +177,31 @@ public class SubscriptionsTable extends Composite {
         });
         filterHeaders.add(gitHubNameFilterHeader);
 
-        filterHeaders.add(null); // empty headers for remaining columns
-        filterHeaders.add(null);
+        // krb account
+        final DropDownCell krbAccountSelectionCell = new DropDownCell(KRB_ACCOUNT_FILTER_OPTIONS);
+        Header<String> krbAccountFilterHeader = new Header<String>(krbAccountSelectionCell) {
+            @Override
+            public String getValue() {
+                return krbAccountSelectionCell.getValue();
+            }
+        };
+        krbAccountFilterHeader.setUpdater(new ValueUpdater<String>() {
+            @Override
+            public void update(String value) {
+                Boolean boolValue;
+                if ("yes".equals(value)) {
+                    boolValue = true;
+                } else if ("no".equals(value)) {
+                    boolValue = false;
+                } else {
+                    boolValue = null;
+                }
+
+                searchPredicate.setKrbAccount(boolValue);
+                dataProvider.refresh();
+            }
+        });
+        filterHeaders.add(krbAccountFilterHeader);
 
         return filterHeaders;
     }
@@ -201,66 +227,21 @@ public class SubscriptionsTable extends Composite {
         final List<HasCell<Subscription, ?>> hasCells = new ArrayList<HasCell<Subscription, ?>>();
 
         // edit button
-        hasCells.add(new HasCell<Subscription, Subscription>() {
-            @Override
-            public Cell<Subscription> getCell() {
-                return new ActionCell<Subscription>("Edit", new EditDelegate());
-            }
-
-            @Override
-            public FieldUpdater<Subscription, Subscription> getFieldUpdater() {
-                return null;
-            }
-
-            @Override
-            public Subscription getValue(Subscription object) {
-                return object;
-            }
-        });
+        hasCells.add(new ConditionalActionCell<Subscription>("Edit", new EditDelegate()));
 
         // subscriptions button
-        hasCells.add(new HasCell<Subscription, Subscription>() {
+        hasCells.add(new ConditionalActionCell<Subscription>("Subscriptions", new SubscribeDelegate()) {
             @Override
-            public Cell<Subscription> getCell() {
-                return new ConditionalActionCell<Subscription>("Subscriptions", new SubscribeDelegate()) {
-                    @Override
-                    public boolean isEnabled(Subscription value) {
-                        return value.getGitHubName() != null;
-                    }
-                };
-            }
-
-            @Override
-            public FieldUpdater<Subscription, Subscription> getFieldUpdater() {
-                return null;
-            }
-
-            @Override
-            public Subscription getValue(Subscription object) {
-                return object;
+            public boolean isEnabled(Subscription value) {
+                return value.getGitHubName() != null;
             }
         });
 
         // delete button
-        hasCells.add(new HasCell<Subscription, Subscription>() {
+        hasCells.add(new ConditionalActionCell<Subscription>("Delete", new DeleteDelegate()) {
             @Override
-            public Cell<Subscription> getCell() {
-                return new ConditionalActionCell<Subscription>("Delete", new DeleteDelegate()) {
-                    @Override
-                    public boolean isEnabled(Subscription value) {
-                        return value.getKerberosUser() != null;
-                    }
-                };
-            }
-
-            @Override
-            public FieldUpdater<Subscription, Subscription> getFieldUpdater() {
-                return null;
-            }
-
-            @Override
-            public Subscription getValue(Subscription object) {
-                return object;
+            public boolean isEnabled(Subscription value) {
+                return value.getKerberosUser() != null;
             }
         });
 
@@ -281,7 +262,7 @@ public class SubscriptionsTable extends Composite {
     /**
      * Called after item was modified.
      *
-     * @param object modified item
+     * @param object    modified item
      * @param savedUser user instance that was actually saved on server
      */
     protected void onEdited(Subscription object, KerberosUser savedUser) {
@@ -329,7 +310,7 @@ public class SubscriptionsTable extends Composite {
     /**
      * Compares Subscription objects according to whether they are related to a registered user.
      */
-    private class IsRegisteredComparator implements Comparator<Subscription>{
+    private class IsRegisteredComparator implements Comparator<Subscription> {
         @Override
         public int compare(Subscription subscription, Subscription subscription2) {
             if (subscription == null) {
@@ -383,7 +364,7 @@ public class SubscriptionsTable extends Composite {
 
     /**
      * Delete button delegate.
-     *
+     * <p/>
      * This deletes related user from database. Subscription object as such may remain in the list.
      */
     private class DeleteDelegate implements ActionCell.Delegate<Subscription> {
@@ -414,23 +395,25 @@ public class SubscriptionsTable extends Composite {
 
     /**
      * Predicate for filtering subscriptions according to given criteria.
-     *
+     * <p/>
      * Any subscription with krb name and/or github name *containing* given strings qualifies.
      */
-    private class SearchPredicate implements Predicate<Subscription> {
+    protected class SearchPredicate implements Predicate<Subscription> {
 
         private String krbNameExpression;
         private String gitHubNameExpression;
+        private Boolean krbAccount;
 
         @Override
         public boolean apply(@Nullable Subscription o) {
             if (o == null) {
                 return false;
-            } else if (isEmpty(krbNameExpression) && isEmpty(gitHubNameExpression)) {
+            } else if (isEmpty(krbNameExpression) && isEmpty(gitHubNameExpression) && krbAccount == null) {
                 return true;
             }
             return (isEmpty(krbNameExpression) || (o.getKerberosName() != null && o.getKerberosName().contains(krbNameExpression)))
-                    && (isEmpty(gitHubNameExpression) || (o.getGitHubName() != null && o.getGitHubName().contains(gitHubNameExpression)));
+                    && (isEmpty(gitHubNameExpression) || (o.getGitHubName() != null && o.getGitHubName().contains(gitHubNameExpression)))
+                    && (krbAccount == null || krbAccount == o.isActiveKerberosAccount());
         }
 
         public void setKrbNameExpression(String krbNameExpression) {
@@ -439,6 +422,10 @@ public class SubscriptionsTable extends Composite {
 
         public void setGitHubNameExpression(String gitHubNameExpression) {
             this.gitHubNameExpression = gitHubNameExpression;
+        }
+
+        public void setKrbAccount(Boolean krbAccount) {
+            this.krbAccount = krbAccount;
         }
 
         private boolean isEmpty(String value) {

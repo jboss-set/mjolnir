@@ -2,6 +2,7 @@ package org.jboss.mjolnir.server.bean;
 
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.OrganizationService;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
@@ -99,6 +100,24 @@ public class GitHubSubscriptionBean {
             }
 
             return subscriptionSummaries;
+        } catch (Exception e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    public void removeFromOrganizations(String gitHubName) {
+        try {
+            for (GithubOrganization org : organizationRepository.getOrganizations()) {
+                try {
+                    organizationService.removeMember(org.getName(), gitHubName);
+                } catch (RequestException e) {
+                    if (e.getStatus() == 404) {
+                        // that's fine => user was not subscribed anyway
+                    } else {
+                        throw e;
+                    }
+                }
+            }
         } catch (Exception e) {
             throw new ApplicationException(e);
         }

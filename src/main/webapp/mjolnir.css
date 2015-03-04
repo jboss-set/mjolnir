@@ -23,6 +23,10 @@ h1 {
 
 table button {
     padding: 0;
+    margin: 0 1px;
+}
+table th input[type=text] {
+    width: 100px;
 }
 
 .sendButton {

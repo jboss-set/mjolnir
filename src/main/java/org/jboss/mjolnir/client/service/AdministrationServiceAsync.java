@@ -5,6 +5,7 @@ import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
+import org.jboss.mjolnir.client.exception.ApplicationException;
 
 import java.util.List;
 import java.util.Map;
@@ -27,4 +28,5 @@ public interface AdministrationServiceAsync {
 
     void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions, AsyncCallback<Void> asyncCallback);
 
+    void unsubscribe(String gitHubName, AsyncCallback<Void> asyncCallback) throws ApplicationException;
 }

@@ -34,6 +34,8 @@ public interface AdministrationService extends RemoteService {
 
     Set<GithubOrganization> getSubscriptions(String gitHubName) throws ApplicationException;
 
+    void unsubscribe(String gitHubName) throws ApplicationException;
+
     void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions) throws ApplicationException;
 
     public static class Util {

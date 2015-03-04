@@ -79,6 +79,11 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         return gitHubSubscriptionBean.getSubscriptions(gitHubName);
     }
 
+    @Override
+    public void unsubscribe(String gitHubName) throws ApplicationException {
+        gitHubSubscriptionBean.removeFromOrganizations(gitHubName);
+    }
+
     /**
      * @see org.jboss.mjolnir.server.bean.GitHubSubscriptionBean#setSubscriptions(String, java.util.Map)
      */

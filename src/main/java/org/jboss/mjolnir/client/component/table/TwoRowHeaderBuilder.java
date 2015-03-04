@@ -16,20 +16,20 @@ import java.util.List;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public class SubscriptionsTableHeaderBuilder extends DefaultHeaderOrFooterBuilder<Subscription> {
+public class TwoRowHeaderBuilder extends DefaultHeaderOrFooterBuilder<Subscription> {
 
-    private List<Header<?>> additionalHeaders;
+    private List<Header<?>> secondRowHeaders;
 
     /**
      * Create a new DefaultHeaderBuilder for the header of footer section.
      *
      * @param table    the table being built
      * @param isFooter true if building the footer, false if the header
-     * @param additionalHeaders filtering headers
+     * @param secondRowHeaders filtering headers
      */
-    public SubscriptionsTableHeaderBuilder(AbstractCellTable<Subscription> table, boolean isFooter, List<Header<?>> additionalHeaders) {
+    public TwoRowHeaderBuilder(AbstractCellTable<Subscription> table, boolean isFooter, List<Header<?>> secondRowHeaders) {
         super(table, isFooter);
-        this.additionalHeaders = additionalHeaders;
+        this.secondRowHeaders = secondRowHeaders;
     }
 
     @Override
@@ -48,16 +48,17 @@ public class SubscriptionsTableHeaderBuilder extends DefaultHeaderOrFooterBuilde
         TableRowBuilder tr = startRow();
         TableCellBuilder th;
 
-        for (int curColumn = 0; curColumn < additionalHeaders.size(); curColumn++) {
+        int curColumn;
+        for (curColumn = 0; curColumn < secondRowHeaders.size(); curColumn++) {
             if (curColumn == 0) {
                 classes = className + " " + style.firstColumnHeader();
-            } else if (curColumn == additionalHeaders.size() - 1) {
+            } else if (curColumn == secondRowHeaders.size() - 1) {
                 classes = className + " " + style.lastColumnHeader();
             } else {
                 classes = className;
             }
 
-            Header<?> header = additionalHeaders.get(curColumn);
+            Header<?> header = secondRowHeaders.get(curColumn);
 
             th = tr.startTH().className(classes);
             DivBuilder div = th.startDiv();
@@ -67,6 +68,14 @@ public class SubscriptionsTableHeaderBuilder extends DefaultHeaderOrFooterBuilde
                 renderHeader(div, context, header);
             }
 
+            div.endDiv();
+            tr.endTH();
+        }
+
+        // empty cells for remaining columns
+        for (; curColumn < getTable().getColumnCount(); curColumn++) {
+            th = tr.startTH().className(className);
+            DivBuilder div = th.startDiv();
             div.endDiv();
             tr.endTH();
         }
