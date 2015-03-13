@@ -4,6 +4,7 @@ import org.jboss.mjolnir.client.exception.ApplicationException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Singleton;
@@ -34,7 +35,6 @@ public class ApplicationParametersBean implements ApplicationParameters, Applica
     private final static String INSERT_SQL = "insert into application_parameters (param_value, param_name) values (?, ?)";
     private final static String UPDATE_SQL = "update application_parameters set param_value = ? where param_name = ?";
 
-    @Resource(lookup = "java:jboss/datasources/MjolnirDS")
     private DataSource dataSource;
 
     private Map<String, String> parameters = Collections.synchronizedMap(new HashMap<String, String>());
@@ -42,6 +42,7 @@ public class ApplicationParametersBean implements ApplicationParameters, Applica
     @PostConstruct
     public void initBean() {
         try {
+            dataSource = JndiUtils.getDataSource();
             reloadParameters();
         } catch (SQLException e) {
             throw new ApplicationException("Couldn't load application configuration.", e);

@@ -3,6 +3,7 @@ package org.jboss.mjolnir.server.bean;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.sql.DataSource;
@@ -26,8 +27,12 @@ public class OrganizationRepositoryBean implements OrganizationRepository {
     private static String GET_ORGS_QUERY = "select id, name from github_orgs";
     private static String GET_TEAMS_QUERY = "select id, org_id, name, github_id from github_teams";
 
-    @Resource(lookup = "java:jboss/datasources/MjolnirDS")
     private DataSource dataSource;
+
+    @PostConstruct
+    public void initBean() {
+        dataSource = JndiUtils.getDataSource();
+    }
 
     @Override
     public Set<GithubOrganization> getOrganizations() throws SQLException {

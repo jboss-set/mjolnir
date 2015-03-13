@@ -3,6 +3,7 @@ package org.jboss.mjolnir.server.bean;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -30,8 +31,12 @@ public class UserRepositoryBean implements UserRepository {
     private final static String INSERT_USER_SQL = "insert into users (github_name, krb_name) values (?, ?)";
     private final static String GET_ALL_USERS_SQL = "select id, krb_name, github_name, admin from users order by krb_name";
 
-    @Resource(lookup = "java:jboss/datasources/MjolnirDS")
     private DataSource dataSource;
+
+    @PostConstruct
+    public void initBean() {
+        dataSource = JndiUtils.getDataSource();
+    }
 
     @Override
     public KerberosUser getUser(String kerberosName) throws SQLException {
