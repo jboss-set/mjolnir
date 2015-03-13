@@ -1,5 +1,6 @@
 package org.jboss.mjolnir.server.bean;
 
+import org.jboss.logging.Logger;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 
 import javax.naming.Context;
@@ -12,12 +13,16 @@ import javax.sql.DataSource;
  */
 public class JndiUtils {
 
+    private final static Logger logger = Logger.getLogger(JndiUtils.class);
+
     private static Context context;
     private static DataSource dataSource;
 
     public static DataSource getDataSource() {
         if (dataSource == null) {
             String appName = (String) lookup("java:app/AppName");
+            logger.debugf("Detected application name: %s", appName);
+
             dataSource = (DataSource) lookup("java:jboss/datasources/" + appName + "/MjolnirDS");
         }
         return dataSource;
@@ -30,7 +35,7 @@ public class JndiUtils {
             }
             return context.lookup(name);
         } catch (NamingException e) {
-            throw new ApplicationException("Couldn't perform JNDI lookup", e);
+            throw new ApplicationException("Couldn't perform JNDI lookup for name: " + name, e);
         }
     }
 
