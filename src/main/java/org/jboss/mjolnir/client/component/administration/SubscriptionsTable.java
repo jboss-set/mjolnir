@@ -411,8 +411,8 @@ public class SubscriptionsTable extends Composite {
             } else if (isEmpty(krbNameExpression) && isEmpty(gitHubNameExpression) && krbAccount == null) {
                 return true;
             }
-            return (isEmpty(krbNameExpression) || (o.getKerberosName() != null && o.getKerberosName().contains(krbNameExpression)))
-                    && (isEmpty(gitHubNameExpression) || (o.getGitHubName() != null && o.getGitHubName().contains(gitHubNameExpression)))
+            return (isEmpty(krbNameExpression) || (o.getKerberosName() != null && o.getKerberosName().toLowerCase().contains(krbNameExpression.toLowerCase())))
+                    && (isEmpty(gitHubNameExpression) || (o.getGitHubName() != null && o.getGitHubName().toLowerCase().contains(gitHubNameExpression.toLowerCase())))
                     && (krbAccount == null || krbAccount == o.isActiveKerberosAccount());
         }
 

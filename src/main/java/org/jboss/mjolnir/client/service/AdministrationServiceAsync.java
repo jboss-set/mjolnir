@@ -6,6 +6,7 @@ import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.exception.ApplicationException;
+import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
 
 import java.util.List;
 import java.util.Map;
@@ -16,17 +17,17 @@ import java.util.Set;
  */
 public interface AdministrationServiceAsync {
 
-    void getOrganizationMembers(AsyncCallback<List<SubscriptionSummary>> async);
+    void getOrganizationMembers(AsyncCallback<List<SubscriptionSummary>> async) throws ApplicationException;
 
-    void getRegisteredUsers(AsyncCallback<List<Subscription>> async);
+    void getRegisteredUsers(AsyncCallback<List<Subscription>> async) throws ApplicationException;
 
-    void deleteUser(KerberosUser user, AsyncCallback<Void> asyncCallback);
+    void deleteUser(KerberosUser user, AsyncCallback<Void> asyncCallback) throws ApplicationException;
 
-    void editUser(KerberosUser user, AsyncCallback<Void> asyncCallback);
+    void editUser(KerberosUser user, AsyncCallback<Void> asyncCallback) throws ApplicationException, GitHubNameAlreadyTakenException;
 
-    void getSubscriptions(String gitHubName, AsyncCallback<Set<GithubOrganization>> asyncCallback);
+    void getSubscriptions(String gitHubName, AsyncCallback<Set<GithubOrganization>> asyncCallback) throws ApplicationException;
 
-    void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions, AsyncCallback<Void> asyncCallback);
+    void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions, AsyncCallback<Void> asyncCallback) throws ApplicationException;
 
     void unsubscribe(String gitHubName, AsyncCallback<Void> asyncCallback) throws ApplicationException;
 }
