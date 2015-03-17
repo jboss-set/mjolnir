@@ -1,6 +1,8 @@
 package org.jboss.mjolnir.server.bean;
 
 import org.jboss.mjolnir.client.exception.ApplicationException;
+import org.jboss.mjolnir.server.ldap.LdapClient;
+import org.jboss.mjolnir.server.util.KerberosUtils;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -30,33 +32,21 @@ public class LdapRepositoryBean implements LdapRepository {
     private final static String CONTEXT_NAME = "ou=users,dc=redhat,dc=com";
     private final static int GROUPING_FACTOR = 100; // query for so many users at a time
 
-    private InitialDirContext ctx;
-    private SearchControls searchControls;
-
     @EJB
     private ApplicationParameters applicationParameters;
+
+    private LdapClient ldapClient;
 
     @PostConstruct
     public void init() {
         // fetch ldap url
         final String ldapUrl = applicationParameters.getMandatoryParameter(ApplicationParameters.LDAP_URL_KEY);
 
-        // prepare naming context
-        final Hashtable<String, Object> env = new Hashtable<String, Object>();
-        env.put(Context.SECURITY_AUTHENTICATION, "simple");
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(Context.PROVIDER_URL, ldapUrl);
-
         try {
-            ctx = new InitialDirContext(env);
+            ldapClient = new LdapClient(ldapUrl);
         } catch (NamingException e) {
-            throw new ApplicationException("Couldn't create directory context.", e);
+            throw new ApplicationException("Couldn't create LDAP client instance", e);
         }
-
-        // prepare SearchControls instance
-        searchControls = new SearchControls();
-        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        searchControls.setReturningAttributes(new String[] {"uid"});
     }
 
     /**
@@ -66,7 +56,7 @@ public class LdapRepositoryBean implements LdapRepository {
     public boolean checkUserExists(String uid) {
         try {
             final NamingEnumeration<SearchResult> results =
-                    ctx.search(CONTEXT_NAME, "uid=" + uid, searchControls);
+                    ldapClient.search(CONTEXT_NAME, "uid=" + KerberosUtils.normalizeUsername(uid));
             final boolean found = results.hasMore();
             results.close();
             return found;
@@ -103,13 +93,13 @@ public class LdapRepositoryBean implements LdapRepository {
             final StringBuilder query = new StringBuilder("(|");
             for (String uid: users) {
                 query.append("(uid=")
-                        .append(uid)
+                        .append(KerberosUtils.normalizeUsername(uid))
                         .append(")");
             }
             query.append(")");
 
             final NamingEnumeration<SearchResult> searchResults =
-                    ctx.search(CONTEXT_NAME, query.toString(), searchControls);
+                    ldapClient.search(CONTEXT_NAME, query.toString());
 
             // fill the result map with found users
             final Map<String, Boolean> result = new HashMap<String, Boolean>();

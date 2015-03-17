@@ -28,6 +28,7 @@ import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.client.service.LoginService;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.UserRepository;
+import org.jboss.mjolnir.server.util.KerberosUtils;
 
 import javax.ejb.EJB;
 import javax.security.auth.callback.Callback;
@@ -69,7 +70,7 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
         final KerberosUser user;
         try {
             validateCredentials(krb5Name, password);
-            user = userRepository.getOrCreateUser(krb5Name);
+            user = userRepository.getOrCreateUser(KerberosUtils.normalizeUsername(krb5Name));
             setAuthenticatedUser(user);
         } catch (LoginException e) {
             log("LoginException caught from JaaS. Problem with login credentials.");

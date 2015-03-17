@@ -2,9 +2,9 @@ package org.jboss.mjolnir.server.bean;
 
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
+import org.jboss.mjolnir.server.util.JndiUtils;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.sql.DataSource;
 import java.sql.Connection;

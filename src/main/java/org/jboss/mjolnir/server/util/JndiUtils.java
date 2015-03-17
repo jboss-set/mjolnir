@@ -1,4 +1,4 @@
-package org.jboss.mjolnir.server.bean;
+package org.jboss.mjolnir.server.util;
 
 import org.jboss.logging.Logger;
 import org.jboss.mjolnir.client.exception.ApplicationException;
@@ -17,6 +17,9 @@ public class JndiUtils {
 
     private static Context context;
     private static DataSource dataSource;
+
+    private JndiUtils() {
+    }
 
     public static DataSource getDataSource() {
         if (dataSource == null) {

@@ -2,9 +2,9 @@ package org.jboss.mjolnir.server.bean;
 
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.exception.ApplicationException;
+import org.jboss.mjolnir.server.util.JndiUtils;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;

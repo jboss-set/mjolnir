@@ -1,10 +1,9 @@
 package org.jboss.mjolnir.server.bean;
 
 import org.jboss.mjolnir.client.exception.ApplicationException;
+import org.jboss.mjolnir.server.util.JndiUtils;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Singleton;
