@@ -5,18 +5,49 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
-    <!-- The LoginService servlet -->
+
+    <!-- Servlets -->
+
     <servlet>
-        <servlet-name>loginService</servlet-name>
-        <servlet-class>org.jboss.mjolnir.server.LoginServiceImpl</servlet-class>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>org.jboss.mjolnir.server.service.LoginServiceImpl</servlet-class>
     </servlet>
     
     <servlet-mapping>
-        <servlet-name>loginService</servlet-name>
+        <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/mjolnir/LoginService</url-pattern>
     </servlet-mapping>
 
-    <!-- Security -->
+    <servlet>
+        <servlet-name>GitHubServlet</servlet-name>
+        <servlet-class>org.jboss.mjolnir.server.service.GitHubServiceImpl</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>GitHubServlet</servlet-name>
+        <url-pattern>/mjolnir/GitHubService</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdministrationServlet</servlet-name>
+        <servlet-class>org.jboss.mjolnir.server.service.AdministrationServiceImpl</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>AdministrationServlet</servlet-name>
+        <url-pattern>/mjolnir/AdministrationService</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ReportingServlet</servlet-name>
+        <servlet-class>org.jboss.mjolnir.server.service.ReportingServiceImpl</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ReportingServlet</servlet-name>
+        <url-pattern>/mjolnir/ReportingService</url-pattern>
+    </servlet-mapping>
+
     <servlet>
         <servlet-name>xsrf</servlet-name>
         <servlet-class>com.google.gwt.user.server.rpc.XsrfTokenServiceServlet</servlet-class>
@@ -32,14 +63,35 @@
         <param-value>JSESSIONID</param-value>
     </context-param>
 
-    <env-entry>
-        <env-entry-name>INFINISPAN_STORE</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>/home/jboss/infinispan.store</env-entry-value>
-    </env-entry>
-    
+
+    <!-- Security Filter -->
+
+    <filter>
+        <filter-name>AuthenticationFilter</filter-name>
+        <filter-class>org.jboss.mjolnir.server.AuthenticationFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>AuthenticationFilter</filter-name>
+        <servlet-name>GitHubServlet</servlet-name>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>secured</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+
+    <!-- Index file -->
+
     <welcome-file-list>
-        <welcome-file>LoginPage.jsp</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
 
 </web-app>

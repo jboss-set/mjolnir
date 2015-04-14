@@ -20,54 +20,38 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.mjolnir.authentication;
 
-import java.io.Serializable;
+package org.jboss.mjolnir.client.service;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.server.rpc.XsrfProtect;
+import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.authentication.LoginFailedException;
+import org.jboss.mjolnir.client.exception.ApplicationException;
 
 /**
- * Wrapper class that holds basic information of each team in the github-team-data.xml file.
- *
  * @author: navssurtani
  * @since: 0.1
  */
 
-public class GithubTeam implements Serializable {
+@RemoteServiceRelativePath("LoginService")
+@XsrfProtect
+public interface LoginService extends RemoteService {
 
-    private String name;
-    private int id;
-    private String membershipState;
-    private GithubOrganization organization;
+    KerberosUser login(String krb5Name, String password) throws LoginFailedException;
+    KerberosUser getLoggedUser() throws ApplicationException;
+    void logout() throws ApplicationException;
 
-    public GithubTeam(String name, int id) {
-        if (name == null || id == 0) throw new NullPointerException("Null params");
-        this.name = name;
-        this.id = id;
-    }
+    public static class Util {
+        private static LoginServiceAsync instance;
 
-    public GithubTeam() {
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getMembershipState() {
-        return membershipState;
-    }
-
-    public void setMembershipState(String membershipState) {
-        this.membershipState = membershipState;
-    }
-
-    public GithubOrganization getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(GithubOrganization organization) {
-        this.organization = organization;
+        public static LoginServiceAsync getInstance() {
+            if (instance == null) {
+                instance = (LoginServiceAsync) GWT.create(LoginService.class);
+            }
+            return instance;
+        }
     }
 }

@@ -1,0 +1,17 @@
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+
+    </ui:style>
+    <g:HTMLPanel>
+        <h3>GitHub Name Settings</h3>
+        <p><g:InlineLabel ui:field="messageLabel"/></p>
+        <p>
+            GitHub name: <g:TextBox ui:field="textBox"/>
+        </p>
+        <p class="error"><g:InlineLabel ui:field="feedbackLabel"/></p>
+        <p style="text-align: right;">
+            <g:Button ui:field="cancelButton">Cancel</g:Button>
+            <g:Button ui:field="submitButton">Save</g:Button>
+        </p>
+    </g:HTMLPanel>
+</ui:UiBinder>

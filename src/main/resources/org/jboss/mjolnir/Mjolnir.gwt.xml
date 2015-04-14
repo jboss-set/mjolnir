@@ -9,9 +9,12 @@
     <!-- Inherit the core Web Toolkit stuff.-->
     <inherits name='com.google.gwt.user.User'/>
 
-     <!--Inherit the default GWT style sheet.-->
+    <!--Inherit the default GWT style sheet.-->
     <inherits name='com.google.gwt.user.theme.clean.Clean'/>
-    <inherits name="com.google.gwt.rpc.RPC"/>
+    <inherits name="com.google.gwt.logging.Logging"/>
+
+    <!-- GWT Guava -->
+    <inherits name="com.google.common.collect.Collect"/>
 
     <!-- Specify the app entry point class.-->
     <entry-point class='org.jboss.mjolnir.client.EntryPage'/>
@@ -20,5 +23,7 @@
     <source path='client'/>
     <source path='authentication'/>
 
-
+    <set-property name="compiler.stackMode" value="emulated" />
+    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>
+    <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>
 </module>

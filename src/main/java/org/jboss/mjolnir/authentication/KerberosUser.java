@@ -35,6 +35,7 @@ public class KerberosUser implements Serializable {
 
     private String krb5Name;
     private String githubName;
+    private boolean admin;
 
     public String getName() {
         return krb5Name;
@@ -52,8 +53,33 @@ public class KerberosUser implements Serializable {
         this.githubName = githubName;
     }
 
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
+
     @Override
     public String toString() {
         return "{ krb5Name " + krb5Name + ": githubName " + githubName + " }";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        KerberosUser that = (KerberosUser) o;
+
+        if (!krb5Name.equals(that.krb5Name)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return krb5Name.hashCode();
     }
 }

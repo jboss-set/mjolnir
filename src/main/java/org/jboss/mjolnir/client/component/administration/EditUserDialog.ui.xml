@@ -1,0 +1,21 @@
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+    </ui:style>
+    <g:HTMLPanel>
+        <table>
+            <tr>
+                <td>Kerberos Name: </td>
+                <td><g:TextBox ui:field="kerberosNameBox"/></td>
+            </tr>
+            <tr>
+                <td>GitHub Name: </td>
+                <td><g:TextBox ui:field="gitHubNameBox"/></td>
+            </tr>
+        </table>
+        <p class="error"><g:InlineLabel ui:field="feedbackLabel"/></p>
+        <p style="text-align: right;">
+            <g:Button ui:field="cancelButton">Cancel</g:Button>
+            <g:Button ui:field="submitButton">Save</g:Button>
+        </p>
+    </g:HTMLPanel>
+</ui:UiBinder>
