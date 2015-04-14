@@ -23,7 +23,7 @@ public interface AdministrationServiceAsync {
 
     void deleteUser(KerberosUser user, AsyncCallback<Void> asyncCallback) throws ApplicationException;
 
-    void editUser(KerberosUser user, AsyncCallback<Void> asyncCallback) throws ApplicationException, GitHubNameAlreadyTakenException;
+    void editUser(KerberosUser user, AsyncCallback<Void> asyncCallback) throws ApplicationException;
 
     void getSubscriptions(String gitHubName, AsyncCallback<Set<GithubOrganization>> asyncCallback) throws ApplicationException;
 

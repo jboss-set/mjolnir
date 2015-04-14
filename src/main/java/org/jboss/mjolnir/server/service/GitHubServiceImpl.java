@@ -102,8 +102,9 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             log("Successfully added " + githubName + " to team.");
             return state;
         } catch (IOException e) {
-            throw new ApplicationException("Unable to subscribe user " + githubName
-                    + " to team #" + teamId, e);
+            final String message = "Unable to subscribe user " + githubName + " to team #" + teamId + ": " + e.getMessage();
+            log(message, e);
+            throw new ApplicationException(message, e);
         }
     }
 

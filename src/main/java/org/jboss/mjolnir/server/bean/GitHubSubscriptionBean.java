@@ -185,18 +185,22 @@ public class GitHubSubscriptionBean {
      * @param subscriptions subscription map (team id => subscribe?)
      */
     public void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions) {
-        try {
             for (Map.Entry<Integer, Boolean> entry : subscriptions.entrySet()) {
                 final Integer teamId = entry.getKey();
                 if (entry.getValue()) {
-                    teamService.addMembership(teamId, gitHubName);
+                    try {
+                        teamService.addMembership(teamId, gitHubName);
+                    } catch (IOException e) {
+                        throw new ApplicationException("Couldn't add membership: user: " + gitHubName + ", team: " + teamId, e);
+                    }
                 } else {
-                    teamService.removeMembership(teamId, gitHubName);
+                    try {
+                        teamService.removeMembership(teamId, gitHubName);
+                    } catch (IOException e) {
+                        throw new ApplicationException("Couldn't remove membership: user: " + gitHubName + ", team: " + teamId, e);
+                    }
                 }
             }
-        } catch (IOException e) {
-            throw new ApplicationException(e);
-        }
     }
 
     public void unsubscribeUser(String organization, String gitHubName) {
