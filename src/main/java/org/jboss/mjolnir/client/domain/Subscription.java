@@ -56,7 +56,7 @@ public class Subscription implements Serializable {
                 '}';
     }
 
-    /*@Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Subscription)) return false;
@@ -74,5 +74,5 @@ public class Subscription implements Serializable {
         int result = gitHubName != null ? gitHubName.hashCode() : 0;
         result = 31 * result + (kerberosUser != null ? kerberosUser.hashCode() : 0);
         return result;
-    }*/
+    }
 }

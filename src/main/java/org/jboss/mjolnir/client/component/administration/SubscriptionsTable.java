@@ -591,9 +591,9 @@ public class SubscriptionsTable extends Composite {
                 @Override
                 public void onSuccess(Collection<Subscription> result) {
                     for (Subscription subscription: result) {
-                        int idx = selectedItems.indexOf(subscription);
+                        int idx = subscriptionList.indexOf(subscription);
                         if (idx > -1) {
-                            Subscription originalSubscription = selectedItems.get(idx);
+                            Subscription originalSubscription = subscriptionList.get(idx);
                             originalSubscription.setKerberosUser(subscription.getKerberosUser());
                         }
                     }
