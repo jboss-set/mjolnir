@@ -94,7 +94,7 @@ public class SubscriptionSummaryScreen extends Composite {
         style.setHeight(100, Style.Unit.PCT);*/
 
         SubscriptionsTable table = new SubscriptionsTable(subscriptionSummary.getSubscriptions());
-        table.addAction("Unsubscribe", new UnsubscribeActionDelegate(table));
+        table.addAction("Unsubscribe", new UnsubscribeActionDelegate(table), true);
 
         panel.add(new HTMLPanel("h3", subscriptionSummary.getOrganization().getName()));
         panel.add(table);

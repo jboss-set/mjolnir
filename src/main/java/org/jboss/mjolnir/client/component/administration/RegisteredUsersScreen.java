@@ -69,7 +69,7 @@ public class RegisteredUsersScreen extends Composite {
 
     private SubscriptionsTable createTable(List<Subscription> subscriptions) {
         SubscriptionsTable table = new SubscriptionsTable(subscriptions);
-        table.addAction("Delete", new DeleteDelegate(table));
+        table.addAction("Delete", new DeleteDelegate(table), true);
         return table;
     }
 
@@ -114,7 +114,6 @@ public class RegisteredUsersScreen extends Composite {
         }
 
         private void onDeleted(Collection<Subscription> deletedItems) {
-            table.getSelectedItems().clear();
             for (Subscription item: deletedItems) {
                 // remove object from the list
                 table.getItemList().remove(item);

@@ -73,6 +73,7 @@ public class SubscriptionsTable extends Composite {
     private List<Button> actionButtons = new ArrayList<Button>();
     private Set<Subscription> selectedItems = new HashSet<Subscription>();
     private List<Subscription> subscriptionList;
+    private ColumnSortEvent.ListHandler<Subscription> sortHandler;
 
     public SubscriptionsTable(List<Subscription> subscriptions) {
         initWidget(panel);
@@ -94,7 +95,7 @@ public class SubscriptionsTable extends Composite {
 
         // column definitions
 
-        final CheckboxCell selectionCell = new CheckboxCell(false, true);
+        final CheckboxCell selectionCell = new CheckboxCell(true, true);
         final Column<Subscription, Boolean> selectionCol = new Column<Subscription, Boolean>(selectionCell) {
             @Override
             public Boolean getValue(Subscription object) {
@@ -156,8 +157,7 @@ public class SubscriptionsTable extends Composite {
 
         // sorting
 
-        final ColumnSortEvent.ListHandler<Subscription> sortHandler =
-                new ColumnSortEvent.ListHandler<Subscription>(subscriptions) {
+        sortHandler = new ColumnSortEvent.ListHandler<Subscription>(subscriptionList) {
                     @Override
                     public void onColumnSort(ColumnSortEvent event) {
                         super.onColumnSort(event);
@@ -200,6 +200,10 @@ public class SubscriptionsTable extends Composite {
     }
 
     public void addAction(String caption, final ActionDelegate delegate) {
+        addAction(caption, delegate, false);
+    }
+
+    public void addAction(String caption, final ActionDelegate delegate, boolean separator) {
         Button button = new Button(caption, new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -208,9 +212,17 @@ public class SubscriptionsTable extends Composite {
             }
         });
         button.setEnabled(false);
+
+        if (separator) {
+            HTMLPanel span = new HTMLPanel("span", " | ");
+            span.getElement().getStyle().setColor("#999");
+            buttonsPanel.add(span);
+        } else {
+            buttonsPanel.add(new HTMLPanel("span", " "));
+        }
+
         actionButtons.add(button);
         buttonsPanel.add(button);
-        buttonsPanel.add(new HTMLPanel("span", " "));
     }
 
     private void enableActionButtons(boolean enable) {
@@ -238,6 +250,11 @@ public class SubscriptionsTable extends Composite {
         return selectedItems;
     }
 
+    public void clearSelectedItems() {
+        selectedItems.clear();
+        enableActionButtons(false);
+    }
+
     public List<Subscription> getItemList() {
         return subscriptionList;
     }
@@ -248,8 +265,10 @@ public class SubscriptionsTable extends Composite {
 
     public void refresh() {
         List<Subscription> filteredList = Lists.newArrayList(Iterables.filter(subscriptionList, searchPredicate));
+        clearSelectedItems();
         dataProvider.setList(filteredList);
-//        dataProvider.refresh();
+        sortHandler.setList(filteredList);
+
     }
 
     /**
@@ -300,7 +319,7 @@ public class SubscriptionsTable extends Composite {
         Header<String> krbAccountFilterHeader = new Header<String>(krbAccountSelectionCell) {
             @Override
             public String getValue() {
-                return krbAccountSelectionCell.getValue();
+                return "";
             }
         };
         krbAccountFilterHeader.setUpdater(new ValueUpdater<String>() {
@@ -314,7 +333,6 @@ public class SubscriptionsTable extends Composite {
                 } else {
                     boolValue = null;
                 }
-
                 searchPredicate.setKrbAccount(boolValue);
                 refresh();
             }
@@ -326,7 +344,7 @@ public class SubscriptionsTable extends Composite {
         Header<String> whitelistFilterHeader = new Header<String>(whitelistCell) {
             @Override
             public String getValue() {
-                return whitelistCell.getValue();
+                return "";
             }
         };
         whitelistFilterHeader.setUpdater(new ValueUpdater<String>() {
@@ -490,16 +508,12 @@ public class SubscriptionsTable extends Composite {
 
     // predicates
 
-    public interface SearchPreditcate<T> extends Predicate<T> {
-        boolean isEmpty();
-    }
-
     /**
      * Predicate for filtering subscriptions according to given criteria.
      * <p/>
      * Any subscription with krb name and/or github name *containing* given strings qualifies.
      */
-    private class SubscriptionSearchPredicate implements SearchPreditcate<Subscription> {
+    private class SubscriptionSearchPredicate implements Predicate<Subscription> {
 
         private String krbNameExpression;
         private String gitHubNameExpression;
@@ -523,6 +537,10 @@ public class SubscriptionsTable extends Composite {
             return isEmpty(krbNameExpression) && isEmpty(gitHubNameExpression) && krbAccount == null && whitelisted == null;
         }
 
+        private boolean isEmpty(String value) {
+            return value == null || "".equals(value);
+        }
+
         public void setKrbNameExpression(String krbNameExpression) {
             this.krbNameExpression = krbNameExpression;
         }
@@ -537,10 +555,6 @@ public class SubscriptionsTable extends Composite {
 
         public void setWhitelisted(Boolean whitelisted) {
             this.whitelisted = whitelisted;
-        }
-
-        private boolean isEmpty(String value) {
-            return value == null || "".equals(value);
         }
 
         @Override
