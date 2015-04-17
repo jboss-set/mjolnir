@@ -3,6 +3,7 @@ package org.jboss.mjolnir.server.bean;
 import org.jboss.mjolnir.authentication.KerberosUser;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -55,5 +56,13 @@ public interface UserRepository {
      * @throws SQLException
      */
     void deleteUser(String kerberosName) throws SQLException;
+
+    /**
+     * Removes users from database.
+     *
+     * @param users users to delete
+     * @throws SQLException
+     */
+    void deleteUsers(Collection<KerberosUser> users) throws SQLException;
 
 }

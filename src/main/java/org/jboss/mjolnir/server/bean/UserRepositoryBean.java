@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -24,12 +25,12 @@ import java.util.List;
 @Stateless
 public class UserRepositoryBean implements UserRepository {
 
-    private final static String GET_USER_SQL = "select id, krb_name, github_name, admin from users where krb_name = ?";
+    private final static String GET_USER_SQL = "select id, krb_name, github_name, admin, whitelisted from users where krb_name = ?";
     private final static String DELETE_USER_SQL = "delete from users where krb_name = ?";
-    private final static String GET_USER_BY_GITHUB_NAME_SQL = "select id, krb_name, github_name, admin from users where github_name = ?";
-    private final static String UPDATE_USER_SQL = "update users set github_name = ? where krb_name = ?";
+    private final static String GET_USER_BY_GITHUB_NAME_SQL = "select id, krb_name, github_name, admin, whitelisted from users where github_name = ?";
+    private final static String UPDATE_USER_SQL = "update users set github_name = ?, whitelisted = ? where krb_name = ?";
     private final static String INSERT_USER_SQL = "insert into users (github_name, krb_name) values (?, ?)";
-    private final static String GET_ALL_USERS_SQL = "select id, krb_name, github_name, admin from users order by krb_name";
+    private final static String GET_ALL_USERS_SQL = "select id, krb_name, github_name, admin, whitelisted from users order by krb_name";
 
     private DataSource dataSource;
 
@@ -61,6 +62,7 @@ public class UserRepositoryBean implements UserRepository {
                 user.setName(resultSet.getString("krb_name"));
                 user.setGithubName(resultSet.getString("github_name"));
                 user.setAdmin(resultSet.getBoolean("admin"));
+                user.setWhitelisted(resultSet.getBoolean("whitelisted"));
             }
             resultSet.close();
             statement.close();
@@ -110,7 +112,8 @@ public class UserRepositoryBean implements UserRepository {
             PreparedStatement statement;
             statement = connection.prepareStatement(UPDATE_USER_SQL);
             statement.setString(1, user.getGithubName());
-            statement.setString(2, user.getName());
+            statement.setBoolean(2, user.isWhitelisted());
+            statement.setString(3, user.getName());
             final int affectedRows = statement.executeUpdate();
             statement.close();
             return affectedRows;
@@ -132,6 +135,7 @@ public class UserRepositoryBean implements UserRepository {
                 user.setName(resultSet.getString("krb_name"));
                 user.setGithubName(resultSet.getString("github_name"));
                 user.setAdmin(resultSet.getBoolean("admin"));
+                user.setWhitelisted(resultSet.getBoolean("whitelisted"));
                 users.add(user);
             }
             resultSet.close();
@@ -156,4 +160,12 @@ public class UserRepositoryBean implements UserRepository {
             connection.close();
         }
     }
+
+    @Override
+    public void deleteUsers(Collection<KerberosUser> users) throws SQLException {
+        for (KerberosUser user: users) {
+            deleteUser(user.getName());
+        }
+    }
+
 }

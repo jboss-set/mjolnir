@@ -36,6 +36,7 @@ public class KerberosUser implements Serializable {
     private String krb5Name;
     private String githubName;
     private boolean admin;
+    private boolean whitelisted;
 
     public String getName() {
         return krb5Name;
@@ -59,6 +60,14 @@ public class KerberosUser implements Serializable {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    public boolean isWhitelisted() {
+        return whitelisted;
+    }
+
+    public void setWhitelisted(boolean whitelisted) {
+        this.whitelisted = whitelisted;
     }
 
     @Override

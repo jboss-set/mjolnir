@@ -40,10 +40,39 @@ public class Subscription implements Serializable {
     }
 
     public String getKerberosName() {
-        if (kerberosUser != null) {
-            return kerberosUser.getName();
-        }
-        return null;
+        return kerberosUser != null ? kerberosUser.getName() : null;
     }
 
+    public boolean isWhitelisted() {
+        return kerberosUser != null && kerberosUser.isWhitelisted();
+    }
+
+    @Override
+    public String toString() {
+        return "Subscription{" +
+                "gitHubName='" + gitHubName + '\'' +
+                ", kerberosUser=" + kerberosUser +
+                ", activeKerberosAccount=" + activeKerberosAccount +
+                '}';
+    }
+
+    /*@Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Subscription)) return false;
+
+        Subscription that = (Subscription) o;
+
+        if (gitHubName != null ? !gitHubName.equals(that.gitHubName) : that.gitHubName != null) return false;
+        if (kerberosUser != null ? !kerberosUser.equals(that.kerberosUser) : that.kerberosUser != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = gitHubName != null ? gitHubName.hashCode() : 0;
+        result = 31 * result + (kerberosUser != null ? kerberosUser.hashCode() : 0);
+        return result;
+    }*/
 }

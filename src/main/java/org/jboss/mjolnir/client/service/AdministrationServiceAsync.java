@@ -8,6 +8,7 @@ import org.jboss.mjolnir.client.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,11 +24,15 @@ public interface AdministrationServiceAsync {
 
     void deleteUser(KerberosUser user, AsyncCallback<Void> asyncCallback) throws ApplicationException;
 
+    void deleteUsers(Collection<KerberosUser> user, AsyncCallback<Void> asyncCallback) throws ApplicationException;
+
     void editUser(KerberosUser user, AsyncCallback<Void> asyncCallback) throws ApplicationException;
 
     void getSubscriptions(String gitHubName, AsyncCallback<Set<GithubOrganization>> asyncCallback) throws ApplicationException;
 
     void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions, AsyncCallback<Void> asyncCallback) throws ApplicationException;
 
-    void unsubscribe(String gitHubName, AsyncCallback<Void> asyncCallback) throws ApplicationException;
+    void unsubscribe(Collection<Subscription> subscriptions, AsyncCallback<Void> asyncCallback) throws ApplicationException;
+
+    void whitelist(Collection<Subscription> subscriptions, boolean whitelist, AsyncCallback<Collection<Subscription>> asyncCallback);
 }

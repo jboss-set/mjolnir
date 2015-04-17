@@ -13,6 +13,7 @@ import org.jboss.mjolnir.server.bean.UserRepository;
 
 import javax.ejb.EJB;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +59,15 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     }
 
     @Override
+    public void deleteUsers(Collection<KerberosUser> users) {
+        try {
+            userRepository.deleteUsers(users);
+        } catch (SQLException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    @Override
     public void editUser(KerberosUser user) throws GitHubNameAlreadyTakenException {
         try {
             final KerberosUser userByGitHubName = userRepository.getUserByGitHubName(user.getGithubName());
@@ -80,8 +90,10 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     }
 
     @Override
-    public void unsubscribe(String gitHubName) throws ApplicationException {
-        gitHubSubscriptionBean.removeFromOrganizations(gitHubName);
+    public void unsubscribe(Collection<Subscription> subscriptions) throws ApplicationException {
+        for (Subscription subscription: subscriptions) {
+            gitHubSubscriptionBean.removeFromOrganizations(subscription.getGitHubName());
+        }
     }
 
     /**
@@ -90,6 +102,25 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @Override
     public void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions) {
         gitHubSubscriptionBean.setSubscriptions(gitHubName, subscriptions);
+    }
+
+    @Override
+    public Collection<Subscription> whitelist(Collection<Subscription> subscriptions, boolean whitelist) {
+        try {
+            for (Subscription subscription : subscriptions) {
+                KerberosUser kerberosUser = subscription.getKerberosUser();
+                if (kerberosUser == null) {
+                    kerberosUser = new KerberosUser();
+                    kerberosUser.setGithubName(subscription.getGitHubName());
+                    subscription.setKerberosUser(kerberosUser);
+                }
+                kerberosUser.setWhitelisted(whitelist);
+                userRepository.saveUser(kerberosUser);
+            }
+            return subscriptions;
+        } catch (SQLException e) {
+            throw new ApplicationException("Couldn't whitelist users.", e);
+        }
     }
 
 

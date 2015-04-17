@@ -41,11 +41,11 @@ public class UnknownMembersReportBean extends AbstractReportBean<List<Subscripti
     protected List<SubscriptionSummary> loadData() {
         final List<SubscriptionSummary> organizationMembers = gitHubSubscriptionBean.getOrganizationMembers();
 
-        // remove all that have active krb account
+        // remove all that have active krb account or are whitelisted
         for (SubscriptionSummary summary : organizationMembers) {
             List<Subscription> unknownUsers = new ArrayList<Subscription>(summary.getSubscriptions());
             for (Subscription subscription : summary.getSubscriptions()) {
-                if (subscription.isActiveKerberosAccount()) {
+                if (subscription.isActiveKerberosAccount() || subscription.isWhitelisted()) {
                     unknownUsers.remove(subscription);
                 }
             }
