@@ -74,6 +74,8 @@ public class SubscriptionsTable extends Composite {
     private Set<Subscription> selectedItems = new HashSet<Subscription>();
     private List<Subscription> subscriptionList;
     private ColumnSortEvent.ListHandler<Subscription> sortHandler;
+    private List<HasCell<Subscription, ?>> hasCells = new ArrayList<HasCell<Subscription, ?>>();
+    private Column<Subscription, Subscription> actionColumn;
 
     public SubscriptionsTable(List<Subscription> subscriptions) {
         initWidget(panel);
@@ -152,7 +154,7 @@ public class SubscriptionsTable extends Composite {
         whitelistCol.setSortable(true);
         subscriptionTable.addColumn(whitelistCol, "Whitelist?");
 
-        subscriptionTable.addColumn(createActionColumn(), "Actions");
+        subscriptionTable.addColumn(actionColumn = createActionColumn(), "Actions");
 
 
         // sorting
@@ -186,14 +188,10 @@ public class SubscriptionsTable extends Composite {
     }
 
     protected void initStyles() {
-        Style style = panel.getElement().getStyle();
-        style.setHeight(100, Style.Unit.PCT);
-        style.setPosition(Style.Position.RELATIVE);
-
         Style dataStyle = dataPanel.getElement().getStyle();
         dataStyle.setPosition(Style.Position.ABSOLUTE);
-        dataStyle.setTop(40, Style.Unit.PX);
-        dataStyle.setBottom(60, Style.Unit.PX);
+        dataStyle.setTop(140, Style.Unit.PX);
+        dataStyle.setBottom(30, Style.Unit.PX);
         dataStyle.setLeft(1, Style.Unit.EM);
         dataStyle.setRight(1, Style.Unit.EM);
         dataStyle.setOverflowY(Style.Overflow.AUTO);
@@ -373,8 +371,8 @@ public class SubscriptionsTable extends Composite {
      *
      * @return action column
      */
-    protected Column<Subscription, Subscription> createActionColumn() {
-        final List<HasCell<Subscription, ?>> hasCells = createActionCells();
+    private Column<Subscription, Subscription> createActionColumn() {
+        addDefaultActionCells();
 
         final Cell<Subscription> cell = new CompositeCell<Subscription>(hasCells);
         return new Column<Subscription, Subscription>(cell) {
@@ -385,34 +383,21 @@ public class SubscriptionsTable extends Composite {
         };
     }
 
-    protected List<HasCell<Subscription, ?>> createActionCells() {
-        final List<HasCell<Subscription, ?>> hasCells = new ArrayList<HasCell<Subscription, ?>>();
-
+    protected void addDefaultActionCells() {
         // edit button
-        hasCells.add(new ConditionalActionCell<Subscription>("Edit", new EditDelegate()));
+//        hasCells.add(new ConditionalActionCell<Subscription>("Edit", new EditDelegate()));
 
         // subscriptions button
-        hasCells.add(new ConditionalActionCell<Subscription>("Subscriptions", new SubscribeDelegate()) {
+        addActionCell(new ConditionalActionCell<Subscription>("Subscriptions", new SubscribeDelegate()) {
             @Override
             public boolean isEnabled(Subscription value) {
                 return value.getGitHubName() != null;
             }
         });
-
-        return hasCells;
     }
 
-    /**
-     * Called after item was modified.
-     *
-     * @param object    modified item
-     * @param savedUser user instance that was actually saved on server
-     */
-    protected void onEdited(Subscription object, KerberosUser savedUser) {
-        // updates subscription item in the list with current user object
-        object.setKerberosUser(savedUser);
-        object.setGitHubName(savedUser.getGithubName());
-        dataProvider.refresh();
+    protected void addActionCell(ConditionalActionCell<Subscription> actionCell) {
+        hasCells.add(actionCell);
     }
 
 
@@ -470,28 +455,6 @@ public class SubscriptionsTable extends Composite {
 
 
     // button delegates
-
-    /**
-     * Edit button delegate.
-     */
-    private class EditDelegate implements ActionCell.Delegate<Subscription> {
-        @Override
-        public void execute(final Subscription object) {
-            // displays edit dialog
-            KerberosUser userToEdit = object.getKerberosUser();
-            if (userToEdit == null) { // if user is not yet in our database, create new object
-                userToEdit = new KerberosUser();
-                userToEdit.setGithubName(object.getGitHubName());
-            }
-            final EditUserDialog editDialog = new EditUserDialog(userToEdit) {
-                @Override
-                protected void onSave(KerberosUser savedUser) {
-                    onEdited(object, savedUser);
-                }
-            };
-            editDialog.center();
-        }
-    }
 
     /**
      * Subscribe button delegate.

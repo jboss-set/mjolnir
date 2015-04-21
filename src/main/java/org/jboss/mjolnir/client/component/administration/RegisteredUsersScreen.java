@@ -1,6 +1,6 @@
 package org.jboss.mjolnir.client.component.administration;
 
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.XsrfToken;
@@ -11,6 +11,7 @@ import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.XsrfUtil;
 import org.jboss.mjolnir.client.component.ConfirmationDialog;
 import org.jboss.mjolnir.client.component.LoadingPanel;
+import org.jboss.mjolnir.client.component.table.ConditionalActionCell;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
@@ -40,10 +41,6 @@ public class RegisteredUsersScreen extends Composite {
     public RegisteredUsersScreen() {
         initWidget(panel);
 
-        Style style = panel.getElement().getStyle();
-        style.setHeight(100, Style.Unit.PCT);
-        style.setPosition(Style.Position.RELATIVE);
-
         panel.add(new HTMLPanel("h2", "Users Registered in Mjolnir"));
         panel.add(loadingPanel);
 
@@ -68,7 +65,13 @@ public class RegisteredUsersScreen extends Composite {
     }
 
     private SubscriptionsTable createTable(List<Subscription> subscriptions) {
-        SubscriptionsTable table = new SubscriptionsTable(subscriptions);
+        SubscriptionsTable table = new SubscriptionsTable(subscriptions) {
+            protected void addDefaultActionCells() {
+                // edit button
+                addActionCell(new ConditionalActionCell<Subscription>("Edit", new EditDelegate(this)));
+                super.addDefaultActionCells();
+            }
+        };
         table.addAction("Delete", new DeleteDelegate(table), true);
         return table;
     }
@@ -121,4 +124,49 @@ public class RegisteredUsersScreen extends Composite {
             table.refresh();
         }
     }
+
+    /**
+     * Edit button delegate.
+     */
+    private class EditDelegate implements ActionCell.Delegate<Subscription> {
+
+        private SubscriptionsTable table;
+
+        public EditDelegate(SubscriptionsTable table) {
+            this.table = table;
+        }
+
+        @Override
+        public void execute(final Subscription object) {
+            // displays edit dialog
+            KerberosUser userToEdit = object.getKerberosUser();
+            if (userToEdit == null) { // if user is not yet in our database, create new object
+                userToEdit = new KerberosUser();
+                userToEdit.setGithubName(object.getGitHubName());
+            }
+            final EditUserDialog editDialog = new EditUserDialog(userToEdit) {
+                @Override
+                protected void onSave(KerberosUser savedUser) {
+                    onEdited(object, savedUser);
+                }
+            };
+            editDialog.center();
+        }
+
+
+        /**
+         * Called after item was modified.
+         *
+         * @param object    modified item
+         * @param savedUser user instance that was actually saved on server
+         */
+        protected void onEdited(Subscription object, KerberosUser savedUser) {
+            // updates subscription item in the list with current user object
+            object.setKerberosUser(savedUser);
+            object.setGitHubName(savedUser.getGithubName());
+            table.getDataProvider().refresh();
+        }
+
+    }
+
 }

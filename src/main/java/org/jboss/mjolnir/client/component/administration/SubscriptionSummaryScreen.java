@@ -47,10 +47,6 @@ public class SubscriptionSummaryScreen extends Composite {
     public SubscriptionSummaryScreen() {
         initWidget(panel);
 
-        Style style = panel.getElement().getStyle();
-        style.setHeight(100, Style.Unit.PCT);
-//        style.setPosition(Style.Position.RELATIVE);
-
         panel.add(new HTMLPanel("h2", "GitHub Organization Members"));
         panel.add(loadingPanel);
 
@@ -84,15 +80,6 @@ public class SubscriptionSummaryScreen extends Composite {
     }
 
     private void createSubscriptionTable(SubscriptionSummary subscriptionSummary) {
-        /*HTMLPanel organizationPanel = new HTMLPanel("");
-        panel.add(organizationPanel);
-
-        Style style = organizationPanel.getElement().getStyle();
-        style.setPosition(Style.Position.RELATIVE);
-//        style.setTop(110, Style.Unit.PX);
-//        style.setBottom(0, Style.Unit.PX);
-        style.setHeight(100, Style.Unit.PCT);*/
-
         SubscriptionsTable table = new SubscriptionsTable(subscriptionSummary.getSubscriptions());
         table.addAction("Unsubscribe", new UnsubscribeActionDelegate(table), true);
 

@@ -62,14 +62,21 @@ public class EditUserDialog extends DialogBox {
         submitButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final KerberosUser userToSave = new KerberosUser();
+                // create new user instance, so we don't modify original instance with data that may not be accepted
+                final KerberosUser userToSave;
+                if (user != null) {
+                    userToSave = user.copy();
+                } else {
+                    userToSave = new KerberosUser();
+                }
+
+                // set updated data
                 if (user == null || user.getName() == null) { // username is not modifiable for existing users
                     userToSave.setName(kerberosNameBox.getText());
-                } else {
-                    userToSave.setName(user.getName());
                 }
                 userToSave.setGithubName(gitHubNameBox.getText());
 
+                // save
                 administrationService.editUser(userToSave, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {

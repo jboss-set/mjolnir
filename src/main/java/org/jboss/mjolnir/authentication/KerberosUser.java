@@ -70,6 +70,14 @@ public class KerberosUser implements Serializable {
         this.whitelisted = whitelisted;
     }
 
+    public KerberosUser copy() {
+        KerberosUser copy = new KerberosUser();
+        copy.setName(this.getName());
+        copy.setGithubName(this.getGithubName());
+        copy.setWhitelisted(this.isWhitelisted());
+        return copy;
+    }
+
     @Override
     public String toString() {
         return "{ krb5Name " + krb5Name + ": githubName " + githubName + " }";
