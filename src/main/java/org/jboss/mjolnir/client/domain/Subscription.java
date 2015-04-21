@@ -56,6 +56,12 @@ public class Subscription implements Serializable {
                 '}';
     }
 
+    /**
+     * Compare primarily by krb name. If that is not available, compare by github name.
+     *
+     * @param o object to compare to
+     * @return are equal?
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -63,10 +69,10 @@ public class Subscription implements Serializable {
 
         Subscription that = (Subscription) o;
 
-        if (gitHubName != null ? !gitHubName.equals(that.gitHubName) : that.gitHubName != null) return false;
-        if (kerberosUser != null ? !kerberosUser.equals(that.kerberosUser) : that.kerberosUser != null) return false;
+        if (kerberosUser != null && that.kerberosUser != null)
+            return kerberosUser.getName().equals(that.kerberosUser.getName());
+        return gitHubName != null && gitHubName.equals(that.gitHubName);
 
-        return true;
     }
 
     @Override

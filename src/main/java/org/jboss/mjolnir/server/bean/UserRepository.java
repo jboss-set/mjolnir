@@ -52,10 +52,10 @@ public interface UserRepository {
     /**
      * Removes user from database.
      *
-     * @param kerberosName krb name
+     * @param user user to delete
      * @throws SQLException
      */
-    void deleteUser(String kerberosName) throws SQLException;
+    void deleteUser(KerberosUser user) throws SQLException;
 
     /**
      * Removes users from database.

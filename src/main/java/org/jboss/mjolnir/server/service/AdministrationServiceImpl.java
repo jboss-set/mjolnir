@@ -52,7 +52,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @Override
     public void deleteUser(KerberosUser user) {
         try {
-            userRepository.deleteUser(user.getName());
+            userRepository.deleteUser(user);
         } catch (SQLException e) {
             throw new ApplicationException(e);
         }
@@ -111,6 +111,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
                 KerberosUser kerberosUser = subscription.getKerberosUser();
                 if (kerberosUser == null) {
                     kerberosUser = new KerberosUser();
+                    subscription.setKerberosUser(kerberosUser);
                     kerberosUser.setGithubName(subscription.getGitHubName());
                     subscription.setKerberosUser(kerberosUser);
                 }

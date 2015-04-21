@@ -597,6 +597,7 @@ public class SubscriptionsTable extends Composite {
                             originalSubscription.setKerberosUser(subscription.getKerberosUser());
                         }
                     }
+                    clearSelectedItems();
                     dataProvider.refresh();
                 }
             });

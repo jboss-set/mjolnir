@@ -24,9 +24,6 @@ public class ExtendedTeamService extends TeamService {
 
     private static String SEGMENT_MEMBERSHIPS = "/memberships";
 
-    public ExtendedTeamService() {
-    }
-
     public ExtendedTeamService(GitHubClient client) {
         super(client);
     }
@@ -34,8 +31,8 @@ public class ExtendedTeamService extends TeamService {
     /**
      * Add given user to team with given id
      *
-     * @param id
-     * @param user
+     * @param id team id
+     * @param user user name
      * @throws java.io.IOException
      */
     public String addMembership(int id, String user) throws IOException {
@@ -44,14 +41,17 @@ public class ExtendedTeamService extends TeamService {
         if (user.length() == 0)
             throw new IllegalArgumentException("User cannot be empty");
 
-        final StringBuilder uri = new StringBuilder(SEGMENT_TEAMS);
-        uri.append('/').append(id);
-        uri.append(SEGMENT_MEMBERSHIPS);
-        uri.append('/').append(user);
-        final Map result = client.put(uri.toString(), null, HashMap.class);
+        final Map result = client.put(SEGMENT_TEAMS + '/' + id + SEGMENT_MEMBERSHIPS + '/' + user, null, HashMap.class);
         return (String) result.get("state");
     }
 
+    /**
+     *
+     * @param id team id
+     * @param user user name
+     * @return membership state
+     * @throws IOException
+     */
     public String getMembership(int id, String user) throws IOException {
         if (user == null)
             throw new IllegalArgumentException("User cannot be null");
@@ -79,18 +79,19 @@ public class ExtendedTeamService extends TeamService {
         return (String) map.get("state");
     }
 
+    /**
+     *
+     * @param id team id
+     * @param user user name
+     * @throws IOException
+     */
     public void removeMembership(int id, String user) throws IOException {
         if (user == null)
             throw new IllegalArgumentException("User cannot be null");
         if (user.length() == 0)
             throw new IllegalArgumentException("User cannot be empty");
 
-        final StringBuilder uri = new StringBuilder(SEGMENT_TEAMS);
-        uri.append('/').append(id);
-        uri.append(SEGMENT_MEMBERSHIPS);
-        uri.append('/').append(user);
-
-        client.delete(uri.toString());
+        client.delete(SEGMENT_TEAMS + '/' + id + SEGMENT_MEMBERSHIPS + '/' + user);
     }
 
 
