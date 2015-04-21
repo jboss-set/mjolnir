@@ -65,7 +65,7 @@ public class ReportScreen extends Composite {
     private void printReport(Report<?> report, ReportType reportType) {
         resultPanel.clear();
         final HTMLPanel prePanel = new HTMLPanel("pre", report.getContent());
-        prePanel.getElement().getStyle().setProperty("white-space", "pre-wrap");
+        prePanel.getElement().getStyle().setProperty("whiteSpace", "pre-wrap");
         resultPanel.add(prePanel);
 
         if (report.getActions() != null && report.getActions().size() > 0) {
