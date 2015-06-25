@@ -1,7 +1,6 @@
 package org.jboss.mjolnir.client.service;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
@@ -10,7 +9,7 @@ import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.exception.ApplicationException;
-import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +33,7 @@ public interface AdministrationService extends RemoteService {
 
     void deleteUsers(Collection<KerberosUser> user) throws ApplicationException;
 
-    void editUser(KerberosUser user) throws ApplicationException, GitHubNameAlreadyTakenException;
+    EntityUpdateResult<KerberosUser> editUser(KerberosUser user) throws ApplicationException;
 
     Set<GithubOrganization> getSubscriptions(String gitHubName) throws ApplicationException;
 

@@ -12,6 +12,7 @@
 
     <properties>
         <gwt.version>2.7.0</gwt.version>
+        <devel.webapp-dir>${project.build.directory}/devel-web-inf</devel.webapp-dir>
     </properties>
 
     <dependencies>
@@ -105,6 +106,7 @@
                 <version>2.2</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <packagingExcludes>WEB-INF/web-devel.xml</packagingExcludes>
                 </configuration>
             </plugin>
 
@@ -136,8 +138,50 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <tasks>
+                                <echo>Copying development web resources.</echo>
+                                <!-- copy web-devel.xml to temporary directory for use in 'devel' profile -->
+                                <copy file="${project.basedir}/src/main/webapp/WEB-INF/web-devel.xml"
+                                      tofile="${devel.webapp-dir}/WEB-INF/web.xml"/>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>devel</id>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <configuration combine.children="append">
+                            <webResources>
+                                <resource>
+                                    <!-- use development version of web.xml instead of default one -->
+                                    <directory>${devel.webapp-dir}</directory>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 
 </project>

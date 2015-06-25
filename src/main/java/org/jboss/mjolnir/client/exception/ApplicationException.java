@@ -20,6 +20,6 @@ public class ApplicationException extends RuntimeException implements IsSerializ
     }
 
     public ApplicationException(Throwable cause) {
-        super(cause);
+        super(cause.getMessage(), cause);
     }
 }

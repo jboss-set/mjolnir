@@ -8,14 +8,15 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.ExceptionHandler;
-import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
+import org.jboss.mjolnir.client.component.util.HTMLUtil;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 
 /**
  * Dialog for modifying users.
@@ -42,7 +43,7 @@ public class EditUserDialog extends DialogBox {
     Button cancelButton;
 
     @UiField
-    Label feedbackLabel;
+    HTML feedbackLabel;
 
     public EditUserDialog(final KerberosUser user) {
         setGlassEnabled(true);
@@ -77,25 +78,25 @@ public class EditUserDialog extends DialogBox {
                 userToSave.setGithubName(gitHubNameBox.getText());
 
                 // save
-                administrationService.editUser(userToSave, new AsyncCallback<Void>() {
+                administrationService.editUser(userToSave, new AsyncCallback<EntityUpdateResult<KerberosUser>>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        if (caught instanceof GitHubNameAlreadyTakenException) {
-                            feedbackLabel.setText("Error: " + caught.getMessage());
-                            return;
-                        }
                         ExceptionHandler.handle("Couldn't save user.", caught);
                     }
 
                     @Override
-                    public void onSuccess(Void result) {
-                        if (user != null) {
-                            user.setName(userToSave.getName());
-                            user.setGithubName(userToSave.getGithubName());
+                    public void onSuccess(EntityUpdateResult<KerberosUser> result) {
+                        if (result.isOK()) {
+                            if (user != null) {
+                                user.setName(userToSave.getName());
+                                user.setGithubName(userToSave.getGithubName());
+                            }
+                            onSave(userToSave);
+                            EditUserDialog.this.hide();
+                            EditUserDialog.this.removeFromParent();
+                        } else {
+                            feedbackLabel.setHTML(HTMLUtil.toUl(result.getValidationMessages()));
                         }
-                        onSave(userToSave);
-                        EditUserDialog.this.hide();
-                        EditUserDialog.this.removeFromParent();
                     }
                 });
             }
