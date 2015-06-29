@@ -133,9 +133,6 @@
                 <groupId>org.wildfly.plugins</groupId>
                 <artifactId>wildfly-maven-plugin</artifactId>
                 <version>1.0.2.Final</version>
-                <configuration>
-                    <name>mjolnir-dev.war</name>
-                </configuration>
             </plugin>
 
             <plugin>
@@ -162,10 +159,13 @@
 
     <profiles>
         <profile>
-            <id>devel</id>
+            <id>dev</id>
 
             <build>
+                <finalName>mjolnir-dev</finalName>
+
                 <plugins>
+                    <!-- disables HTTPS security constraint -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-war-plugin</artifactId>
