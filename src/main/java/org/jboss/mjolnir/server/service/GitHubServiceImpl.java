@@ -22,24 +22,30 @@
 
 package org.jboss.mjolnir.server.service;
 
-import org.eclipse.egit.github.core.client.GitHubClient;
-import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.authentication.GithubTeam;
-import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.exception.ApplicationException;
-import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
-import org.jboss.mjolnir.client.service.GitHubService;
-import org.jboss.mjolnir.server.bean.ApplicationParameters;
-import org.jboss.mjolnir.server.bean.OrganizationRepository;
-import org.jboss.mjolnir.server.bean.UserRepository;
-import org.jboss.mjolnir.server.github.ExtendedTeamService;
-
-import javax.ejb.EJB;
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.ejb.EJB;
+import javax.servlet.ServletException;
+
+import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.UserService;
+import org.jboss.mjolnir.authentication.GithubOrganization;
+import org.jboss.mjolnir.authentication.GithubTeam;
+import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.client.exception.ApplicationException;
+import org.jboss.mjolnir.client.service.GitHubService;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
+import org.jboss.mjolnir.server.bean.ApplicationParameters;
+import org.jboss.mjolnir.server.bean.OrganizationRepository;
+import org.jboss.mjolnir.server.bean.UserRepository;
+import org.jboss.mjolnir.server.github.ExtendedTeamService;
+import org.jboss.mjolnir.server.service.validation.GitHubNameExistsValidation;
+import org.jboss.mjolnir.server.service.validation.GitHubNameTakenValidation;
+import org.jboss.mjolnir.client.domain.ValidationResult;
+import org.jboss.mjolnir.server.service.validation.Validator;
 
 /**
  * {@inheritDoc}
@@ -57,38 +63,45 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
 
     private ExtendedTeamService teamService;
 
+    private Validator<KerberosUser> validator;
+
     @Override
     public void init() throws ServletException {
         super.init();
 
-        final String token = applicationParameters.getMandatoryParameter(ApplicationParameters.GITHUB_TOKEN_KEY);
+        String token = applicationParameters.getMandatoryParameter(ApplicationParameters.GITHUB_TOKEN_KEY);
 
-        final GitHubClient client = new GitHubClient();
+        GitHubClient client = new GitHubClient();
         client.setOAuth2Token(token);
         teamService = new ExtendedTeamService(client);
+        UserService userService = new UserService(client);
+
+        validator = new Validator<KerberosUser>();
+        validator.addValidation(new GitHubNameTakenValidation(userRepository));
+        validator.addValidation(new GitHubNameExistsValidation(userService));
     }
 
     @Override
-    public KerberosUser modifyGithubName(String newGithubName) throws GitHubNameAlreadyTakenException {
+    public EntityUpdateResult<KerberosUser> modifyGitHubName(String newGithubName) {
         try {
             // reload authenticated user form database
             final String krb5Name = getAuthenticatedUser().getName();
             final KerberosUser user = userRepository.getUser(krb5Name);
-            setAuthenticatedUser(user); // update session with current instance
 
-            final KerberosUser userByGitHubName = userRepository.getUserByGitHubName(newGithubName);
-            if (userByGitHubName != null && !userByGitHubName.equals(user)) {
-                throw new GitHubNameAlreadyTakenException("This GitHub name is already taken by different user.");
-            }
-
-            // update github name
             log("Changing githubName for KerberosUser " + krb5Name + ". Old name is " + user.getGithubName() + ". New name " +
                     "is " + newGithubName);
+
             user.setGithubName(newGithubName);
-            // Now put it back into the cache.
-            userRepository.saveUser(user);
-            log("Successfully modified GithubName for KerberosUser " + krb5Name);
-            return user;
+            ValidationResult validationResult = validator.validate(user);
+            if (validationResult.isOK()) {
+                userRepository.saveUser(user);
+                setAuthenticatedUser(user); // update session with current instance
+                log("Successfully modified GithubName for KerberosUser " + krb5Name);
+                return EntityUpdateResult.ok(user);
+            } else {
+                log("Validation failure: " + validationResult);
+                return EntityUpdateResult.validationFailure(validationResult);
+            }
         } catch (SQLException e) {
             throw new ApplicationException(e);
         }

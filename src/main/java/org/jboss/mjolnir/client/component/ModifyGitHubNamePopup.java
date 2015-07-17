@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.XsrfToken;
 import com.google.gwt.user.client.rpc.XsrfTokenService;
 import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -19,9 +20,10 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.CurrentUser;
 import org.jboss.mjolnir.client.ExceptionHandler;
-import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
+import org.jboss.mjolnir.client.component.util.HTMLUtil;
 import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.client.service.GitHubServiceAsync;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 
 import java.util.logging.Logger;
 
@@ -51,7 +53,7 @@ public class ModifyGitHubNamePopup extends PopupPanel {
     Button cancelButton;
 
     @UiField
-    Label feedbackLabel;
+    HTML feedbackLabel;
 
     /**
      * @param allowCancel can user close the popup without submitting?
@@ -98,21 +100,21 @@ public class ModifyGitHubNamePopup extends PopupPanel {
             @Override
             public void onSuccess(XsrfToken result) {
                 ((HasRpcToken) gitHubService).setRpcToken(result);
-                gitHubService.modifyGithubName(newName, new AsyncCallback<KerberosUser>() {
+                gitHubService.modifyGitHubName(newName, new AsyncCallback<EntityUpdateResult<KerberosUser>>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        if (caught instanceof GitHubNameAlreadyTakenException) {
-                            feedbackLabel.setText("Error: " + caught.getMessage());
-                            return;
-                        }
                         ExceptionHandler.handle("Cant modify GitHub name.", caught);
                     }
 
                     @Override
-                    public void onSuccess(KerberosUser updatedUser) {
-                        CurrentUser.get().setGithubName(updatedUser.getGithubName());
-                        ModifyGitHubNamePopup.this.hide();
-                        onSaved(updatedUser);
+                    public void onSuccess(EntityUpdateResult<KerberosUser> result) {
+                        if (result.isOK()) {
+                            CurrentUser.get().setGithubName(result.getUpdatedEntity().getGithubName());
+                            ModifyGitHubNamePopup.this.hide();
+                            onSaved(result.getUpdatedEntity());
+                        } else {
+                            feedbackLabel.setHTML(HTMLUtil.toUl(result.getValidationMessages()));
+                        }
                     }
                 });
             }

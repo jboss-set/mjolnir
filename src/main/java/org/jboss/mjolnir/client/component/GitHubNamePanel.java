@@ -39,16 +39,12 @@ public class GitHubNamePanel extends Composite {
                 final ModifyGitHubNamePopup popup = new ModifyGitHubNamePopup(true) {
                     @Override
                     protected void onSaved(KerberosUser modifiedUser) {
-                        setGitHubName(modifiedUser.getGithubName());
+                        // update displayed label value
+                        gitHubNameLabel.setText(modifiedUser.getGithubName());
                     }
                 };
                 popup.center();
             }
         });
     }
-
-    public void setGitHubName(String gitHubName) {
-        gitHubNameLabel.setText(gitHubName);
-    }
-
 }

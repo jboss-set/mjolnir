@@ -23,7 +23,6 @@
         .centerPanel {
             padding: 1em;
             border-left: 1px solid #CFCFCF;
-            overflow: auto;
         }
     </ui:style>
     <g:DockLayoutPanel unit="PX" width="1024px" styleName="contentBox">

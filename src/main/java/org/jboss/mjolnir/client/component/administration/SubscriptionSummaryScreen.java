@@ -3,6 +3,9 @@ package org.jboss.mjolnir.client.component.administration;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -29,12 +32,17 @@ import java.util.List;
  */
 public class SubscriptionSummaryScreen extends Composite {
 
-    private static final String UNSUBSCRIBE_USER_TEXT = "Remove user from GitHub organizations?";
+    interface Templates extends SafeHtmlTemplates {
+        @Template("Unsubscribe {0} users from GitHub organizations?")
+        SafeHtml unsubscribeUsers(int number);
+    }
+    private static final Templates TEMPLATES = GWT.create(Templates.class);
+
 
     private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
-
     private HTMLPanel panel = new HTMLPanel("");
     private LoadingPanel loadingPanel = new LoadingPanel();
+
 
     public SubscriptionSummaryScreen() {
         initWidget(panel);
@@ -72,39 +80,29 @@ public class SubscriptionSummaryScreen extends Composite {
     }
 
     private void createSubscriptionTable(SubscriptionSummary subscriptionSummary) {
+        SubscriptionsTable table = new SubscriptionsTable(subscriptionSummary.getSubscriptions());
+        table.addAction("Unsubscribe", new UnsubscribeActionDelegate(table), true);
+
         panel.add(new HTMLPanel("h3", subscriptionSummary.getOrganization().getName()));
-        panel.add(new SubscriptionsTable(subscriptionSummary.getSubscriptions()) {
-
-            @Override
-            protected List<HasCell<Subscription, ?>> createActionCells() {
-                List<HasCell<Subscription, ?>> actionCells = super.createActionCells();
-                actionCells.add(2, new ConditionalActionCell<Subscription>("Unsubscribe", new UnsubscribeDelegate()) {
-                    @Override
-                    public boolean isEnabled(Subscription value) {
-                        return value.getGitHubName() != null;
-                    }
-                });
-                return actionCells;
-            }
-
-            @Override
-            protected void onDeleted(Subscription object) {
-                // remove KerberosUser instance, but Subscription instance must remain in the list,
-                // since GitHub subscriptions were not removed
-                object.setKerberosUser(null);
-                dataProvider.refresh();
-            }
-        });
+        panel.add(table);
     }
 
 
-    private class UnsubscribeDelegate implements ActionCell.Delegate<Subscription> {
+    private class UnsubscribeActionDelegate implements SubscriptionsTable.ActionDelegate {
+
+        private SubscriptionsTable table;
+
+        public UnsubscribeActionDelegate(SubscriptionsTable table) {
+            this.table = table;
+        }
+
         @Override
-        public void execute(final Subscription object) {
-            final ConfirmationDialog confirmDialog = new ConfirmationDialog(UNSUBSCRIBE_USER_TEXT) {
+        public void execute(final List<Subscription> selectedItems) {
+            final ConfirmationDialog confirmDialog =
+                    new ConfirmationDialog(TEMPLATES.unsubscribeUsers(selectedItems.size()).asString()) {
                 @Override
                 public void onConfirm() {
-                    administrationService.unsubscribe(object.getGitHubName(), new AsyncCallback<Void>() {
+                    administrationService.unsubscribe(selectedItems, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             ExceptionHandler.handle(caught);
@@ -112,6 +110,7 @@ public class SubscriptionSummaryScreen extends Composite {
 
                         @Override
                         public void onSuccess(Void result) {
+                            table.getDataProvider().getList().removeAll(selectedItems);
                         }
                     });
                 }
@@ -119,5 +118,4 @@ public class SubscriptionSummaryScreen extends Composite {
             confirmDialog.center();
         }
     }
-
 }

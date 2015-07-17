@@ -1,21 +1,30 @@
 package org.jboss.mjolnir.server.service;
 
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.EJB;
+import javax.servlet.ServletException;
+
+import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.UserService;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.exception.ApplicationException;
-import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
 import org.jboss.mjolnir.client.service.AdministrationService;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.GitHubSubscriptionBean;
 import org.jboss.mjolnir.server.bean.UserRepository;
-
-import javax.ejb.EJB;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.jboss.mjolnir.server.service.validation.GitHubNameExistsValidation;
+import org.jboss.mjolnir.server.service.validation.GitHubNameTakenValidation;
+import org.jboss.mjolnir.client.domain.ValidationResult;
+import org.jboss.mjolnir.server.service.validation.Validator;
 
 /**
  * Performs administration tasks.
@@ -32,6 +41,23 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
 
     @EJB
     private GitHubSubscriptionBean gitHubSubscriptionBean;
+
+    private Validator<KerberosUser> validator;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+
+        String token = applicationParameters.getMandatoryParameter(ApplicationParameters.GITHUB_TOKEN_KEY);
+
+        GitHubClient client = new GitHubClient();
+        client.setOAuth2Token(token);
+        UserService userService = new UserService(client);
+
+        validator = new Validator<KerberosUser>();
+        validator.addValidation(new GitHubNameTakenValidation(userRepository));
+        validator.addValidation(new GitHubNameExistsValidation(userService));
+    }
 
     /**
      * @see org.jboss.mjolnir.server.bean.GitHubSubscriptionBean#getOrganizationMembers()
@@ -51,21 +77,32 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @Override
     public void deleteUser(KerberosUser user) {
         try {
-            userRepository.deleteUser(user.getName());
+            userRepository.deleteUser(user);
         } catch (SQLException e) {
             throw new ApplicationException(e);
         }
     }
 
     @Override
-    public void editUser(KerberosUser user) throws GitHubNameAlreadyTakenException {
+    public void deleteUsers(Collection<KerberosUser> users) {
         try {
-            final KerberosUser userByGitHubName = userRepository.getUserByGitHubName(user.getGithubName());
-            if (userByGitHubName != null && !userByGitHubName.equals(user)) {
-                throw new GitHubNameAlreadyTakenException("This GitHub name is already taken by different user.");
-            }
+            userRepository.deleteUsers(users);
+        } catch (SQLException e) {
+            throw new ApplicationException(e);
+        }
+    }
 
-            userRepository.saveUser(user);
+    @Override
+    public EntityUpdateResult<KerberosUser> editUser(KerberosUser user) {
+        try {
+            ValidationResult validationResult = validator.validate(user);
+
+            if (validationResult.isOK()) {
+                userRepository.saveUser(user);
+                return EntityUpdateResult.ok(user);
+            } else {
+                return EntityUpdateResult.validationFailure(validationResult);
+            }
         } catch (SQLException e) {
             throw new ApplicationException(e);
         }
@@ -80,8 +117,10 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     }
 
     @Override
-    public void unsubscribe(String gitHubName) throws ApplicationException {
-        gitHubSubscriptionBean.removeFromOrganizations(gitHubName);
+    public void unsubscribe(Collection<Subscription> subscriptions) throws ApplicationException {
+        for (Subscription subscription: subscriptions) {
+            gitHubSubscriptionBean.removeFromOrganizations(subscription.getGitHubName());
+        }
     }
 
     /**
@@ -90,6 +129,26 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @Override
     public void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions) {
         gitHubSubscriptionBean.setSubscriptions(gitHubName, subscriptions);
+    }
+
+    @Override
+    public Collection<Subscription> whitelist(Collection<Subscription> subscriptions, boolean whitelist) {
+        try {
+            for (Subscription subscription : subscriptions) {
+                KerberosUser kerberosUser = subscription.getKerberosUser();
+                if (kerberosUser == null) {
+                    kerberosUser = new KerberosUser();
+                    subscription.setKerberosUser(kerberosUser);
+                    kerberosUser.setGithubName(subscription.getGitHubName());
+                    subscription.setKerberosUser(kerberosUser);
+                }
+                kerberosUser.setWhitelisted(whitelist);
+                userRepository.saveUser(kerberosUser);
+            }
+            return subscriptions;
+        } catch (SQLException e) {
+            throw new ApplicationException("Couldn't whitelist users.", e);
+        }
     }
 
 
