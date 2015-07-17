@@ -15,6 +15,8 @@ This project is designed to be built by Apache Maven (developed on 3.0.4). You c
 mvn clean jboss-as:deploy
 ```
 
+When using `dev` profile, created WAR won't require HTTPS, enabling GWT codeserver to be used.
+
 Running
 -------
 

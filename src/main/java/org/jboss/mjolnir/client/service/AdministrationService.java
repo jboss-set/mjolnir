@@ -9,8 +9,9 @@ import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.exception.ApplicationException;
-import org.jboss.mjolnir.client.exception.GitHubNameAlreadyTakenException;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,13 +31,17 @@ public interface AdministrationService extends RemoteService {
 
     void deleteUser(KerberosUser user) throws ApplicationException;
 
-    void editUser(KerberosUser user) throws ApplicationException, GitHubNameAlreadyTakenException;
+    void deleteUsers(Collection<KerberosUser> user) throws ApplicationException;
+
+    EntityUpdateResult<KerberosUser> editUser(KerberosUser user) throws ApplicationException;
 
     Set<GithubOrganization> getSubscriptions(String gitHubName) throws ApplicationException;
 
-    void unsubscribe(String gitHubName) throws ApplicationException;
+    void unsubscribe(Collection<Subscription> subscriptions) throws ApplicationException;
 
     void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions) throws ApplicationException;
+
+    Collection<Subscription> whitelist(Collection<Subscription> subscriptions, boolean whitelist);
 
     public static class Util {
         private static AdministrationServiceAsync instance;

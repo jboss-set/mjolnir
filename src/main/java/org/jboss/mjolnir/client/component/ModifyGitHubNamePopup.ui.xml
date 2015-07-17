@@ -3,12 +3,12 @@
 
     </ui:style>
     <g:HTMLPanel>
-        <h3>GitHub Name Settings</h3>
+        <h3>GitHub Username Settings</h3>
         <p><g:InlineLabel ui:field="messageLabel"/></p>
         <p>
-            GitHub name: <g:TextBox ui:field="textBox"/>
+            Enter your GitHub username: <g:TextBox ui:field="textBox"/>
         </p>
-        <p class="error"><g:InlineLabel ui:field="feedbackLabel"/></p>
+        <p class="error"><g:HTML ui:field="feedbackLabel"/></p>
         <p style="text-align: right;">
             <g:Button ui:field="cancelButton">Cancel</g:Button>
             <g:Button ui:field="submitButton">Save</g:Button>
