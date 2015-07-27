@@ -32,7 +32,11 @@ public class GitHubNameExistsValidation implements Validation<KerberosUser> {
         } catch (RequestException e) {
             if (e.getStatus() == 404) {
                 result.addFailure("Specified GitHub name is not registered on GitHub.");
-            } else {
+            }
+            else if (e.getStatus() == 401) {
+                throw new ApplicationException("Specified Github token is invalid. Refer to README.md file for more information.", e);
+            }
+            else {
                 throw new ApplicationException(CALL_FAILURE, e);
             }
         } catch (IOException e) {

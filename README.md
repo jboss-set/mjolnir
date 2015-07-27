@@ -20,9 +20,13 @@ When using `dev` profile, created WAR won't require HTTPS, enabling GWT codeserv
 Running
 -------
 
-Application requires a datasource available under JNDI name "java:jboss/datasources/<appName>/MjolnirDS", where "<appName>" is name under which the application is deployed.
+Application requires a datasource available under JNDI name "java:jboss/datasources/<appName>/MjolnirDS", where <appName> is name under which the application is deployed.
 
 Database must be initialized with tables defined in src/main/resources/create_tables.sql and contain data from src/main/resources/initial_data.sql.
+
+Also you need to insert a valid GitHub token into application_parameters table: https://help.github.com/articles/creating-an-access-token-for-command-line-use/
+
+Creating a new organization tutorial: https://help.github.com/articles/creating-a-new-organization-from-scratch/
 
 After successful deployment, the application can be used by browsing (by default) to:
 
