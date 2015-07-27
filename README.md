@@ -20,7 +20,7 @@ When using `dev` profile, created WAR won't require HTTPS, enabling GWT codeserv
 Running
 -------
 
-Application requires a datasource available under JNDI name "java:jboss/datasources/<appName>/MjolnirDS", where <appName> is name under which the application is deployed.
+Application requires a datasource available under JNDI name "java:jboss/datasources/&lt;appName&gt;/MjolnirDS", where &lt;appName&gt; is name under which the application is deployed.
 
 Database must be initialized with tables defined in src/main/resources/create_tables.sql and contain data from src/main/resources/initial_data.sql.
 
