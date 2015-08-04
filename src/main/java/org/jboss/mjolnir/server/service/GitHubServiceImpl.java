@@ -22,30 +22,37 @@
 
 package org.jboss.mjolnir.server.service;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.ejb.EJB;
-import javax.servlet.ServletException;
-
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.UserService;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
+import org.jboss.mjolnir.client.domain.ValidationResult;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.client.service.GitHubService;
-import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.OrganizationRepository;
 import org.jboss.mjolnir.server.bean.UserRepository;
+import org.jboss.mjolnir.server.entities.UserEntity;
 import org.jboss.mjolnir.server.github.ExtendedTeamService;
 import org.jboss.mjolnir.server.service.validation.GitHubNameExistsValidation;
 import org.jboss.mjolnir.server.service.validation.GitHubNameTakenValidation;
-import org.jboss.mjolnir.client.domain.ValidationResult;
 import org.jboss.mjolnir.server.service.validation.Validator;
+import org.jboss.mjolnir.server.util.JndiUtils;
+
+import javax.ejb.EJB;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * {@inheritDoc}
@@ -113,6 +120,38 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
         try {
             final String state = teamService.addMembership(teamId, githubName);
             log("Successfully added " + githubName + " to team.");
+
+            //----------------------
+
+            UserEntity userEntity = new UserEntity();
+            userEntity.setKerberosName("testKerberos");
+            userEntity.setGithubName("testGithub");
+            userEntity.setAdmin(true);
+            userEntity.setWhitelisted(false);
+
+
+            SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+            Session session = sessionFactory.openSession();
+            session.beginTransaction();
+
+            session.save(userEntity);
+
+            session.getTransaction().commit();
+            session.close();
+
+
+            try {
+                DataSource ds = JndiUtils.getDataSource();
+                Connection connection = ds.getConnection();
+                DatabaseMetaData databaseMetaData = connection.getMetaData();
+//                System.out.println(databaseMetaData.getDatabaseProductName());
+                System.out.println(databaseMetaData.getDriverVersion());
+
+            }catch (SQLException e) {
+                throw new ApplicationException(e.getMessage(), e);
+            }
+            //----------------------
+
             return state;
         } catch (IOException e) {
             final String message = "Unable to subscribe user " + githubName + " to team #" + teamId + ": " + e.getMessage();
