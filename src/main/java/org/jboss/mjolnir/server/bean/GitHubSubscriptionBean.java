@@ -4,6 +4,7 @@ import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.OrganizationService;
+import org.hibernate.HibernateException;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
@@ -150,7 +151,7 @@ public class GitHubSubscriptionBean {
             }
 
             return new ArrayList<Subscription>(subscriptionMap.values());
-        } catch (SQLException e) {
+        } catch (HibernateException e) {
             throw new ApplicationException(e);
         }
     }

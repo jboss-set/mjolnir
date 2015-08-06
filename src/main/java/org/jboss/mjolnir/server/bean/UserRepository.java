@@ -19,7 +19,7 @@ public interface UserRepository {
      * @param kerberosName krb name
      * @return user instance or null
      */
-    KerberosUser getUser(String kerberosName) throws SQLException;
+    KerberosUser getUser(String kerberosName);
 
     /**
      * Returns user by his GitHub name.
@@ -27,19 +27,19 @@ public interface UserRepository {
      * @param gitHubName krb name
      * @return user instance or null
      */
-    KerberosUser getUserByGitHubName(String gitHubName) throws SQLException;
+    KerberosUser getUserByGitHubName(String gitHubName);
 
     /**
      * Updates existing user.
      *
      * @param kerberosUser user
      */
-    void saveUser(KerberosUser kerberosUser) throws SQLException;
+    void saveUser(KerberosUser kerberosUser);
 
     /**
      * Returns user by its krb name. If user doesn't exists, creates new.
      */
-    KerberosUser getOrCreateUser(String kerberosName) throws SQLException;
+    KerberosUser getOrCreateUser(String kerberosName);
 
     /**
      * Retrieves all users in database.
@@ -47,7 +47,7 @@ public interface UserRepository {
      * @return users
      * @throws SQLException
      */
-    List<KerberosUser> getAllUsers() throws SQLException;
+    List<KerberosUser> getAllUsers();
 
     /**
      * Removes user from database.
@@ -55,7 +55,7 @@ public interface UserRepository {
      * @param user user to delete
      * @throws SQLException
      */
-    void deleteUser(KerberosUser user) throws SQLException;
+    void deleteUser(KerberosUser user);
 
     /**
      * Removes users from database.
@@ -63,6 +63,6 @@ public interface UserRepository {
      * @param users users to delete
      * @throws SQLException
      */
-    void deleteUsers(Collection<KerberosUser> users) throws SQLException;
+    void deleteUsers(Collection<KerberosUser> users);
 
 }

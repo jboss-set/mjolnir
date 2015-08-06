@@ -1,30 +1,29 @@
 package org.jboss.mjolnir.server.service;
 
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ejb.EJB;
-import javax.servlet.ServletException;
-
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.UserService;
+import org.hibernate.HibernateException;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
+import org.jboss.mjolnir.client.domain.ValidationResult;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.client.service.AdministrationService;
-import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.GitHubSubscriptionBean;
 import org.jboss.mjolnir.server.bean.UserRepository;
 import org.jboss.mjolnir.server.service.validation.GitHubNameExistsValidation;
 import org.jboss.mjolnir.server.service.validation.GitHubNameTakenValidation;
-import org.jboss.mjolnir.client.domain.ValidationResult;
 import org.jboss.mjolnir.server.service.validation.Validator;
+
+import javax.ejb.EJB;
+import javax.servlet.ServletException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Performs administration tasks.
@@ -78,7 +77,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     public void deleteUser(KerberosUser user) {
         try {
             userRepository.deleteUser(user);
-        } catch (SQLException e) {
+        } catch (HibernateException e) {
             throw new ApplicationException(e);
         }
     }
@@ -87,7 +86,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     public void deleteUsers(Collection<KerberosUser> users) {
         try {
             userRepository.deleteUsers(users);
-        } catch (SQLException e) {
+        } catch (HibernateException e) {
             throw new ApplicationException(e);
         }
     }
@@ -103,7 +102,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
             } else {
                 return EntityUpdateResult.validationFailure(validationResult);
             }
-        } catch (SQLException e) {
+        } catch (HibernateException e) {
             throw new ApplicationException(e);
         }
     }
@@ -146,7 +145,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
                 userRepository.saveUser(kerberosUser);
             }
             return subscriptions;
-        } catch (SQLException e) {
+        } catch (HibernateException e) {
             throw new ApplicationException("Couldn't whitelist users.", e);
         }
     }

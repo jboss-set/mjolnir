@@ -10,7 +10,6 @@ import javax.annotation.PostConstruct;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Singleton;
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,33 +30,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Local(ApplicationParameters.class)
 public class ApplicationParametersBean implements ApplicationParameters, ApplicationParametersRemote {
 
-    private final static String READ_SQL = "select param_name, param_value from application_parameters";
-    private final static String INSERT_SQL = "insert into application_parameters (param_value, param_name) values (?, ?)";
-    private final static String UPDATE_SQL = "update application_parameters set param_value = ? where param_name = ?";
-
-    private DataSource dataSource;
     private SessionFactory sessionFactory;
-
-    /*
-        //-----------
-
-
-        SessionFactory sessionFactory = HibernateUtils.getSessionFactory();
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-
-        ApplicationParameterEntity param = new ApplicationParameterEntity();
-        param.setParamName("testParamName");
-        session.delete(param);
-        param.setParamValue("ASDASD");
-        session.save(param);
-
-        session.getTransaction().commit();
-        session.close();
-
-
-        //-----------
-*/
 
     private Map<String, String> parameters = Collections.synchronizedMap(new HashMap<String, String>());
 
@@ -114,23 +87,5 @@ public class ApplicationParametersBean implements ApplicationParameters, Applica
         session.saveOrUpdate(param);
         session.getTransaction().commit();
         session.close();
-
-        /*final Connection connection = dataSource.getConnection();
-        try {
-            final PreparedStatement statement;
-
-            if (parameters.containsKey(name)) {
-                statement = connection.prepareStatement(UPDATE_SQL);
-            } else {
-                statement = connection.prepareStatement(INSERT_SQL);
-            }
-            statement.setString(1, value);
-            statement.setString(2, name);
-            statement.execute();
-
-            parameters.put(name, value);
-        } finally {
-            connection.close();
-        }*/
     }
 }

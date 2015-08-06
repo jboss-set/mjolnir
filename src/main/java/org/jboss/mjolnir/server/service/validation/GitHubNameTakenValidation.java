@@ -1,10 +1,9 @@
 package org.jboss.mjolnir.server.service.validation;
 
-import java.sql.SQLException;
-
+import org.hibernate.HibernateException;
 import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.client.domain.ValidationResult;
+import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.bean.UserRepository;
 
 /**
@@ -29,7 +28,7 @@ public class GitHubNameTakenValidation implements Validation<KerberosUser> {
                 result.addFailure("This GitHub name is already taken by different user.");
             }
             return result;
-        } catch (SQLException e) {
+        } catch (HibernateException e) {
             throw new ApplicationException(e);
         }
     }

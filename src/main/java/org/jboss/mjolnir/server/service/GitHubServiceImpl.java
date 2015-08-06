@@ -24,6 +24,7 @@ package org.jboss.mjolnir.server.service;
 
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.UserService;
+import org.hibernate.HibernateException;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
@@ -101,7 +102,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
                 log("Validation failure: " + validationResult);
                 return EntityUpdateResult.validationFailure(validationResult);
             }
-        } catch (SQLException e) {
+        } catch (HibernateException e) {
             throw new ApplicationException(e);
         }
     }

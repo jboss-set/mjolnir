@@ -1,20 +1,17 @@
 package org.jboss.mjolnir.server.bean;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
-import org.jboss.mjolnir.server.util.JndiUtils;
+import org.jboss.mjolnir.server.entities.GithubOrganizationEntity;
+import org.jboss.mjolnir.server.entities.GithubTeamEntity;
+import org.jboss.mjolnir.server.util.HibernateUtils;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * {@inheritDoc}
@@ -24,47 +21,47 @@ import java.util.Set;
 @Stateless
 public class OrganizationRepositoryBean implements OrganizationRepository {
 
-    private static String GET_ORGS_QUERY = "select id, name from github_orgs";
-    private static String GET_TEAMS_QUERY = "select id, org_id, name, github_id from github_teams";
-
-    private DataSource dataSource;
+    private SessionFactory sessionFactory;
 
     @PostConstruct
     public void initBean() {
-        dataSource = JndiUtils.getDataSource();
+        sessionFactory = HibernateUtils.getSessionFactory();
     }
 
     @Override
     public Set<GithubOrganization> getOrganizations() throws SQLException {
-        final Connection connection = dataSource.getConnection();
-        try {
-            // load organizations into a map
-            final PreparedStatement orgsStatement = connection.prepareStatement(GET_ORGS_QUERY);
-            final ResultSet orgsResult = orgsStatement.executeQuery();
-            final Map<Long, GithubOrganization> orgMap = new HashMap<Long, GithubOrganization>();
+        // load organizations into a map
+        Session session = sessionFactory.openSession();
 
-            while (orgsResult.next()) {
-                final GithubOrganization org = new GithubOrganization(orgsResult.getString("name"));
-                orgMap.put(orgsResult.getLong("id"), org);
-            }
+        final List<GithubOrganizationEntity> organizationsList =
+                session.createCriteria(GithubOrganizationEntity.class).list();
 
-            // load teams and add them to organizations
-            final PreparedStatement teamsStatement = connection.prepareStatement(GET_TEAMS_QUERY);
-            final ResultSet teamsResult = teamsStatement.executeQuery();
+        session.close();
 
-            while (teamsResult.next()) {
-                final GithubTeam team = new GithubTeam(teamsResult.getString("name"), teamsResult.getInt("github_id"));
-                final Long orgId = teamsResult.getLong("org_id");
-                final GithubOrganization org = orgMap.get(orgId);
-                if (org != null) {
-                    org.addTeam(team);
-                }
-            }
+        final Map<Long, GithubOrganization> orgMap = new HashMap<Long, GithubOrganization>();
 
-            return new HashSet<GithubOrganization>(orgMap.values());
-        } finally {
-            connection.close();
+        for (GithubOrganizationEntity organization : organizationsList) {
+            final GithubOrganization org = new GithubOrganization(organization.getName());
+            orgMap.put(organization.getId(), org);
         }
+
+        // load teams and add them to organizations
+        session = sessionFactory.openSession();
+
+        final List<GithubTeamEntity> teamsList = session.createCriteria(GithubTeamEntity.class).list();
+
+        session.close();
+
+        for (GithubTeamEntity teamEnt : teamsList) {
+            final GithubTeam team = new GithubTeam(teamEnt.getName(), teamEnt.getGithubId().intValue());
+            final Long orgId = teamEnt.getOrganization().getId();
+            final GithubOrganization org = orgMap.get(orgId);
+            if (org != null) {
+                org.addTeam(team);
+            }
+        }
+
+        return new HashSet<GithubOrganization>(orgMap.values());
     }
 
 }

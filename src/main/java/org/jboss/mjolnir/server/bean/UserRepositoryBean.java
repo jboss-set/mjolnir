@@ -1,18 +1,19 @@
 package org.jboss.mjolnir.server.bean;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.exception.ApplicationException;
-import org.jboss.mjolnir.server.util.JndiUtils;
+import org.jboss.mjolnir.server.entities.UserEntity;
+import org.jboss.mjolnir.server.util.HibernateUtils;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.ejb.TransactionManagementType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,66 +24,67 @@ import java.util.List;
  * @author Tomas Hofman (thofman@redhat.com)
  */
 @Stateless
+@javax.ejb.TransactionManagement(TransactionManagementType.BEAN)
 public class UserRepositoryBean implements UserRepository {
 
-    private final static String GET_USER_SQL = "select id, krb_name, github_name, admin, whitelisted from users where krb_name = ?";
-    private final static String DELETE_USER_SQL = "delete from users where krb_name = ? or (krb_name is null and github_name = ?)";
-    private final static String GET_USER_BY_GITHUB_NAME_SQL = "select id, krb_name, github_name, admin, whitelisted from users where github_name = ?";
-    private final static String UPDATE_USER_SQL = "update users set krb_name = ?, github_name = ?, whitelisted = ? where krb_name = ? or (krb_name is null and github_name = ?)";
-    private final static String INSERT_USER_SQL = "insert into users (github_name, krb_name, whitelisted) values (?, ?, ?)";
-    private final static String GET_ALL_USERS_SQL = "select id, krb_name, github_name, admin, whitelisted from users order by krb_name";
-
-    private DataSource dataSource;
+    private SessionFactory sessionFactory;
 
     @PostConstruct
     public void initBean() {
-        dataSource = JndiUtils.getDataSource();
+        sessionFactory = HibernateUtils.getSessionFactory();
     }
 
     @Override
-    public KerberosUser getUser(String kerberosName) throws SQLException {
-        return getUser(GET_USER_SQL, kerberosName);
+    public KerberosUser getUser(String kerberosName) {
+        return getUser(UserName.KERBEROS, kerberosName);
     }
 
     @Override
-    public KerberosUser getUserByGitHubName(String gitHubName) throws SQLException {
-        return getUser(GET_USER_BY_GITHUB_NAME_SQL, gitHubName);
+    public KerberosUser getUserByGitHubName(String gitHubName) {
+        return getUser(UserName.GITHUB, gitHubName);
     }
 
-    private KerberosUser getUser(String sql, String param) throws SQLException {
-        final Connection connection = dataSource.getConnection();
-        try {
-            final PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, param);
-            final ResultSet resultSet = statement.executeQuery();
+    private KerberosUser getUser(UserName userName, String param) {
 
-            KerberosUser user = null;
-            if (resultSet.next()) {
-                user = new KerberosUser();
-                user.setName(resultSet.getString("krb_name"));
-                user.setGithubName(resultSet.getString("github_name"));
-                user.setAdmin(resultSet.getBoolean("admin"));
-                user.setWhitelisted(resultSet.getBoolean("whitelisted"));
-            }
-            resultSet.close();
-            statement.close();
-            return user;
-        } finally {
-            connection.close();
+        KerberosUser user = null;
+
+        Session session = sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(UserEntity.class);
+
+        switch (userName) {
+            case KERBEROS:
+                criteria.add(Restrictions.eq("kerberosName", param));
+                break;
+            case GITHUB:
+                criteria.add(Restrictions.eq("githubName", param));
+                break;
         }
+
+        UserEntity userEntity = (UserEntity) criteria.uniqueResult();
+
+        if (userEntity != null) {
+            user = new KerberosUser();
+            user.setName(userEntity.getKerberosName());
+            user.setGithubName(userEntity.getGithubName());
+            user.setAdmin(userEntity.isAdmin());
+            user.setWhitelisted(userEntity.isWhitelisted());
+        }
+
+        session.close();
+        return user;
     }
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void saveUser(KerberosUser user) throws SQLException {
-        if (updateUser(user) == 0) {
+    public void saveUser(KerberosUser user) {
+        if (!updateUser(user)) {
             insertUser(user);
         }
     }
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public KerberosUser getOrCreateUser(String kerberosName) throws SQLException {
+    public KerberosUser getOrCreateUser(String kerberosName) {
         KerberosUser user = getUser(kerberosName);
         if (user == null) {
             user = new KerberosUser();
@@ -92,84 +94,108 @@ public class UserRepositoryBean implements UserRepository {
         return user;
     }
 
-    private void insertUser(KerberosUser user) throws SQLException {
-        final Connection connection = dataSource.getConnection();
-        try {
-            PreparedStatement statement;
-            statement = connection.prepareStatement(INSERT_USER_SQL);
-            statement.setString(1, user.getGithubName());
-            statement.setString(2, user.getName());
-            statement.setBoolean(3, user.isWhitelisted());
-            statement.executeUpdate();
-            statement.close();
-        } finally {
-            connection.close();
-        }
+    private void insertUser(KerberosUser user) {
+        UserEntity userEntity = convertUser(user);
+
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        session.save(userEntity);
+        session.getTransaction().commit();
+        session.close();
     }
 
-    private int updateUser(KerberosUser user) throws SQLException {
-        final Connection connection = dataSource.getConnection();
-        try {
-            PreparedStatement statement;
-            statement = connection.prepareStatement(UPDATE_USER_SQL);
-            statement.setString(1, user.getName());
-            statement.setString(2, user.getGithubName());
-            statement.setBoolean(3, user.isWhitelisted());
-            statement.setString(4, user.getName());
-            statement.setString(5, user.getGithubName());
-            final int affectedRows = statement.executeUpdate();
-            statement.close();
-            return affectedRows;
-        } finally {
-            connection.close();
+    private boolean updateUser(KerberosUser user) {
+        UserEntity userEntity = getUserFromDB(user);
+
+        if(userEntity == null) {
+            //user is not stored in the DB
+            return false;
         }
+
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        session.update(userEntity);
+        session.getTransaction().commit();
+        session.close();
+
+        return true;
     }
 
     @Override
-    public List<KerberosUser> getAllUsers() throws SQLException {
-        final Connection connection = dataSource.getConnection();
-        try {
-            final PreparedStatement statement = connection.prepareStatement(GET_ALL_USERS_SQL);
-            final ResultSet resultSet = statement.executeQuery();
+    public List<KerberosUser> getAllUsers() {
+        Session session = sessionFactory.openSession();
 
-            final List<KerberosUser> users = new ArrayList<KerberosUser>();
-            while (resultSet.next()) {
-                final KerberosUser user = new KerberosUser();
-                user.setName(resultSet.getString("krb_name"));
-                user.setGithubName(resultSet.getString("github_name"));
-                user.setAdmin(resultSet.getBoolean("admin"));
-                user.setWhitelisted(resultSet.getBoolean("whitelisted"));
-                users.add(user);
-            }
-            resultSet.close();
-            statement.close();
-            return users;
-        } finally {
-            connection.close();
+        List<UserEntity> entityList = session.createCriteria(UserEntity.class).list();
+        final List<KerberosUser> users = new ArrayList<>();
+
+        for(UserEntity entity : entityList) {
+            final KerberosUser user = new KerberosUser();
+            user.setName(entity.getKerberosName());
+            user.setGithubName(entity.getGithubName());
+            user.setAdmin(entity.isAdmin());
+            user.setWhitelisted(entity.isWhitelisted());
+            users.add(user);
         }
+
+        return users;
     }
 
     @Override
-    public void deleteUser(KerberosUser user) throws SQLException {
-        final Connection connection = dataSource.getConnection();
-        try {
-            final PreparedStatement statement = connection.prepareStatement(DELETE_USER_SQL);
-            statement.setString(1, user.getName());
-            statement.setString(2, user.getGithubName());
-            int affectedRecords = statement.executeUpdate();
-            if (affectedRecords != 1) {
-                throw new ApplicationException("Couldn't delete user - user not found.");
-            }
-        } finally {
-            connection.close();
+    public void deleteUser(KerberosUser user) {
+        UserEntity userEntity = getUserFromDB(user);
+
+        if(user == null) {
+            throw new ApplicationException("Couldn't delete user - user not found.");
         }
+
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        session.delete(userEntity);
+        session.getTransaction().commit();
+        session.close();
     }
 
     @Override
-    public void deleteUsers(Collection<KerberosUser> users) throws SQLException {
-        for (KerberosUser user: users) {
+    public void deleteUsers(Collection<KerberosUser> users) {
+        for (KerberosUser user : users) {
             deleteUser(user);
         }
     }
 
+    private enum UserName {
+        KERBEROS,
+        GITHUB
+    }
+
+    private UserEntity convertUser(KerberosUser user) {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setKerberosName(user.getName());
+        userEntity.setGithubName(user.getGithubName());
+        userEntity.setAdmin(user.isAdmin());
+        userEntity.setWhitelisted(user.isWhitelisted());
+
+        return userEntity;
+    }
+
+    private UserEntity getUserFromDB(KerberosUser user) {
+        UserEntity userEntity;
+        Session session = sessionFactory.openSession();
+
+        //kerberosName is unique in the DB
+        userEntity = (UserEntity) session.createCriteria(UserEntity.class)
+                .add(Restrictions.eq("kerberosName", user.getName())).uniqueResult();
+
+        //githubName is unique in the DB
+        if (userEntity == null) {
+            userEntity = (UserEntity) session.createCriteria(UserEntity.class)
+                    .add(Restrictions.eq("githubName", user.getGithubName())).uniqueResult();
+        }
+
+        userEntity.setKerberosName(user.getName());
+        userEntity.setGithubName(user.getGithubName());
+        userEntity.setAdmin(user.isAdmin());
+        userEntity.setWhitelisted(user.isWhitelisted());
+
+        return userEntity;
+    }
 }
