@@ -7,12 +7,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.HasRpcToken;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.rpc.XsrfToken;
-import com.google.gwt.user.client.rpc.XsrfTokenService;
-import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
+import com.google.gwt.user.client.rpc.*;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -41,11 +36,23 @@ public class SubscriptionScreen extends Composite {
     private VerticalPanel panel = new VerticalPanel();
     private LoadingPanel loadingPanel = new LoadingPanel();
 
+    private boolean teamsLoaded;
+    private Widget tables;
+
     public SubscriptionScreen() {
         initWidget(panel);
 
+        loadPanel();
+    }
+
+    public void reloadSubscriptions() {
+        checkGitHubNameAndCreateContent();
+    }
+
+    private void loadPanel() {
         panel.add(new HTMLPanel("h2", "Subscribe to GitHub Teams"));
         panel.add(loadingPanel);
+
         checkGitHubNameAndCreateContent();
     }
 
@@ -81,11 +88,20 @@ public class SubscriptionScreen extends Composite {
 
                         @Override
                         public void onSuccess(Set<GithubOrganization> result) {
-                            loadingPanel.removeFromParent();
 
-                            // add subscription table
-                            panel.add(new GitHubNamePanel());
-                            panel.add(createSubscriptionTable(result));
+                            if(!teamsLoaded) {
+                                teamsLoaded = true;
+                                loadingPanel.removeFromParent();
+
+                                // add subscription table
+                                panel.add(new GitHubNamePanel(SubscriptionScreen.this));
+                                tables = createSubscriptionTable(result);
+                                panel.add(tables);
+                            } else {
+                                panel.clear();
+                                teamsLoaded = false;
+                                loadPanel();
+                            }
                         }
                     });
                 }
