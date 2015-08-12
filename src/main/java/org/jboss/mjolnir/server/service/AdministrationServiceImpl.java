@@ -74,6 +74,22 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     }
 
     @Override
+    public EntityUpdateResult<KerberosUser> registerUser(KerberosUser user) {
+        try {
+            ValidationResult validationResult = validator.validate(user);
+
+            if (validationResult.isOK()) {
+                userRepository.saveUser(user);
+                return EntityUpdateResult.ok(user);
+            } else {
+                return EntityUpdateResult.validationFailure(validationResult);
+            }
+        } catch (HibernateException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    @Override
     public void deleteUser(KerberosUser user) {
         try {
             userRepository.deleteUser(user);
@@ -97,7 +113,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
             ValidationResult validationResult = validator.validate(user);
 
             if (validationResult.isOK()) {
-                userRepository.saveUser(user);
+                userRepository.saveOrUpdateUser(user);
                 return EntityUpdateResult.ok(user);
             } else {
                 return EntityUpdateResult.validationFailure(validationResult);
@@ -142,7 +158,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
                     subscription.setKerberosUser(kerberosUser);
                 }
                 kerberosUser.setWhitelisted(whitelist);
-                userRepository.saveUser(kerberosUser);
+                userRepository.saveOrUpdateUser(kerberosUser);
             }
             return subscriptions;
         } catch (HibernateException e) {

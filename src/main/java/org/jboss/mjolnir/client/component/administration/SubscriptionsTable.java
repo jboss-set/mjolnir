@@ -3,30 +3,16 @@ package org.jboss.mjolnir.client.component.administration;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.gwt.cell.client.ActionCell;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.CheckboxCell;
-import com.google.gwt.cell.client.CompositeCell;
-import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.HasCell;
-import com.google.gwt.cell.client.TextInputCell;
-import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.cell.client.*;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
-import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.component.table.ConditionalActionCell;
 import org.jboss.mjolnir.client.component.table.DropDownCell;
@@ -36,12 +22,7 @@ import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -198,10 +179,10 @@ public class SubscriptionsTable extends Composite {
     }
 
     public void addAction(String caption, final ActionDelegate delegate) {
-        addAction(caption, delegate, false);
+        addAction(caption, delegate, false, false);
     }
 
-    public void addAction(String caption, final ActionDelegate delegate, boolean separator) {
+    public void addAction(String caption, final ActionDelegate delegate, boolean separator, boolean isPermanentAction) {
         Button button = new Button(caption, new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -209,7 +190,12 @@ public class SubscriptionsTable extends Composite {
                 delegate.execute(selectedItemsCopy);
             }
         });
-        button.setEnabled(false);
+
+        if(isPermanentAction) {
+            button.setEnabled(true);
+        } else {
+            button.setEnabled(false);
+        }
 
         if (separator) {
             HTMLPanel span = new HTMLPanel("span", " | ");
@@ -219,7 +205,9 @@ public class SubscriptionsTable extends Composite {
             buttonsPanel.add(new HTMLPanel("span", " "));
         }
 
-        actionButtons.add(button);
+        if(!isPermanentAction) {
+            actionButtons.add(button);
+        }
         buttonsPanel.add(button);
     }
 

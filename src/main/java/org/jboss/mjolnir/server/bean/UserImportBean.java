@@ -93,7 +93,7 @@ public class UserImportBean {
         final Cache<String, KerberosUser> cache = cacheManager.getCache();
         for (KerberosUser user : cache.values()) {
             if (userRepository.getUser(user.getName()) == null) {
-                userRepository.saveUser(user);
+                userRepository.saveOrUpdateUser(user);
             }
         }
     }

@@ -94,7 +94,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             user.setGithubName(newGithubName);
             ValidationResult validationResult = validator.validate(user);
             if (validationResult.isOK()) {
-                userRepository.saveUser(user);
+                userRepository.saveOrUpdateUser(user);
                 setAuthenticatedUser(user); // update session with current instance
                 log("Successfully modified GithubName for KerberosUser " + krb5Name);
                 return EntityUpdateResult.ok(user);

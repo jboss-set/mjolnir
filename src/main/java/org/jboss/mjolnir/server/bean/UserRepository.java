@@ -30,11 +30,18 @@ public interface UserRepository {
     KerberosUser getUserByGitHubName(String gitHubName);
 
     /**
-     * Updates existing user.
+     * Saves new user.
      *
      * @param kerberosUser user
      */
     void saveUser(KerberosUser kerberosUser);
+
+    /**
+     * Save or updates existing user.
+     *
+     * @param kerberosUser user
+     */
+    void saveOrUpdateUser(KerberosUser kerberosUser);
 
     /**
      * Returns user by its krb name. If user doesn't exists, creates new.

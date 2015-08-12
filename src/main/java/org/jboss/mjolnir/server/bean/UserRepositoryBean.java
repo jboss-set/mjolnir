@@ -77,6 +77,12 @@ public class UserRepositoryBean implements UserRepository {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void saveUser(KerberosUser user) {
+        insertUser(user);
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void saveOrUpdateUser(KerberosUser user) {
         if (!updateUser(user)) {
             insertUser(user);
         }
