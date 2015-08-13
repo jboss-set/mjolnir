@@ -145,7 +145,7 @@ public class RegisteredUsersScreen extends Composite {
                 userToEdit = new KerberosUser();
                 userToEdit.setGithubName(object.getGitHubName());
             }
-            final EditUserDialog editDialog = new EditUserDialog(userToEdit) {
+            final UserDialog editDialog = new UserDialog(userToEdit, UserDialog.DialogType.EDIT) {
                 @Override
                 protected void onSave(KerberosUser savedUser) {
                     onEdited(object, savedUser);
@@ -184,19 +184,20 @@ public class RegisteredUsersScreen extends Composite {
         @Override
         public void execute(final List<Subscription> selectedItems) {
             //display register dialog
-            final RegisterUserDialog registerDialog = new RegisterUserDialog() {
+            final UserDialog registerDialog = new UserDialog(null, UserDialog.DialogType.REGISTER) {
                 @Override
                 protected void onSave(KerberosUser savedUser) {
-                    onRegistered(savedUser);
+                    onRegistered(savedUser, activeAccountCheckBox.getValue());
                 }
             };
             registerDialog.center();
         }
 
-        private void onRegistered(KerberosUser user) {
+        private void onRegistered(KerberosUser user, boolean isActiveKrb) {
             Subscription subscription = new Subscription();
             subscription.setKerberosUser(user);
             subscription.setGitHubName(user.getGithubName());
+            subscription.setActiveKerberosAccount(isActiveKrb);
             table.getItemList().add(subscription);
             table.refresh();
         }

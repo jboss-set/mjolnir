@@ -13,6 +13,7 @@ import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.GitHubSubscriptionBean;
+import org.jboss.mjolnir.server.bean.LdapRepository;
 import org.jboss.mjolnir.server.bean.UserRepository;
 import org.jboss.mjolnir.server.service.validation.GitHubNameExistsValidation;
 import org.jboss.mjolnir.server.service.validation.GitHubNameTakenValidation;
@@ -40,6 +41,9 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
 
     @EJB
     private GitHubSubscriptionBean gitHubSubscriptionBean;
+
+    @EJB
+    private LdapRepository ldapRepository;
 
     private Validator<KerberosUser> validator;
 
@@ -71,6 +75,11 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @Override
     public List<Subscription> getRegisteredUsers() {
         return gitHubSubscriptionBean.getRegisteredUsers();
+    }
+
+    @Override
+    public Boolean checkUserExists(String userName) {
+        return ldapRepository.checkUserExists(userName);
     }
 
     @Override

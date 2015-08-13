@@ -29,6 +29,8 @@ public interface AdministrationService extends RemoteService {
 
     List<Subscription> getRegisteredUsers() throws ApplicationException;
 
+    Boolean checkUserExists(String userName);
+
     EntityUpdateResult<KerberosUser> registerUser(KerberosUser user) throws ApplicationException;
 
     void deleteUser(KerberosUser user) throws ApplicationException;

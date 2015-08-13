@@ -21,6 +21,8 @@ public interface AdministrationServiceAsync {
 
     void getRegisteredUsers(AsyncCallback<List<Subscription>> async);
 
+    void checkUserExists(String userName, AsyncCallback<Boolean> async);
+
     void registerUser(KerberosUser user, AsyncCallback<EntityUpdateResult<KerberosUser>> async);
 
     void deleteUser(KerberosUser user, AsyncCallback<Void> asyncCallback);
