@@ -37,7 +37,7 @@ public interface AdministrationService extends RemoteService {
 
     void deleteUsers(Collection<KerberosUser> user) throws ApplicationException;
 
-    EntityUpdateResult<KerberosUser> editUser(KerberosUser user) throws ApplicationException;
+    EntityUpdateResult<KerberosUser> editUser(KerberosUser user, boolean validateKrbName, boolean validateGHname) throws ApplicationException;
 
     Set<GithubOrganization> getSubscriptions(String gitHubName) throws ApplicationException;
 

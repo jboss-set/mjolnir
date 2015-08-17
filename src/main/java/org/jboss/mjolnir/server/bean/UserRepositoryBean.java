@@ -111,15 +111,16 @@ public class UserRepositoryBean implements UserRepository {
     }
 
     private boolean updateUser(KerberosUser user) {
-        UserEntity userEntity = getUserFromDB(user);
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
 
-        if(userEntity == null) {
+        UserEntity userEntity = getUserFromDB(user, session);
+
+        if (userEntity == null) {
             //user is not stored in the DB
             return false;
         }
 
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
         session.update(userEntity);
         session.getTransaction().commit();
         session.close();
@@ -131,10 +132,12 @@ public class UserRepositoryBean implements UserRepository {
     public List<KerberosUser> getAllUsers() {
         Session session = sessionFactory.openSession();
 
+        //the criteria query list() method always produces List<UserEntity> because the query runs on this class/table
+        @SuppressWarnings("unchecked")
         List<UserEntity> entityList = session.createCriteria(UserEntity.class).list();
-        final List<KerberosUser> users = new ArrayList<>();
+        final List<KerberosUser> users = new ArrayList<KerberosUser>();
 
-        for(UserEntity entity : entityList) {
+        for (UserEntity entity : entityList) {
             final KerberosUser user = new KerberosUser();
             user.setName(entity.getKerberosName());
             user.setGithubName(entity.getGithubName());
@@ -148,14 +151,15 @@ public class UserRepositoryBean implements UserRepository {
 
     @Override
     public void deleteUser(KerberosUser user) {
-        UserEntity userEntity = getUserFromDB(user);
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
 
-        if(user == null) {
+        UserEntity userEntity = getUserFromDB(user, session);
+
+        if (user == null) {
             throw new ApplicationException("Couldn't delete user - user not found.");
         }
 
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
         session.delete(userEntity);
         session.getTransaction().commit();
         session.close();
@@ -183,18 +187,25 @@ public class UserRepositoryBean implements UserRepository {
         return userEntity;
     }
 
-    private UserEntity getUserFromDB(KerberosUser user) {
+    private UserEntity getUserFromDB(KerberosUser user, Session session) {
+        if (user == null) {
+            throw new ApplicationException("Cannot retrieve a null user from the DB.");
+        }
+        if (session == null) {
+            throw new ApplicationException("Cannot open a DB connection.");
+        }
+
         UserEntity userEntity;
-        Session session = sessionFactory.openSession();
+
+        //first check GH name because krb name can be null
+        //githubName is unique in the DB
+        userEntity = (UserEntity) session.createCriteria(UserEntity.class)
+                .add(Restrictions.eq("githubName", user.getGithubName())).uniqueResult();
 
         //kerberosName is unique in the DB
-        userEntity = (UserEntity) session.createCriteria(UserEntity.class)
-                .add(Restrictions.eq("kerberosName", user.getName())).uniqueResult();
-
-        //githubName is unique in the DB
         if (userEntity == null) {
             userEntity = (UserEntity) session.createCriteria(UserEntity.class)
-                    .add(Restrictions.eq("githubName", user.getGithubName())).uniqueResult();
+                    .add(Restrictions.eq("kerberosName", user.getName())).uniqueResult();
         }
 
         userEntity.setKerberosName(user.getName());

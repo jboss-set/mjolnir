@@ -15,9 +15,7 @@ import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.GitHubSubscriptionBean;
 import org.jboss.mjolnir.server.bean.LdapRepository;
 import org.jboss.mjolnir.server.bean.UserRepository;
-import org.jboss.mjolnir.server.service.validation.GitHubNameExistsValidation;
-import org.jboss.mjolnir.server.service.validation.GitHubNameTakenValidation;
-import org.jboss.mjolnir.server.service.validation.Validator;
+import org.jboss.mjolnir.server.service.validation.*;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -46,6 +44,8 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     private LdapRepository ldapRepository;
 
     private Validator<KerberosUser> validator;
+    private Validation<KerberosUser> krbNameValidation;
+    private Validation<KerberosUser> githubNameValidation;
 
     @Override
     public void init() throws ServletException {
@@ -58,7 +58,11 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         UserService userService = new UserService(client);
 
         validator = new Validator<KerberosUser>();
-        validator.addValidation(new GitHubNameTakenValidation(userRepository));
+
+        krbNameValidation = new KrbNameTakenValidation(userRepository);
+        githubNameValidation = new GitHubNameTakenValidation(userRepository);
+        validator.addValidation(krbNameValidation);
+        validator.addValidation(githubNameValidation);
         validator.addValidation(new GitHubNameExistsValidation(userService));
     }
 
@@ -117,9 +121,18 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     }
 
     @Override
-    public EntityUpdateResult<KerberosUser> editUser(KerberosUser user) {
+    public EntityUpdateResult<KerberosUser> editUser(KerberosUser user, boolean validateKrbName, boolean validateGHname) {
         try {
+            if(!validateKrbName) {
+                validator.removeValidation(krbNameValidation);
+            }
+            if(!validateGHname) {
+                validator.removeValidation(githubNameValidation);
+            }
             ValidationResult validationResult = validator.validate(user);
+            validator.addValidation(krbNameValidation);
+            validator.addValidation(githubNameValidation);
+
 
             if (validationResult.isOK()) {
                 userRepository.saveOrUpdateUser(user);

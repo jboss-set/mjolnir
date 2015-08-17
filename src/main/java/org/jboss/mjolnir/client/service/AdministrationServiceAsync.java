@@ -29,7 +29,7 @@ public interface AdministrationServiceAsync {
 
     void deleteUsers(Collection<KerberosUser> user, AsyncCallback<Void> asyncCallback);
 
-    void editUser(KerberosUser user, AsyncCallback<EntityUpdateResult<KerberosUser>> asyncCallback);
+    void editUser(KerberosUser user, boolean validateKrbName, boolean validateGHname, AsyncCallback<EntityUpdateResult<KerberosUser>> asyncCallback);
 
     void getSubscriptions(String gitHubName, AsyncCallback<Set<GithubOrganization>> asyncCallback);
 

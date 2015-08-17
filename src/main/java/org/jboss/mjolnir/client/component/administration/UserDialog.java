@@ -23,8 +23,6 @@ import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
  */
 public class UserDialog extends DialogBox {
 
-    //TODO add validation on exit of the field with kerberos name
-
     interface Binder extends UiBinder<Widget, UserDialog> {}
     private static Binder uiBinder = GWT.create(Binder.class);
 
@@ -98,6 +96,9 @@ public class UserDialog extends DialogBox {
 
         if (user != null && user.getName() != null) { // username is not modifiable for existing users
             kerberosNameBox.setEnabled(false);
+        } else {                                        //GH name cannot be modified with null kerberos
+            setKerberosNameBoxActiveValidation();
+            gitHubNameBox.setEnabled(false);
         }
 
         // set field values
@@ -130,7 +131,7 @@ public class UserDialog extends DialogBox {
                 userToSave.setWhitelisted(whitelistedCheckBox.getValue());
 
                 // save
-                administrationService.editUser(userToSave, new AsyncCallback<EntityUpdateResult<KerberosUser>>() {
+                administrationService.editUser(userToSave, kerberosNameBox.isEnabled(), gitHubNameBox.isEnabled(), new AsyncCallback<EntityUpdateResult<KerberosUser>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         ExceptionHandler.handle("Couldn't save user.", caught);
@@ -166,12 +167,7 @@ public class UserDialog extends DialogBox {
     private void initRegisterDialog() {
         setText("Register User");
 
-        kerberosNameBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                setActiveKrbAccount(kerberosNameBox.getText());
-            }
-        });
+        setKerberosNameBoxActiveValidation();
 
         submitButton.addClickHandler(new ClickHandler() {
             @Override
@@ -179,7 +175,10 @@ public class UserDialog extends DialogBox {
                 // create new user instance
                 final KerberosUser user = new KerberosUser();
 
-                user.setName(kerberosNameBox.getText());
+                //krb name must be null, when not entered because of the unique constraint
+                String userName = kerberosNameBox.getText();
+
+                user.setName(userName.isEmpty() ? null : userName);
                 user.setGithubName(gitHubNameBox.getText());
                 user.setAdmin(adminCheckBox.getValue());
                 user.setWhitelisted(whitelistedCheckBox.getValue());
@@ -188,7 +187,7 @@ public class UserDialog extends DialogBox {
                 administrationService.registerUser(user, new AsyncCallback<EntityUpdateResult<KerberosUser>>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        ExceptionHandler.handle("Couldn't save user. Check whether the kerberos username is unique.", caught);
+                        ExceptionHandler.handle("Couldn't save user.", caught);
                     }
 
                     @Override
@@ -214,6 +213,15 @@ public class UserDialog extends DialogBox {
             public void onClick(ClickEvent event) {
                 UserDialog.this.hide();
                 UserDialog.this.removeFromParent();
+            }
+        });
+    }
+
+    private void setKerberosNameBoxActiveValidation() {
+        kerberosNameBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                setActiveKrbAccount(kerberosNameBox.getText());
             }
         });
     }

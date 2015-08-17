@@ -84,7 +84,7 @@ public class KerberosUser implements Serializable {
     }
 
     /**
-     * Compare primarily by krb name. If that is not available, compare by github name.
+     * User can have a null name, so two entities are equal only when they have the same github name.
      *
      * @param o object to compare to
      * @return are equal?
@@ -96,13 +96,12 @@ public class KerberosUser implements Serializable {
 
         KerberosUser that = (KerberosUser) o;
 
-        if (krb5Name != null && that.krb5Name != null) return krb5Name.equals(that.krb5Name);
-        return githubName != null && githubName.equals(that.githubName);
+        return githubName.equals(that.githubName);
     }
 
     @Override
     public int hashCode() {
-        int result = krb5Name != null ? krb5Name.hashCode() : 0;
+        int result = 17;
         result = 31 * result + (githubName != null ? githubName.hashCode() : 0);
         return result;
     }

@@ -135,22 +135,32 @@ public class GitHubSubscriptionBean {
 
             // fetch users and create Subscription objects
             final Map<String, Subscription> subscriptionMap = new HashMap<String, Subscription>(allUsers.size());
+            //list needed to hold the null values, to avoid creating collection for each entry key
+            final List<Subscription> result = new ArrayList<Subscription>();
             for (KerberosUser user: allUsers) {
                 final Subscription subscription = new Subscription();
                 subscription.setKerberosUser(user);
                 subscription.setGitHubName(user.getGithubName());
-                subscriptionMap.put(user.getName(), subscription);
+
+                if(user.getName() != null) {
+                    subscriptionMap.put(user.getName(), subscription);
+                } else {
+                    //cannot be active when the value is null
+                    subscription.setActiveKerberosAccount(false);
+                    result.add(subscription);
+                }
             }
 
             // check LDAP records for retrieved users
             final Map<String, Boolean> checkedLdapUsers = ldapRepository.checkUsersExists(subscriptionMap.keySet());
-            for (Map.Entry<String, Boolean> checkedLdapUser: checkedLdapUsers.entrySet()) {
+            for (Map.Entry<String, Boolean> checkedLdapUser : checkedLdapUsers.entrySet()) {
                 if (checkedLdapUser.getValue()) {
                     subscriptionMap.get(checkedLdapUser.getKey()).setActiveKerberosAccount(true);
                 }
             }
 
-            return new ArrayList<Subscription>(subscriptionMap.values());
+            result.addAll(0, subscriptionMap.values());
+            return result;
         } catch (HibernateException e) {
             throw new ApplicationException(e);
         }
