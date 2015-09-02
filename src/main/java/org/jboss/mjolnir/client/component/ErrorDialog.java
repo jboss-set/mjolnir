@@ -3,7 +3,6 @@ package org.jboss.mjolnir.client.component;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.logging.impl.StackTracePrintStream;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -33,10 +32,11 @@ public class ErrorDialog extends DialogBox {
 
 
         // message
-
-        final HTMLPanel messagePara = new HTMLPanel("p", message);
-        messagePara.setStyleName("strongText");
-        panel.add(messagePara);
+        if (message != null) {
+            final HTMLPanel messagePara = new HTMLPanel("p", message);
+            messagePara.setStyleName("strongText");
+            panel.add(messagePara);
+        }
 
         String reason = "Reason: " + throwable.getMessage();
         if (throwable.getCause() != null) {
@@ -49,13 +49,12 @@ public class ErrorDialog extends DialogBox {
         // stack trace para
 
         final HTMLPanel stacktracePara = new HTMLPanel("p", "");
-        final Anchor showStackAnchor = new Anchor("Show stacktrace");
+        final Anchor showStackAnchor = new Anchor("Show exceptions");
         showStackAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                StringBuilder sb = new StringBuilder();
-                throwable.printStackTrace(new StackTracePrintStream(sb));
-                stacktracePara.add(new HTMLPanel("pre", sb.toString()));
+                // try to show causing exceptions - they aren't available on the client side most of the time, but let's try
+                stacktracePara.add(new HTMLPanel("pre", buildExceptionChain(throwable)));
                 showStackAnchor.removeFromParent();
             }
         });
@@ -78,5 +77,17 @@ public class ErrorDialog extends DialogBox {
             }
         });
         buttonPanel.add(continueButton);
+    }
+
+    private static String buildExceptionChain(Throwable throwable) {
+        StringBuilder sb = new StringBuilder();
+        while (throwable != null) {
+            sb.append(throwable.getClass().getSimpleName())
+                    .append(": ")
+                    .append(throwable.getMessage())
+                    .append("\n");
+            throwable = throwable.getCause();
+        }
+        return sb.toString();
     }
 }

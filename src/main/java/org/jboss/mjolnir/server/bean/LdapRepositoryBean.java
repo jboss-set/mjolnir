@@ -1,5 +1,6 @@
 package org.jboss.mjolnir.server.bean;
 
+import org.jboss.logging.Logger;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.ldap.LdapClient;
 import org.jboss.mjolnir.server.util.KerberosUtils;
@@ -27,6 +28,8 @@ public class LdapRepositoryBean implements LdapRepository {
 
     private static final String CONTEXT_NAME = "ou=users,dc=redhat,dc=com";
     private static final int GROUPING_FACTOR = 50; // query for so many users at a time
+    private static final String LDAP_SEARCH_ERROR = "Couldn't create LDAP client instance";
+    private static final Logger logger = Logger.getLogger(LdapRepositoryBean.class);
 
     @EJB
     private ApplicationParameters applicationParameters;
@@ -57,7 +60,8 @@ public class LdapRepositoryBean implements LdapRepository {
             results.close();
             return found;
         } catch (NamingException e) {
-            throw new ApplicationException("Couldn't perform directory search.", e);
+            logger.error(LDAP_SEARCH_ERROR, e);
+            throw new ApplicationException(LDAP_SEARCH_ERROR + e.getMessage(), e);
         }
     }
 
@@ -115,7 +119,8 @@ public class LdapRepositoryBean implements LdapRepository {
 
             return result;
         } catch (NamingException e) {
-            throw new ApplicationException("Couldn't perform directory search.", e);
+            logger.error(LDAP_SEARCH_ERROR, e);
+            throw new ApplicationException(LDAP_SEARCH_ERROR + e.getMessage(), e);
         }
     }
 

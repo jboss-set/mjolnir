@@ -60,7 +60,7 @@ public class SubscriptionSummaryScreen extends Composite {
                 administrationService.getOrganizationMembers(new AsyncCallback<List<SubscriptionSummary>>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        ExceptionHandler.handle(caught);
+                        ExceptionHandler.handle("Couldn't load organization members.", caught);
                     }
 
                     @Override
