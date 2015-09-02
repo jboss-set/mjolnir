@@ -2,12 +2,12 @@ package org.jboss.mjolnir.server.bean;
 
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.entities.ApplicationParameterEntity;
-import org.jboss.mjolnir.server.util.JpaUtils;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Singleton;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.sql.SQLException;
@@ -30,6 +30,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Local(ApplicationParameters.class)
 public class ApplicationParametersBean implements ApplicationParameters, ApplicationParametersRemote {
 
+    @Inject
     private EntityManagerFactory entityManagerFactory;
 
     private Map<String, String> parameters = Collections.synchronizedMap(new HashMap<String, String>());
@@ -37,7 +38,6 @@ public class ApplicationParametersBean implements ApplicationParameters, Applica
     @PostConstruct
     public void initBean() {
         try {
-            entityManagerFactory = JpaUtils.getEntityManagerFactory();
             reloadParameters();
         } catch (SQLException e) {
             throw new ApplicationException("Couldn't load application configuration.", e);

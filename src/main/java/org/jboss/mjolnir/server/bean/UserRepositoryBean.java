@@ -3,12 +3,11 @@ package org.jboss.mjolnir.server.bean;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.entities.UserEntity;
-import org.jboss.mjolnir.server.util.JpaUtils;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
@@ -24,12 +23,8 @@ import java.util.List;
 @Stateless
 public class UserRepositoryBean implements UserRepository {
 
+    @Inject
     private EntityManagerFactory entityManagerFactory;
-
-    @PostConstruct
-    public void initBean() {
-        entityManagerFactory = JpaUtils.getEntityManagerFactory();
-    }
 
     @Override
     public KerberosUser getUser(String kerberosName) {
