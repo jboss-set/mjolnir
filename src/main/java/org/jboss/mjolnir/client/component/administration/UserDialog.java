@@ -23,7 +23,9 @@ import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
  */
 public class UserDialog extends DialogBox {
 
-    interface Binder extends UiBinder<Widget, UserDialog> {}
+    interface Binder extends UiBinder<Widget, UserDialog> {
+    }
+
     private static Binder uiBinder = GWT.create(Binder.class);
 
     private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
@@ -59,7 +61,7 @@ public class UserDialog extends DialogBox {
         //the value of the activeCheckBox cannot be changed
         activeAccountCheckBox.setEnabled(false);
 
-        switch(dialogType) {
+        switch (dialogType) {
             case EDIT:
                 initEditDialog(user);
                 break;
@@ -74,7 +76,8 @@ public class UserDialog extends DialogBox {
         EDIT
     }
 
-    protected void onSave(KerberosUser savedUser) {}
+    protected void onSave(KerberosUser savedUser) {
+    }
 
     private void setActiveKrbAccount(String uid) {
         //check whether the account is active kerberos
@@ -123,10 +126,16 @@ public class UserDialog extends DialogBox {
                 }
 
                 // set updated data
-                if (user == null || user.getName() == null) { // username is not modifiable for existing users
-                    userToSave.setName(kerberosNameBox.getText());
+                //krb name must be null, when not entered because of the unique constraint
+                String userName = kerberosNameBox.getText();
+                userToSave.setName(userName.isEmpty() ? null : userName);
+
+                if (userToSave.getGithubName().equals(gitHubNameBox.getText())) {
+                    gitHubNameBox.setEnabled(false);
+                } else {
+                    userToSave.setGithubName(gitHubNameBox.getText());
                 }
-                userToSave.setGithubName(gitHubNameBox.getText());
+
                 userToSave.setAdmin(adminCheckBox.getValue());
                 userToSave.setWhitelisted(whitelistedCheckBox.getValue());
 

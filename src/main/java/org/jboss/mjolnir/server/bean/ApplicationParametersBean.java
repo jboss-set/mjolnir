@@ -1,15 +1,15 @@
 package org.jboss.mjolnir.server.bean;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.entities.ApplicationParameterEntity;
-import org.jboss.mjolnir.server.util.HibernateUtils;
+import org.jboss.mjolnir.server.util.JpaUtils;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Singleton;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,14 +30,14 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Local(ApplicationParameters.class)
 public class ApplicationParametersBean implements ApplicationParameters, ApplicationParametersRemote {
 
-    private SessionFactory sessionFactory;
+    private EntityManagerFactory entityManagerFactory;
 
     private Map<String, String> parameters = Collections.synchronizedMap(new HashMap<String, String>());
 
     @PostConstruct
     public void initBean() {
         try {
-            sessionFactory = HibernateUtils.getSessionFactory();
+            entityManagerFactory = JpaUtils.getEntityManagerFactory();
             reloadParameters();
         } catch (SQLException e) {
             throw new ApplicationException("Couldn't load application configuration.", e);
@@ -46,15 +46,15 @@ public class ApplicationParametersBean implements ApplicationParameters, Applica
 
     @Override
     public void reloadParameters() throws SQLException {
-        final Session session = sessionFactory.openSession();
+        final EntityManager em = entityManagerFactory.createEntityManager();
         final List<ApplicationParameterEntity> parametersList =
-                session.createCriteria(ApplicationParameterEntity.class).list();
+                em.createQuery("FROM ApplicationParameterEntity", ApplicationParameterEntity.class).getResultList();
 
         for (ApplicationParameterEntity param : parametersList) {
             parameters.put(param.getParamName(), param.getParamValue());
         }
 
-        session.close();
+        em.close();
     }
 
     @Override
@@ -81,11 +81,9 @@ public class ApplicationParametersBean implements ApplicationParameters, Applica
         param.setParamName(name);
         param.setParamValue(value);
 
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
+        EntityManager em = entityManagerFactory.createEntityManager();
 
-        session.saveOrUpdate(param);
-        session.getTransaction().commit();
-        session.close();
+        em.merge(param);
+        em.close();
     }
 }

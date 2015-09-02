@@ -1,0 +1,18 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+    <persistence-unit name="MjolnirPU" transaction-type="JTA">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+
+        <class>org.jboss.mjolnir.server.entities.ApplicationParameterEntity</class>
+        <class>org.jboss.mjolnir.server.entities.GithubTeamEntity</class>
+        <class>org.jboss.mjolnir.server.entities.GithubOrganizationEntity</class>
+        <class>org.jboss.mjolnir.server.entities.UserEntity</class>
+
+        <properties>
+            <property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.JBossAppServerJtaPlatform" />
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL82Dialect" />
+        </properties>
+    </persistence-unit>
+</persistence>

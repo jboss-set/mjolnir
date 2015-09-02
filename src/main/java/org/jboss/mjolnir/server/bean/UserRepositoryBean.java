@@ -1,19 +1,17 @@
 package org.jboss.mjolnir.server.bean;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.entities.UserEntity;
-import org.jboss.mjolnir.server.util.HibernateUtils;
+import org.jboss.mjolnir.server.util.JpaUtils;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagementType;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -24,14 +22,13 @@ import java.util.List;
  * @author Tomas Hofman (thofman@redhat.com)
  */
 @Stateless
-@javax.ejb.TransactionManagement(TransactionManagementType.BEAN)
 public class UserRepositoryBean implements UserRepository {
 
-    private SessionFactory sessionFactory;
+    private EntityManagerFactory entityManagerFactory;
 
     @PostConstruct
     public void initBean() {
-        sessionFactory = HibernateUtils.getSessionFactory();
+        entityManagerFactory = JpaUtils.getEntityManagerFactory();
     }
 
     @Override
@@ -48,29 +45,26 @@ public class UserRepositoryBean implements UserRepository {
 
         KerberosUser user = null;
 
-        Session session = sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(UserEntity.class);
+        EntityManager em = entityManagerFactory.createEntityManager();
+        TypedQuery<UserEntity> getUserQuery = null;
 
         switch (userName) {
             case KERBEROS:
-                criteria.add(Restrictions.eq("kerberosName", param));
+                getUserQuery = em.createQuery("FROM UserEntity WHERE kerberosName=:name", UserEntity.class);
                 break;
             case GITHUB:
-                criteria.add(Restrictions.eq("githubName", param));
+                getUserQuery = em.createQuery("FROM UserEntity WHERE githubName=:name", UserEntity.class);
                 break;
         }
 
-        UserEntity userEntity = (UserEntity) criteria.uniqueResult();
+        List<UserEntity> result = getUserQuery.setParameter("name", param).getResultList();
 
-        if (userEntity != null) {
-            user = new KerberosUser();
-            user.setName(userEntity.getKerberosName());
-            user.setGithubName(userEntity.getGithubName());
-            user.setAdmin(userEntity.isAdmin());
-            user.setWhitelisted(userEntity.isWhitelisted());
+        if (result.size() == 1) {
+            UserEntity userEntity = result.get(0);
+            user = convertUserEntity(userEntity);
         }
 
-        session.close();
+        em.close();
         return user;
     }
 
@@ -103,46 +97,40 @@ public class UserRepositoryBean implements UserRepository {
     private void insertUser(KerberosUser user) {
         UserEntity userEntity = convertUser(user);
 
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        session.save(userEntity);
-        session.getTransaction().commit();
-        session.close();
+        EntityManager em = entityManagerFactory.createEntityManager();
+        em.persist(userEntity);
+        em.close();
     }
 
     private boolean updateUser(KerberosUser user) {
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
 
-        UserEntity userEntity = getUserFromDB(user, session);
+        EntityManager em = entityManagerFactory.createEntityManager();
+
+        UserEntity userEntity = getUserFromDB(user, em);
 
         if (userEntity == null) {
             //user is not stored in the DB
             return false;
         }
 
-        session.update(userEntity);
-        session.getTransaction().commit();
-        session.close();
+        userEntity.setKerberosName(user.getName());
+        userEntity.setGithubName(user.getGithubName());
+        userEntity.setAdmin(user.isAdmin());
+        userEntity.setWhitelisted(user.isWhitelisted());
+        em.close();
 
         return true;
     }
 
     @Override
     public List<KerberosUser> getAllUsers() {
-        Session session = sessionFactory.openSession();
+        EntityManager em = entityManagerFactory.createEntityManager();
 
-        //the criteria query list() method always produces List<UserEntity> because the query runs on this class/table
-        @SuppressWarnings("unchecked")
-        List<UserEntity> entityList = session.createCriteria(UserEntity.class).list();
-        final List<KerberosUser> users = new ArrayList<KerberosUser>();
+        List<UserEntity> entityList = em.createQuery("FROM UserEntity", UserEntity.class).getResultList();
+        final List<KerberosUser> users = new ArrayList<>();
 
         for (UserEntity entity : entityList) {
-            final KerberosUser user = new KerberosUser();
-            user.setName(entity.getKerberosName());
-            user.setGithubName(entity.getGithubName());
-            user.setAdmin(entity.isAdmin());
-            user.setWhitelisted(entity.isWhitelisted());
+            final KerberosUser user = convertUserEntity(entity);
             users.add(user);
         }
 
@@ -151,18 +139,17 @@ public class UserRepositoryBean implements UserRepository {
 
     @Override
     public void deleteUser(KerberosUser user) {
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
 
-        UserEntity userEntity = getUserFromDB(user, session);
+        EntityManager em = entityManagerFactory.createEntityManager();
 
-        if (user == null) {
+        UserEntity userEntity = getUserFromDB(user, em);
+
+        if (userEntity == null) {
             throw new ApplicationException("Couldn't delete user - user not found.");
         }
 
-        session.delete(userEntity);
-        session.getTransaction().commit();
-        session.close();
+        em.remove(userEntity);
+        em.close();
     }
 
     @Override
@@ -187,31 +174,46 @@ public class UserRepositoryBean implements UserRepository {
         return userEntity;
     }
 
-    private UserEntity getUserFromDB(KerberosUser user, Session session) {
+    private KerberosUser convertUserEntity(UserEntity userEntity) {
+        KerberosUser kerberosUser = new KerberosUser();
+        kerberosUser.setName(userEntity.getKerberosName());
+        kerberosUser.setGithubName(userEntity.getGithubName());
+        kerberosUser.setAdmin(userEntity.isAdmin());
+        kerberosUser.setWhitelisted(userEntity.isWhitelisted());
+
+        return kerberosUser;
+    }
+
+    private UserEntity getUserFromDB(KerberosUser user, EntityManager em) {
         if (user == null) {
             throw new ApplicationException("Cannot retrieve a null user from the DB.");
         }
-        if (session == null) {
+        if (em == null) {
             throw new ApplicationException("Cannot open a DB connection.");
         }
 
-        UserEntity userEntity;
+        List<UserEntity> userEntities;
 
         //first check GH name because krb name can be null
         //githubName is unique in the DB
-        userEntity = (UserEntity) session.createCriteria(UserEntity.class)
-                .add(Restrictions.eq("githubName", user.getGithubName())).uniqueResult();
+        userEntities = em.createQuery("FROM UserEntity WHERE githubName=:name", UserEntity.class)
+                .setParameter("name", user.getGithubName()).getResultList();
 
         //kerberosName is unique in the DB
-        if (userEntity == null) {
-            userEntity = (UserEntity) session.createCriteria(UserEntity.class)
-                    .add(Restrictions.eq("kerberosName", user.getName())).uniqueResult();
+        if (userEntities.size() == 0) {
+            userEntities = em.createQuery("FROM UserEntity WHERE kerberosName=:name", UserEntity.class)
+                    .setParameter("name", user.getName()).getResultList();
         }
 
-        userEntity.setKerberosName(user.getName());
-        userEntity.setGithubName(user.getGithubName());
-        userEntity.setAdmin(user.isAdmin());
-        userEntity.setWhitelisted(user.isWhitelisted());
+        UserEntity userEntity = null;
+
+        if (userEntities.size() == 1) {
+            userEntity = userEntities.get(0);
+            userEntity.setKerberosName(user.getName());
+            userEntity.setGithubName(user.getGithubName());
+            userEntity.setAdmin(user.isAdmin());
+            userEntity.setWhitelisted(user.isWhitelisted());
+        }
 
         return userEntity;
     }
