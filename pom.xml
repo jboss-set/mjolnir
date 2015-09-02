@@ -145,6 +145,9 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
                 <version>${gwt.version}</version>
+                <configuration>
+                    <module>org.jboss.mjolnir.Mjolnir</module>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -255,6 +258,15 @@
                                     <directory>${devel.webapp-dir}</directory>
                                 </resource>
                             </webResources>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <version>${gwt.version}</version>
+                        <configuration combine.children="override">
+                            <module>org.jboss.mjolnir.MjolnirDev</module>
                         </configuration>
                     </plugin>
                 </plugins>
