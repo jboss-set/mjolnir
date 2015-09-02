@@ -209,10 +209,6 @@ public class UserRepositoryBean implements UserRepository {
 
         if (userEntities.size() == 1) {
             userEntity = userEntities.get(0);
-            userEntity.setKerberosName(user.getName());
-            userEntity.setGithubName(user.getGithubName());
-            userEntity.setAdmin(user.isAdmin());
-            userEntity.setWhitelisted(user.isWhitelisted());
         }
 
         return userEntity;
