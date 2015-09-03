@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * @author Tomas Hofman (thofman@redhat.com)
  */
-@RemoteServiceRelativePath("ReportingService")
+@RemoteServiceRelativePath("auth/ReportingService")
 @XsrfProtect
 public interface ReportingService extends RemoteService {
 
