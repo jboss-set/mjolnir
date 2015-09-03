@@ -21,7 +21,7 @@ h1 {
     color: #555;
 }
 
-table button {
+button.gwt-Button.narrow {
     padding: 0;
     margin: 0 1px;
 }
@@ -58,6 +58,19 @@ table th input[type=text] {
     font-size: 0;
     height: 0;
     clear: both;
+}
+
+/*
+ Fix for GTK+3 built firefox running on Gnome with dark theme.
+
+ (Input elements inherit system dark background color, which makes them unreadable when text is explicitly
+ set to dark color in CSS but background is left default.)
+*/
+.gwt-Button, .gwt-TextBox, .gwt-PasswordTextBox, select, input[type="text"], textarea {
+    color: #000;
+}
+.gwt-TextBox, .gwt-PasswordTextBox, select, input[type="text"], textarea {
+    background: #fff;
 }
 
 #loading-panel {

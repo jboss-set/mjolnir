@@ -119,7 +119,7 @@ public class SubscriptionScreen extends Composite {
         for (GithubOrganization organization : organizations) {
             panel.add(new HTMLPanel("h3", "Organization " + organization.getName()));
 
-            final CellTable<GithubTeam> cellTable = new CellTable<GithubTeam>();
+            final CellTable<GithubTeam> cellTable = new CellTable<>();
             final TextColumn<GithubTeam> nameColumn = new TextColumn<GithubTeam>() {
                 @Override
                 public String getValue(GithubTeam team) {

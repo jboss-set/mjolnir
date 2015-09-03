@@ -1,6 +1,7 @@
 package org.jboss.mjolnir.client.component.administration;
 
 import com.google.gwt.cell.client.ActionCell;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.XsrfToken;
@@ -68,7 +69,7 @@ public class RegisteredUsersScreen extends Composite {
         SubscriptionsTable table = new SubscriptionsTable(subscriptions) {
             protected void addDefaultActionCells() {
                 // edit button
-                addActionCell(new ConditionalActionCell<Subscription>("Edit", new EditDelegate(this)));
+                addActionCell(new ConditionalActionCell<>(SafeHtmlUtils.fromString("Edit"), new EditDelegate(this)));
                 super.addDefaultActionCells();
             }
         };
@@ -91,7 +92,7 @@ public class RegisteredUsersScreen extends Composite {
                     new ConfirmationDialog("Delete " + selectedItems.size() + " users from Mjolnir database?", DELETE_USER_SUBTEXT) {
                         @Override
                         public void onConfirm() {
-                            final List<KerberosUser> users = new ArrayList<KerberosUser>();
+                            final List<KerberosUser> users = new ArrayList<>();
                             for (Subscription item : selectedItems) {
                                 KerberosUser user = item.getKerberosUser();
                                 if (user != null) {

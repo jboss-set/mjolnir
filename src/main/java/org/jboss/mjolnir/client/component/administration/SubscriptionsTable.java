@@ -21,6 +21,7 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -390,11 +391,8 @@ public class SubscriptionsTable extends Composite {
     }
 
     protected void addDefaultActionCells() {
-        // edit button
-//        hasCells.add(new ConditionalActionCell<Subscription>("Edit", new EditDelegate()));
-
         // subscriptions button
-        addActionCell(new ConditionalActionCell<Subscription>("Subscriptions", new SubscribeDelegate()) {
+        addActionCell(new ConditionalActionCell<Subscription>(SafeHtmlUtils.fromString("Subscriptions"), new SubscribeDelegate()) {
             @Override
             public boolean isEnabled(Subscription value) {
                 return value.getGitHubName() != null;
