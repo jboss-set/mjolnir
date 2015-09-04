@@ -21,9 +21,9 @@ import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.CurrentUser;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.component.util.HTMLUtil;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.client.service.GitHubServiceAsync;
-import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 
 import java.util.logging.Logger;
 

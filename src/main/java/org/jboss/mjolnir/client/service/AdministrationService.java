@@ -6,10 +6,10 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.exception.ApplicationException;
-import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 
 import java.util.Collection;
 import java.util.List;

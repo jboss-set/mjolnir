@@ -1,10 +1,10 @@
 package org.jboss.mjolnir.client.domain;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Represents validation result.

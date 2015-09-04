@@ -1,10 +1,10 @@
 package org.jboss.mjolnir.server.service.validation;
 
+import org.jboss.mjolnir.client.domain.ValidationResult;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.jboss.mjolnir.client.domain.ValidationResult;
 
 /**
  * Groups Validations

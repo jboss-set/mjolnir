@@ -1,13 +1,12 @@
 package org.jboss.mjolnir.server.service.validation;
 
-import java.io.IOException;
-
-import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.UserService;
 import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.client.domain.ValidationResult;
+import org.jboss.mjolnir.client.exception.ApplicationException;
+
+import java.io.IOException;
 
 /**
  * Verifies that given username is registered on GitHub

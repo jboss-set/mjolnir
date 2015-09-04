@@ -2,8 +2,6 @@ package org.jboss.mjolnir.client.component.util;
 
 import java.util.List;
 
-import com.google.gwt.user.client.ui.HTML;
-
 /**
  * @author Tomas Hofman (thofman@redhat.com)
  */
