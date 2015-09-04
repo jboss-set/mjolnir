@@ -38,6 +38,7 @@ import org.jboss.mjolnir.server.bean.UserRepository;
 import org.jboss.mjolnir.server.github.ExtendedTeamService;
 import org.jboss.mjolnir.server.service.validation.GitHubNameExistsValidation;
 import org.jboss.mjolnir.server.service.validation.GitHubNameTakenValidation;
+import org.jboss.mjolnir.server.service.validation.Validation;
 import org.jboss.mjolnir.server.service.validation.Validator;
 
 import javax.ejb.EJB;
@@ -64,6 +65,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     private ExtendedTeamService teamService;
 
     private Validator<KerberosUser> validator;
+    private Validation<KerberosUser> githubNameTakenValidation;
 
     @Override
     public void init() throws ServletException {
@@ -76,8 +78,9 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
         teamService = new ExtendedTeamService(client);
         UserService userService = new UserService(client);
 
-        validator = new Validator<KerberosUser>();
-        validator.addValidation(new GitHubNameTakenValidation(userRepository));
+        validator = new Validator<>();
+        githubNameTakenValidation = new GitHubNameTakenValidation(userRepository);
+        validator.addValidation(githubNameTakenValidation);
         validator.addValidation(new GitHubNameExistsValidation(userService));
     }
 
@@ -91,8 +94,13 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             log("Changing githubName for KerberosUser " + krb5Name + ". Old name is " + user.getGithubName() + ". New name " +
                     "is " + newGithubName);
 
+            if(user.getGithubName().equals(newGithubName)) {
+                validator.removeValidation(githubNameTakenValidation);
+            }
+
             user.setGithubName(newGithubName);
             ValidationResult validationResult = validator.validate(user);
+            validator.addValidation(githubNameTakenValidation);
             if (validationResult.isOK()) {
                 userRepository.saveOrUpdateUser(user);
                 setAuthenticatedUser(user); // update session with current instance
