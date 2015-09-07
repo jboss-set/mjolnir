@@ -25,8 +25,8 @@ import java.util.Set;
 @Stateless
 public class LdapRepositoryBean implements LdapRepository {
 
-    private final static String CONTEXT_NAME = "ou=users,dc=redhat,dc=com";
-    private final static int GROUPING_FACTOR = 50; // query for so many users at a time
+    private static final String CONTEXT_NAME = "ou=users,dc=redhat,dc=com";
+    private static final int GROUPING_FACTOR = 50; // query for so many users at a time
 
     @EJB
     private ApplicationParameters applicationParameters;

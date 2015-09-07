@@ -35,6 +35,7 @@ import java.util.Set;
  */
 public class AdministrationServiceImpl extends AbstractAdminRestrictedService implements AdministrationService {
 
+
     @EJB
     private ApplicationParameters applicationParameters;
 

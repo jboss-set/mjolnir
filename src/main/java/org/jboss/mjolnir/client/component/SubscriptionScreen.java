@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class SubscriptionScreen extends Composite {
 
-    private final static String GITHUB_NAME_DIALOG_MESSAGE = "Before you can manage your subscriptions, please specify your GitHub name.";
+    private static final String GITHUB_NAME_DIALOG_MESSAGE = "Before you can manage your subscriptions, please specify your GitHub name.";
 
     private GitHubServiceAsync gitHubService = GitHubService.Util.getInstance();
     private VerticalPanel panel = new VerticalPanel();

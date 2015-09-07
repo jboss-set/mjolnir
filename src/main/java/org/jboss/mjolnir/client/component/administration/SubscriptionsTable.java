@@ -537,7 +537,7 @@ public class SubscriptionsTable extends Composite {
         }
     }
 
-    public static interface ActionDelegate {
+    public interface ActionDelegate {
         void execute(List<Subscription> selectedItems);
     }
 

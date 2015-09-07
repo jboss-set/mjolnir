@@ -9,9 +9,9 @@ import java.sql.SQLException;
  */
 public interface ApplicationParameters {
 
-    public final static String GITHUB_TOKEN_KEY = "github.token";
+    String GITHUB_TOKEN_KEY = "github.token";
 
-    public final static String LDAP_URL_KEY = "ldap.url";
+    String LDAP_URL_KEY = "ldap.url";
 
     /**
      * Retrieves parameter value.

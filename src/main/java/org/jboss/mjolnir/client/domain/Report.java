@@ -8,6 +8,8 @@ import java.util.List;
  */
 public class Report<D> implements Serializable {
 
+
+    private static final long serialVersionUID = -6959204799863942608L;
     private transient D data;
     private String content;
     private String uuid;

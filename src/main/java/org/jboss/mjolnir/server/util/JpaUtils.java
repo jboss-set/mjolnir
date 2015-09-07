@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class JpaUtils {
 
-    private final static Logger logger = Logger.getLogger(JndiUtils.class);
+    private static final Logger logger = Logger.getLogger(JndiUtils.class);
 
     private static EntityManagerFactory entityManagerFactory;
 

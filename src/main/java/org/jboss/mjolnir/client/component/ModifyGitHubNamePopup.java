@@ -25,8 +25,6 @@ import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.client.service.GitHubServiceAsync;
 
-import java.util.logging.Logger;
-
 /**
  * Popup allowing user to change his GitHub name
  *
@@ -37,7 +35,6 @@ public class ModifyGitHubNamePopup extends PopupPanel {
     interface Binder extends UiBinder<Widget, ModifyGitHubNamePopup> {}
     private static Binder uiBinder = GWT.create(Binder.class);
 
-    private Logger logger = Logger.getLogger("");
     private GitHubServiceAsync gitHubService = GitHubService.Util.getInstance();
 
     @UiField

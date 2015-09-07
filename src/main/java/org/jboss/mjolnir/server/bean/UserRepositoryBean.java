@@ -48,13 +48,10 @@ public class UserRepositoryBean implements UserRepository {
         EntityManager em = entityManagerFactory.createEntityManager();
         TypedQuery<UserEntity> getUserQuery = null;
 
-        switch (userName) {
-            case KERBEROS:
-                getUserQuery = em.createQuery("FROM UserEntity WHERE kerberosName=:name", UserEntity.class);
-                break;
-            case GITHUB:
-                getUserQuery = em.createQuery("FROM UserEntity WHERE githubName=:name", UserEntity.class);
-                break;
+        if (userName == UserName.KERBEROS) {
+            getUserQuery = em.createQuery("FROM UserEntity WHERE kerberosName=:name", UserEntity.class);
+        } else {
+            getUserQuery = em.createQuery("FROM UserEntity WHERE githubName=:name", UserEntity.class);
         }
 
         List<UserEntity> result = getUserQuery.setParameter("name", param).getResultList();

@@ -13,7 +13,7 @@ import javax.sql.DataSource;
  */
 public class JndiUtils {
 
-    private final static Logger logger = Logger.getLogger(JndiUtils.class);
+    private static final Logger logger = Logger.getLogger(JndiUtils.class);
 
     private static Context context;
     private static DataSource dataSource;
