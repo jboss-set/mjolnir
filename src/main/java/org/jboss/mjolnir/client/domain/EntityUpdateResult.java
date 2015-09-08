@@ -1,12 +1,11 @@
 package org.jboss.mjolnir.client.domain;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)

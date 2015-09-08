@@ -72,7 +72,8 @@ public class RegisteredUsersScreen extends Composite {
                 super.addDefaultActionCells();
             }
         };
-        table.addAction("Delete", new DeleteDelegate(table), true);
+        table.addAction("Delete", new DeleteDelegate(table), true, false);
+        table.addAction("Register", new RegisterDelegate(table), true, true);
         return table;
     }
 
@@ -88,36 +89,36 @@ public class RegisteredUsersScreen extends Composite {
         public void execute(final List<Subscription> selectedItems) {
             ConfirmationDialog dialog =
                     new ConfirmationDialog("Delete " + selectedItems.size() + " users from Mjolnir database?", DELETE_USER_SUBTEXT) {
-                @Override
-                public void onConfirm() {
-                    final List<KerberosUser> users = new ArrayList<KerberosUser>();
-                    for (Subscription item: selectedItems) {
-                        KerberosUser user = item.getKerberosUser();
-                        if (user != null) {
-                            users.add(user);
-                        }
-                    }
-
-                    logger.info("Deleting items " + Arrays.toString(users.toArray()));
-
-                    administrationService.deleteUsers(users, new AsyncCallback<Void>() {
                         @Override
-                        public void onFailure(Throwable caught) {
-                            ExceptionHandler.handle(caught);
-                        }
+                        public void onConfirm() {
+                            final List<KerberosUser> users = new ArrayList<KerberosUser>();
+                            for (Subscription item : selectedItems) {
+                                KerberosUser user = item.getKerberosUser();
+                                if (user != null) {
+                                    users.add(user);
+                                }
+                            }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            onDeleted(selectedItems);
+                            logger.info("Deleting items " + Arrays.toString(users.toArray()));
+
+                            administrationService.deleteUsers(users, new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    ExceptionHandler.handle(caught);
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    onDeleted(selectedItems);
+                                }
+                            });
                         }
-                    });
-                }
-            };
+                    };
             dialog.center();
         }
 
         private void onDeleted(Collection<Subscription> deletedItems) {
-            for (Subscription item: deletedItems) {
+            for (Subscription item : deletedItems) {
                 // remove object from the list
                 table.getItemList().remove(item);
             }
@@ -144,7 +145,7 @@ public class RegisteredUsersScreen extends Composite {
                 userToEdit = new KerberosUser();
                 userToEdit.setGithubName(object.getGitHubName());
             }
-            final EditUserDialog editDialog = new EditUserDialog(userToEdit) {
+            final UserDialog editDialog = new UserDialog(userToEdit, UserDialog.DialogType.EDIT) {
                 @Override
                 protected void onSave(KerberosUser savedUser) {
                     onEdited(object, savedUser);
@@ -167,6 +168,39 @@ public class RegisteredUsersScreen extends Composite {
             table.getDataProvider().refresh();
         }
 
+    }
+
+    /**
+     * Register button delegate.
+     */
+    private class RegisterDelegate implements SubscriptionsTable.ActionDelegate {
+
+        private SubscriptionsTable table;
+
+        public RegisterDelegate(SubscriptionsTable table) {
+            this.table = table;
+        }
+
+        @Override
+        public void execute(final List<Subscription> selectedItems) {
+            //display register dialog
+            final UserDialog registerDialog = new UserDialog(null, UserDialog.DialogType.REGISTER) {
+                @Override
+                protected void onSave(KerberosUser savedUser) {
+                    onRegistered(savedUser, activeAccountCheckBox.getValue());
+                }
+            };
+            registerDialog.center();
+        }
+
+        private void onRegistered(KerberosUser user, boolean isActiveKrb) {
+            Subscription subscription = new Subscription();
+            subscription.setKerberosUser(user);
+            subscription.setGitHubName(user.getGithubName());
+            subscription.setActiveKerberosAccount(isActiveKrb);
+            table.getItemList().add(subscription);
+            table.refresh();
+        }
     }
 
 }

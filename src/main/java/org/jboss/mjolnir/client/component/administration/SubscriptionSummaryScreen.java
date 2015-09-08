@@ -1,9 +1,6 @@
 package org.jboss.mjolnir.client.component.administration;
 
-import com.google.gwt.cell.client.ActionCell;
-import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -17,7 +14,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.component.ConfirmationDialog;
 import org.jboss.mjolnir.client.component.LoadingPanel;
-import org.jboss.mjolnir.client.component.table.ConditionalActionCell;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.service.AdministrationService;
@@ -81,7 +77,7 @@ public class SubscriptionSummaryScreen extends Composite {
 
     private void createSubscriptionTable(SubscriptionSummary subscriptionSummary) {
         SubscriptionsTable table = new SubscriptionsTable(subscriptionSummary.getSubscriptions());
-        table.addAction("Unsubscribe", new UnsubscribeActionDelegate(table), true);
+        table.addAction("Unsubscribe", new UnsubscribeActionDelegate(table), true, false);
 
         panel.add(new HTMLPanel("h3", subscriptionSummary.getOrganization().getName()));
         panel.add(table);

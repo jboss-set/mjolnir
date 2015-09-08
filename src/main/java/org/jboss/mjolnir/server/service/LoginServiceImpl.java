@@ -23,6 +23,7 @@
 package org.jboss.mjolnir.server.service;
 
 import com.sun.security.auth.login.ConfigFile;
+import org.hibernate.HibernateException;
 import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
 import org.jboss.mjolnir.client.service.LoginService;
@@ -40,7 +41,6 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.sql.SQLException;
 
 /**
  * Provides authentication methods.
@@ -84,7 +84,7 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
             log("URISyntaxException caught. Big problem here.");
             throw new LoginFailedException("There is a problem with the login on the server. Please contact " +
                     "jboss-set@redhat.com");
-        } catch (SQLException e) {
+        } catch (HibernateException e) {
             throw new LoginFailedException(e.getMessage());
         }
         log("Login succeeded. Returning 'true'");

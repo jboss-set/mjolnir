@@ -7,15 +7,11 @@ import org.jboss.mjolnir.server.util.KerberosUtils;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +25,8 @@ import java.util.Set;
 @Stateless
 public class LdapRepositoryBean implements LdapRepository {
 
-    private final static String CONTEXT_NAME = "ou=users,dc=redhat,dc=com";
-    private final static int GROUPING_FACTOR = 50; // query for so many users at a time
+    private static final String CONTEXT_NAME = "ou=users,dc=redhat,dc=com";
+    private static final int GROUPING_FACTOR = 50; // query for so many users at a time
 
     @EJB
     private ApplicationParameters applicationParameters;

@@ -1,10 +1,10 @@
 package org.jboss.mjolnir.server.service.validation;
 
+import org.jboss.mjolnir.client.domain.ValidationResult;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.jboss.mjolnir.client.domain.ValidationResult;
 
 /**
  * Groups Validations
@@ -16,7 +16,13 @@ public class Validator<X extends Serializable> implements Validation<X> {
     private List<Validation<X>> validations = new ArrayList<Validation<X>>();
 
     public void addValidation(Validation<X> validation) {
-        validations.add(validation);
+        if(!validations.contains(validation)) {
+            validations.add(validation);
+        }
+    }
+
+    public void removeValidation(Validation<X> validation) {
+        validations.remove(validation);
     }
 
     @Override

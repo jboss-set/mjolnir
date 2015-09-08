@@ -1,11 +1,8 @@
 package org.jboss.mjolnir.server.ldap;
 
-import org.jboss.mjolnir.client.exception.ApplicationException;
-
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;

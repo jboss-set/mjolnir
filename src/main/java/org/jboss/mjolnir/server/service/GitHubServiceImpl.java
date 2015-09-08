@@ -22,30 +22,31 @@
 
 package org.jboss.mjolnir.server.service;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.ejb.EJB;
-import javax.servlet.ServletException;
-
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.UserService;
+import org.hibernate.HibernateException;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
+import org.jboss.mjolnir.client.domain.ValidationResult;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.client.service.GitHubService;
-import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.OrganizationRepository;
 import org.jboss.mjolnir.server.bean.UserRepository;
 import org.jboss.mjolnir.server.github.ExtendedTeamService;
 import org.jboss.mjolnir.server.service.validation.GitHubNameExistsValidation;
 import org.jboss.mjolnir.server.service.validation.GitHubNameTakenValidation;
-import org.jboss.mjolnir.client.domain.ValidationResult;
+import org.jboss.mjolnir.server.service.validation.Validation;
 import org.jboss.mjolnir.server.service.validation.Validator;
+
+import javax.ejb.EJB;
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * {@inheritDoc}
@@ -64,6 +65,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     private ExtendedTeamService teamService;
 
     private Validator<KerberosUser> validator;
+    private Validation<KerberosUser> githubNameTakenValidation;
 
     @Override
     public void init() throws ServletException {
@@ -76,8 +78,9 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
         teamService = new ExtendedTeamService(client);
         UserService userService = new UserService(client);
 
-        validator = new Validator<KerberosUser>();
-        validator.addValidation(new GitHubNameTakenValidation(userRepository));
+        validator = new Validator<>();
+        githubNameTakenValidation = new GitHubNameTakenValidation(userRepository);
+        validator.addValidation(githubNameTakenValidation);
         validator.addValidation(new GitHubNameExistsValidation(userService));
     }
 
@@ -91,10 +94,15 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             log("Changing githubName for KerberosUser " + krb5Name + ". Old name is " + user.getGithubName() + ". New name " +
                     "is " + newGithubName);
 
+            if(user.getGithubName().equals(newGithubName)) {
+                validator.removeValidation(githubNameTakenValidation);
+            }
+
             user.setGithubName(newGithubName);
             ValidationResult validationResult = validator.validate(user);
+            validator.addValidation(githubNameTakenValidation);
             if (validationResult.isOK()) {
-                userRepository.saveUser(user);
+                userRepository.saveOrUpdateUser(user);
                 setAuthenticatedUser(user); // update session with current instance
                 log("Successfully modified GithubName for KerberosUser " + krb5Name);
                 return EntityUpdateResult.ok(user);
@@ -102,7 +110,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
                 log("Validation failure: " + validationResult);
                 return EntityUpdateResult.validationFailure(validationResult);
             }
-        } catch (SQLException e) {
+        } catch (HibernateException e) {
             throw new ApplicationException(e);
         }
     }
@@ -112,8 +120,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
         final String githubName = getCurrentUserGitHubName();
         try {
             final String state = teamService.addMembership(teamId, githubName);
-            log("Successfully added " + githubName + " to team.");
-            return state;
+            log("Successfully added " + githubName + " to team.");            return state;
         } catch (IOException e) {
             final String message = "Unable to subscribe user " + githubName + " to team #" + teamId + ": " + e.getMessage();
             log(message, e);

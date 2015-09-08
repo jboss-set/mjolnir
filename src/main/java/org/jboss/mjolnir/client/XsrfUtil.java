@@ -34,7 +34,7 @@ public class XsrfUtil {
         });
     }
 
-    public static interface Callback {
+    public interface Callback {
         void onSuccess(XsrfToken token);
     }
 }

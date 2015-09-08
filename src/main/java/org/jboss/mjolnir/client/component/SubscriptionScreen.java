@@ -35,17 +35,29 @@ import java.util.Set;
  */
 public class SubscriptionScreen extends Composite {
 
-    private final static String GITHUB_NAME_DIALOG_MESSAGE = "Before you can manage your subscriptions, please specify your GitHub name.";
+    private static final String GITHUB_NAME_DIALOG_MESSAGE = "Before you can manage your subscriptions, please specify your GitHub name.";
 
     private GitHubServiceAsync gitHubService = GitHubService.Util.getInstance();
     private VerticalPanel panel = new VerticalPanel();
     private LoadingPanel loadingPanel = new LoadingPanel();
 
+    private boolean teamsLoaded;
+    private Widget tables;
+
     public SubscriptionScreen() {
         initWidget(panel);
 
+        loadPanel();
+    }
+
+    public void reloadSubscriptions() {
+        checkGitHubNameAndCreateContent();
+    }
+
+    private void loadPanel() {
         panel.add(new HTMLPanel("h2", "Subscribe to GitHub Teams"));
         panel.add(loadingPanel);
+
         checkGitHubNameAndCreateContent();
     }
 
@@ -81,11 +93,20 @@ public class SubscriptionScreen extends Composite {
 
                         @Override
                         public void onSuccess(Set<GithubOrganization> result) {
-                            loadingPanel.removeFromParent();
 
-                            // add subscription table
-                            panel.add(new GitHubNamePanel());
-                            panel.add(createSubscriptionTable(result));
+                            if(!teamsLoaded) {
+                                teamsLoaded = true;
+                                loadingPanel.removeFromParent();
+
+                                // add subscription table
+                                panel.add(new GitHubNamePanel(SubscriptionScreen.this));
+                                tables = createSubscriptionTable(result);
+                                panel.add(tables);
+                            } else {
+                                panel.clear();
+                                teamsLoaded = false;
+                                loadPanel();
+                            }
                         }
                     });
                 }

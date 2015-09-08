@@ -26,7 +26,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import org.jboss.mjolnir.authentication.KerberosUser;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.component.table.ConditionalActionCell;
 import org.jboss.mjolnir.client.component.table.DropDownCell;
@@ -198,10 +197,10 @@ public class SubscriptionsTable extends Composite {
     }
 
     public void addAction(String caption, final ActionDelegate delegate) {
-        addAction(caption, delegate, false);
+        addAction(caption, delegate, false, false);
     }
 
-    public void addAction(String caption, final ActionDelegate delegate, boolean separator) {
+    public void addAction(String caption, final ActionDelegate delegate, boolean separator, boolean isPermanentAction) {
         Button button = new Button(caption, new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -209,7 +208,12 @@ public class SubscriptionsTable extends Composite {
                 delegate.execute(selectedItemsCopy);
             }
         });
-        button.setEnabled(false);
+
+        if(isPermanentAction) {
+            button.setEnabled(true);
+        } else {
+            button.setEnabled(false);
+        }
 
         if (separator) {
             HTMLPanel span = new HTMLPanel("span", " | ");
@@ -219,7 +223,9 @@ public class SubscriptionsTable extends Composite {
             buttonsPanel.add(new HTMLPanel("span", " "));
         }
 
-        actionButtons.add(button);
+        if(!isPermanentAction) {
+            actionButtons.add(button);
+        }
         buttonsPanel.add(button);
     }
 
@@ -531,7 +537,7 @@ public class SubscriptionsTable extends Composite {
         }
     }
 
-    public static interface ActionDelegate {
+    public interface ActionDelegate {
         void execute(List<Subscription> selectedItems);
     }
 

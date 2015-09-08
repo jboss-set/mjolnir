@@ -1,26 +1,26 @@
 package org.jboss.mjolnir.server.bean;
 
 import org.jboss.mjolnir.client.exception.ApplicationException;
-import org.jboss.mjolnir.server.util.JndiUtils;
+import org.jboss.mjolnir.server.entities.ApplicationParameterEntity;
+import org.jboss.mjolnir.server.util.JpaUtils;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Singleton;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * {@inheritDoc}
- * <p/>
+ * <p>
  * Application parameters are loaded during bean initialization and are held in memory.
  *
  * @author Tomas Hofman (thofman@redhat.com)
@@ -30,18 +30,14 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Local(ApplicationParameters.class)
 public class ApplicationParametersBean implements ApplicationParameters, ApplicationParametersRemote {
 
-    private final static String READ_SQL = "select param_name, param_value from application_parameters";
-    private final static String INSERT_SQL = "insert into application_parameters (param_value, param_name) values (?, ?)";
-    private final static String UPDATE_SQL = "update application_parameters set param_value = ? where param_name = ?";
-
-    private DataSource dataSource;
+    private EntityManagerFactory entityManagerFactory;
 
     private Map<String, String> parameters = Collections.synchronizedMap(new HashMap<String, String>());
 
     @PostConstruct
     public void initBean() {
         try {
-            dataSource = JndiUtils.getDataSource();
+            entityManagerFactory = JpaUtils.getEntityManagerFactory();
             reloadParameters();
         } catch (SQLException e) {
             throw new ApplicationException("Couldn't load application configuration.", e);
@@ -50,20 +46,15 @@ public class ApplicationParametersBean implements ApplicationParameters, Applica
 
     @Override
     public void reloadParameters() throws SQLException {
-        final Connection connection = dataSource.getConnection();
-        try {
-            final PreparedStatement statement = connection.prepareStatement(READ_SQL);
-            final ResultSet resultSet = statement.executeQuery();
+        final EntityManager em = entityManagerFactory.createEntityManager();
+        final List<ApplicationParameterEntity> parametersList =
+                em.createQuery("FROM ApplicationParameterEntity", ApplicationParameterEntity.class).getResultList();
 
-            while (resultSet.next()) {
-                final String param_name = resultSet.getString("param_name");
-                final String param_value = resultSet.getString("param_value");
-                parameters.put(param_name, param_value);
-            }
-            resultSet.close();
-        } finally {
-            connection.close();
+        for (ApplicationParameterEntity param : parametersList) {
+            parameters.put(param.getParamName(), param.getParamValue());
         }
+
+        em.close();
     }
 
     @Override
@@ -86,22 +77,13 @@ public class ApplicationParametersBean implements ApplicationParameters, Applica
 
     @Override
     public void setParameter(String name, String value) throws SQLException {
-        final Connection connection = dataSource.getConnection();
-        try {
-            final PreparedStatement statement;
+        ApplicationParameterEntity param = new ApplicationParameterEntity();
+        param.setParamName(name);
+        param.setParamValue(value);
 
-            if (parameters.containsKey(name)) {
-                statement = connection.prepareStatement(UPDATE_SQL);
-            } else {
-                statement = connection.prepareStatement(INSERT_SQL);
-            }
-            statement.setString(1, value);
-            statement.setString(2, name);
-            statement.execute();
+        EntityManager em = entityManagerFactory.createEntityManager();
 
-            parameters.put(name, value);
-        } finally {
-            connection.close();
-        }
+        em.merge(param);
+        em.close();
     }
 }

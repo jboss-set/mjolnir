@@ -11,6 +11,18 @@
                 <td>GitHub Name: </td>
                 <td><g:TextBox ui:field="gitHubNameBox"/></td>
             </tr>
+            <tr>
+                <td>Admin: </td>
+                <td><g:CheckBox ui:field="adminCheckBox"/></td>
+            </tr>
+            <tr>
+                <td>Whitelisted: </td>
+                <td><g:CheckBox ui:field="whitelistedCheckBox"/></td>
+            </tr>
+            <tr>
+                <td>Active Krb account: </td>
+                <td><g:CheckBox ui:field="activeAccountCheckBox"/></td>
+            </tr>
         </table>
         <p class="error"><g:HTML ui:field="feedbackLabel"/></p>
         <p style="text-align: right;">

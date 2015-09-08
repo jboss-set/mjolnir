@@ -57,7 +57,7 @@ public class Subscription implements Serializable {
     }
 
     /**
-     * Compare primarily by krb name. If that is not available, compare by github name.
+     * User can have a null name, so two entities are equal only when they have the same github name.
      *
      * @param o object to compare to
      * @return are equal?
@@ -69,9 +69,7 @@ public class Subscription implements Serializable {
 
         Subscription that = (Subscription) o;
 
-        if (kerberosUser != null && that.kerberosUser != null)
-            return kerberosUser.getName().equals(that.kerberosUser.getName());
-        return gitHubName != null && gitHubName.equals(that.gitHubName);
+        return gitHubName.equals(that.gitHubName);
 
     }
 

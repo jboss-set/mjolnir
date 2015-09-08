@@ -28,7 +28,7 @@ public class GitHubNamePanel extends Composite {
     @UiField
     Button changeButton;
 
-    public GitHubNamePanel() {
+    public GitHubNamePanel(final SubscriptionScreen screen) {
         initWidget(uiBinder.createAndBindUi(this));
 
         gitHubNameLabel.setText(CurrentUser.get().getGithubName());
@@ -41,6 +41,7 @@ public class GitHubNamePanel extends Composite {
                     protected void onSaved(KerberosUser modifiedUser) {
                         // update displayed label value
                         gitHubNameLabel.setText(modifiedUser.getGithubName());
+                        screen.reloadSubscriptions();
                     }
                 };
                 popup.center();

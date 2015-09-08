@@ -3,9 +3,9 @@ package org.jboss.mjolnir.client.service;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.domain.SubscriptionSummary;
-import org.jboss.mjolnir.client.domain.EntityUpdateResult;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,11 +21,15 @@ public interface AdministrationServiceAsync {
 
     void getRegisteredUsers(AsyncCallback<List<Subscription>> async);
 
+    void checkUserExists(String userName, AsyncCallback<Boolean> async);
+
+    void registerUser(KerberosUser user, AsyncCallback<EntityUpdateResult<KerberosUser>> async);
+
     void deleteUser(KerberosUser user, AsyncCallback<Void> asyncCallback);
 
     void deleteUsers(Collection<KerberosUser> user, AsyncCallback<Void> asyncCallback);
 
-    void editUser(KerberosUser user, AsyncCallback<EntityUpdateResult<KerberosUser>> asyncCallback);
+    void editUser(KerberosUser user, boolean validateKrbName, boolean validateGHname, AsyncCallback<EntityUpdateResult<KerberosUser>> asyncCallback);
 
     void getSubscriptions(String gitHubName, AsyncCallback<Set<GithubOrganization>> asyncCallback);
 

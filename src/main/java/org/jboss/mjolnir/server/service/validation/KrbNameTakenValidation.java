@@ -7,15 +7,12 @@ import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.bean.UserRepository;
 
 /**
- * Verifies that given GH name is not used by different Mjolnir user
- *
- * @author Tomas Hofman (thofman@redhat.com)
+ * @author Martin Stefanko (mstefank@redhat.com)
  */
-public class GitHubNameTakenValidation implements Validation<KerberosUser> {
-
+public class KrbNameTakenValidation implements Validation<KerberosUser> {
     private UserRepository userRepository;
 
-    public GitHubNameTakenValidation(UserRepository userRepository) {
+    public KrbNameTakenValidation(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -23,9 +20,9 @@ public class GitHubNameTakenValidation implements Validation<KerberosUser> {
     public ValidationResult validate(KerberosUser entity) {
         try {
             ValidationResult result = new ValidationResult();
-            KerberosUser userByGitHubName = userRepository.getUserByGitHubName(entity.getGithubName());
-            if (userByGitHubName != null && userByGitHubName.equals(entity)) {
-                result.addFailure("This GitHub name is already taken by different user.");
+            KerberosUser user = userRepository.getUser(entity.getName());
+            if (user != null && user.getName() != null) {
+                result.addFailure("This Kerberos name is already taken by different user.");
             }
             return result;
         } catch (HibernateException e) {

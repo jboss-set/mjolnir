@@ -2,7 +2,6 @@ package org.jboss.mjolnir.server.bean;
 
 import org.jboss.mjolnir.authentication.KerberosUser;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public interface UserRepository {
      * @param kerberosName krb name
      * @return user instance or null
      */
-    KerberosUser getUser(String kerberosName) throws SQLException;
+    KerberosUser getUser(String kerberosName);
 
     /**
      * Returns user by his GitHub name.
@@ -27,42 +26,46 @@ public interface UserRepository {
      * @param gitHubName krb name
      * @return user instance or null
      */
-    KerberosUser getUserByGitHubName(String gitHubName) throws SQLException;
+    KerberosUser getUserByGitHubName(String gitHubName);
 
     /**
-     * Updates existing user.
+     * Saves new user.
      *
      * @param kerberosUser user
      */
-    void saveUser(KerberosUser kerberosUser) throws SQLException;
+    void saveUser(KerberosUser kerberosUser);
+
+    /**
+     * Save or updates existing user.
+     *
+     * @param kerberosUser user
+     */
+    void saveOrUpdateUser(KerberosUser kerberosUser);
 
     /**
      * Returns user by its krb name. If user doesn't exists, creates new.
      */
-    KerberosUser getOrCreateUser(String kerberosName) throws SQLException;
+    KerberosUser getOrCreateUser(String kerberosName);
 
     /**
      * Retrieves all users in database.
      *
      * @return users
-     * @throws SQLException
      */
-    List<KerberosUser> getAllUsers() throws SQLException;
+    List<KerberosUser> getAllUsers();
 
     /**
      * Removes user from database.
      *
      * @param user user to delete
-     * @throws SQLException
      */
-    void deleteUser(KerberosUser user) throws SQLException;
+    void deleteUser(KerberosUser user);
 
     /**
      * Removes users from database.
      *
      * @param users users to delete
-     * @throws SQLException
      */
-    void deleteUsers(Collection<KerberosUser> users) throws SQLException;
+    void deleteUsers(Collection<KerberosUser> users);
 
 }

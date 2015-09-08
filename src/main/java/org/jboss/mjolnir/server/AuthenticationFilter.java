@@ -18,7 +18,7 @@ import java.io.IOException;
  */
 public class AuthenticationFilter implements Filter {
 
-    public static String AUTHENTICATED_USER_SESSION_KEY = "MJOLNIR_USER";
+    public static final String AUTHENTICATED_USER_SESSION_KEY = "MJOLNIR_USER";
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
