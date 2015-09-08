@@ -17,7 +17,7 @@ import org.jboss.mjolnir.server.util.JndiUtils;
  */
 public class EntityManagerFactoryProducer {
 
-    private final static Logger logger = Logger.getLogger(JndiUtils.class);
+    private static final Logger logger = Logger.getLogger(JndiUtils.class);
 
     @Produces @ApplicationScoped
     EntityManagerFactory createEntityManager() {
