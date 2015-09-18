@@ -41,7 +41,7 @@ import java.util.Set;
  * @author Tomas Hofman (thofman@redhat.com)
  */
 
-@RemoteServiceRelativePath("GitHubService")
+@RemoteServiceRelativePath("auth/GitHubService")
 @XsrfProtect
 public interface GitHubService extends RemoteService {
 

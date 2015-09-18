@@ -1,10 +1,11 @@
 Mjolnir
 =======
 
-This is a tool that is run as a web-app which will allow Github users to be authenticated to specific teams within organizations. The server that this application is running on requires Kerberos installed on it first. Kerberos should be configured in the file jaas.config.
+This tool allows users to self-subscribe to selected GitHub organizations according to their needs. It also contains
+an administration interface allowing browsing, searching and managing GitHub subscriptions and can generate report
+on subscribed users. 
 
-Note that the organizations and teams which this application can handle are determined through XML. The xml file to configure is called github-team-data.xml.
-
+CI Job: https://travis-ci.org/jboss-set/mjolnir
 
 Building
 -----------
@@ -15,7 +16,8 @@ This project is designed to be built by Apache Maven (developed on 3.0.4). You c
 mvn clean jboss-as:deploy
 ```
 
-When using `dev` profile, created WAR won't require HTTPS, enabling GWT codeserver to be used.
+When using `dev` profile, created WAR won't require HTTPS, enabling GWT codeserver to be used. It also limits number
+of GWT permutation that are compiled to only Firefox and Google Chrome versions.
 
 Running
 -------

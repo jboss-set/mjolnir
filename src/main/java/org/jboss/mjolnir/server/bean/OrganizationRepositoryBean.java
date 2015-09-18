@@ -4,10 +4,9 @@ import org.jboss.mjolnir.authentication.GithubOrganization;
 import org.jboss.mjolnir.authentication.GithubTeam;
 import org.jboss.mjolnir.server.entities.GithubOrganizationEntity;
 import org.jboss.mjolnir.server.entities.GithubTeamEntity;
-import org.jboss.mjolnir.server.util.JpaUtils;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.sql.SQLException;
@@ -25,12 +24,8 @@ import java.util.Set;
 @Stateless
 public class OrganizationRepositoryBean implements OrganizationRepository {
 
+    @Inject
     private EntityManagerFactory entityManagerFactory;
-
-    @PostConstruct
-    public void initBean() {
-        entityManagerFactory = JpaUtils.getEntityManagerFactory();
-    }
 
     @Override
     public Set<GithubOrganization> getOrganizations() throws SQLException {

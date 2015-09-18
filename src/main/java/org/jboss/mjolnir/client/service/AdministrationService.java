@@ -21,7 +21,7 @@ import java.util.Set;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-@RemoteServiceRelativePath("AdministrationService")
+@RemoteServiceRelativePath("auth/AdministrationService")
 @XsrfProtect
 public interface AdministrationService extends RemoteService {
 
@@ -47,7 +47,7 @@ public interface AdministrationService extends RemoteService {
 
     Collection<Subscription> whitelist(Collection<Subscription> subscriptions, boolean whitelist);
 
-    public static class Util {
+    class Util {
         private static AdministrationServiceAsync instance;
 
         public static AdministrationServiceAsync getInstance() {

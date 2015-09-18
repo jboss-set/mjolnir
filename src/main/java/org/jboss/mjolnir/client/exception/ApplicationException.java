@@ -7,6 +7,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
+@javax.ejb.ApplicationException(rollback = true)
 public class ApplicationException extends RuntimeException implements IsSerializable {
     public ApplicationException() {
     }

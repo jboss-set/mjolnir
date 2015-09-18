@@ -4,6 +4,7 @@ import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.HasCell;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 /**
@@ -13,14 +14,19 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
  */
 public class ConditionalActionCell<C> extends ActionCell<C> implements HasCell<C, C> {
 
-    public ConditionalActionCell(String text, Delegate<C> delegate) {
-        super(text, delegate);
+    private SafeHtml html;
+
+    public ConditionalActionCell(SafeHtml message, Delegate<C> delegate) {
+        super(message, delegate);
+        this.html = new SafeHtmlBuilder().appendHtmlConstant(
+                "<button type=\"button\" class=\"gwt-Button narrow\" tabindex=\"-1\">").append(message).appendHtmlConstant(
+                "</button>").toSafeHtml();
     }
 
     @Override
     public void render(Context context, C value, SafeHtmlBuilder sb) {
         if (isEnabled(value)) {
-            super.render(context, value, sb);
+            sb.append(html);
         }
     }
 

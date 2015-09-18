@@ -94,20 +94,10 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
             <version>${hibernate.version}</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>xalan</groupId>
-                <artifactId>xalan</artifactId>
-                <version>2.7.1</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
 
     <build>
 
@@ -145,6 +135,9 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
                 <version>${gwt.version}</version>
+                <configuration>
+                    <module>org.jboss.mjolnir.Mjolnir</module>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -208,7 +201,7 @@
                         <id>check-style</id>
                         <phase>compile</phase>
                         <goals>
-                            <goal>checkstyle</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -220,17 +213,61 @@
                 <version>${findbugs.version}</version>
                 <configuration>
                     <xmlOutput>true</xmlOutput>
-                    <xmlOutputDirectory>target/findBugs</xmlOutputDirectory>
+                    <xmlOutputDirectory>target/findbugs</xmlOutputDirectory>
+                    <findbugsXmlOutputDirectory>target/findbugs</findbugsXmlOutputDirectory>
                 </configuration>
                 <executions>
                     <execution>
                         <id>find-bugs</id>
-                        <phase>compile</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>findbugs</goal>
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xml-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <transformationSets>
+                        <transformationSet>
+                            <dir>${project.build.directory}/findbugs</dir>
+                            <includes>
+                                <include>findbugsXml.xml</include>
+                            </includes>
+                            <outputDir>${project.build.directory}/findbugs</outputDir>
+                            <!--<stylesheet>fancy-hist.xsl</stylesheet>-->
+                            <!--<stylesheet>default.xsl</stylesheet>-->
+                            <!--<stylesheet>plain.xsl</stylesheet>-->
+                            <stylesheet>fancy.xsl</stylesheet>
+                            <!--<stylesheet>summary.xsl</stylesheet>-->
+                            <fileMappers>
+                                <fileMapper
+                                        implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
+                                    <targetExtension>.html</targetExtension>
+                                </fileMapper>
+                            </fileMappers>
+                        </transformationSet>
+                    </transformationSets>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.google.code.findbugs</groupId>
+                        <artifactId>findbugs</artifactId>
+                        <version>3.0.1</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
 
@@ -257,6 +294,15 @@
                             </webResources>
                         </configuration>
                     </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <version>${gwt.version}</version>
+                        <configuration combine.children="override">
+                            <module>org.jboss.mjolnir.MjolnirDev</module>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -264,8 +310,8 @@
 
     <repositories>
         <repository>
-	  <id>JBoss repository</id>
-	  <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+            <id>JBoss repository</id>
+            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
         </repository>
     </repositories>
 
