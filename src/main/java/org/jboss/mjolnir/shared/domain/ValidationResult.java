@@ -1,4 +1,4 @@
-package org.jboss.mjolnir.client.domain;
+package org.jboss.mjolnir.shared.domain;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 

@@ -1,5 +1,14 @@
 package org.jboss.mjolnir.client.component.administration;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -14,6 +23,7 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -21,7 +31,6 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -31,18 +40,9 @@ import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.component.table.ConditionalActionCell;
 import org.jboss.mjolnir.client.component.table.DropDownCell;
 import org.jboss.mjolnir.client.component.table.TwoRowHeaderBuilder;
-import org.jboss.mjolnir.client.domain.Subscription;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
+import org.jboss.mjolnir.shared.domain.Subscription;
 
 /**
  * Table composite displaying list of Subscriptions objects.
@@ -51,6 +51,7 @@ import java.util.logging.Logger;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
+@Deprecated
 public class SubscriptionsTable extends Composite {
 
     private static final int PAGE_SIZE = 50;
@@ -61,8 +62,6 @@ public class SubscriptionsTable extends Composite {
         KRB_ACCOUNT_FILTER_OPTIONS.add("yes");
         KRB_ACCOUNT_FILTER_OPTIONS.add("no");
     }
-
-    private static final Logger logger = Logger.getLogger(SubscriptionsTable.class.getName());
 
     protected HTMLPanel panel = new HTMLPanel("");
     private HTMLPanel buttonsPanel = new HTMLPanel("");

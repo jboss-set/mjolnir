@@ -5,11 +5,11 @@ import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.OrganizationService;
 import org.hibernate.HibernateException;
-import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.authentication.GithubTeam;
-import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.domain.Subscription;
-import org.jboss.mjolnir.client.domain.SubscriptionSummary;
+import org.jboss.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.mjolnir.shared.domain.GithubTeam;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
+import org.jboss.mjolnir.shared.domain.Subscription;
+import org.jboss.mjolnir.shared.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.github.ExtendedTeamService;
 

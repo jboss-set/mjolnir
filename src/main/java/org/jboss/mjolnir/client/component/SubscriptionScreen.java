@@ -17,14 +17,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.authentication.GithubTeam;
-import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.mjolnir.shared.domain.GithubTeam;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 import org.jboss.mjolnir.client.CurrentUser;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.service.GitHubService;
 import org.jboss.mjolnir.client.service.GitHubServiceAsync;
-import org.jboss.mjolnir.server.github.MembershipStates;
+import org.jboss.mjolnir.shared.domain.MembershipStates;
 
 import java.util.Set;
 
@@ -33,6 +33,7 @@ import java.util.Set;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
+@Deprecated
 public class SubscriptionScreen extends Composite {
 
     private static final String GITHUB_NAME_DIALOG_MESSAGE = "Before you can manage your subscriptions, please specify your GitHub name.";

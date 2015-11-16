@@ -2,8 +2,8 @@ package org.jboss.mjolnir.server.service.validation;
 
 import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.UserService;
-import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.domain.ValidationResult;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
+import org.jboss.mjolnir.shared.domain.ValidationResult;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 
 import java.io.IOException;

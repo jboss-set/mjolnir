@@ -7,7 +7,7 @@ import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.DefaultHeaderOrFooterBuilder;
 import com.google.gwt.user.cellview.client.Header;
-import org.jboss.mjolnir.client.domain.Subscription;
+import org.jboss.mjolnir.shared.domain.Subscription;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ public class TwoRowHeaderBuilder extends DefaultHeaderOrFooterBuilder<Subscripti
 
         // Get the common style names.
         AbstractCellTable.Style style = getTable().getResources().style();
-        String className = style.header();
+        String className = style.header() + "Filter";
         String classes;
 
         if (isBuildingFooter()) {

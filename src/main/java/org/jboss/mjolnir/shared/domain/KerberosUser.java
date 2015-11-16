@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.mjolnir.authentication;
+package org.jboss.mjolnir.shared.domain;
 
 import java.io.Serializable;
 
@@ -37,6 +37,7 @@ public class KerberosUser implements Serializable {
     private String githubName;
     private boolean admin;
     private boolean whitelisted;
+    private boolean loggedIn;
 
     public String getName() {
         return krb5Name;
@@ -68,6 +69,14 @@ public class KerberosUser implements Serializable {
 
     public void setWhitelisted(boolean whitelisted) {
         this.whitelisted = whitelisted;
+    }
+
+    public boolean isLoggedIn() {
+        return loggedIn;
+    }
+
+    public void setLoggedIn(boolean loggedIn) {
+        this.loggedIn = loggedIn;
     }
 
     public KerberosUser copy() {

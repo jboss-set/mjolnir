@@ -12,12 +12,16 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gwt.version>2.7.0</gwt.version>
         <devel.webapp-dir>${project.build.directory}/devel-web-inf</devel.webapp-dir>
+
+        <gwt.version>2.7.0</gwt.version>
+        <gwtp.version>1.5.1</gwtp.version>
         <hibernate.version>4.2.15.Final</hibernate.version>
+
         <checkstyle.version>2.9.1</checkstyle.version>
-        <org.wildfly.wildfly.build.config.version>8.0.0.Final</org.wildfly.wildfly.build.config.version>
         <findbugs.version>3.0.2</findbugs.version>
+
+        <org.wildfly.wildfly.build.config.version>8.0.0.Final</org.wildfly.wildfly.build.config.version>
     </properties>
 
     <dependencies>
@@ -44,6 +48,14 @@
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <version>${gwt.version}</version>
+        </dependency>
+
+        <!-- GWTP -->
+        <dependency>
+            <groupId>com.gwtplatform</groupId>
+            <artifactId>gwtp-mvp-client</artifactId>
+            <version>${gwtp.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -105,11 +117,11 @@
 
         <plugins>
 
-            <plugin>
+            <!--<plugin>
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt-codeserver</artifactId>
                 <version>${gwt.version}</version>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -137,6 +149,7 @@
                 <version>${gwt.version}</version>
                 <configuration>
                     <module>org.jboss.mjolnir.Mjolnir</module>
+                    <extraJvmArgs>-Xmx1024m</extraJvmArgs>
                 </configuration>
                 <executions>
                     <execution>
@@ -276,6 +289,9 @@
     <profiles>
         <profile>
             <id>dev</id>
+            <activation>
+                <property><name>dev</name></property>
+            </activation>
 
             <build>
                 <finalName>mjolnir-dev</finalName>

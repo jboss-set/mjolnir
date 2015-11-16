@@ -24,11 +24,13 @@
 package org.jboss.mjolnir.client.service;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
-import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 import org.jboss.mjolnir.authentication.LoginFailedException;
+import org.jboss.mjolnir.client.XsrfUtil;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 
 /**
@@ -44,13 +46,14 @@ public interface LoginService extends RemoteService {
     KerberosUser getLoggedUser() throws ApplicationException;
     void logout() throws ApplicationException;
 
-    public static class Util {
+    class Util {
         private static LoginServiceAsync instance;
 
         public static LoginServiceAsync getInstance() {
             if (instance == null) {
-                instance = (LoginServiceAsync) GWT.create(LoginService.class);
+                instance = GWT.create(LoginService.class);
             }
+            XsrfUtil.putToken((HasRpcToken) instance);
             return instance;
         }
     }

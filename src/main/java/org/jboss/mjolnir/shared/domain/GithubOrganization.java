@@ -20,54 +20,66 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.mjolnir.authentication;
+package org.jboss.mjolnir.shared.domain;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Wrapper class that holds basic information of each team in the github-team-data.xml file.
+ * Wrapper class to hold the team information for each Github organization in the github-team-data xml file.
  *
  * @author: navssurtani
  * @since: 0.1
  */
 
-public class GithubTeam implements Serializable {
+public class GithubOrganization implements Serializable {
 
     private String name;
-    private int id;
-    private String membershipState;
-    private GithubOrganization organization;
+    private List<GithubTeam> teams;
+    private String token;
 
-    public GithubTeam(String name, int id) {
-        if (name == null || id == 0) throw new NullPointerException("Null params");
+    public GithubOrganization(String name) {
         this.name = name;
-        this.id = id;
+        this.teams = new ArrayList<GithubTeam>();
     }
 
-    public GithubTeam() {
+    public GithubOrganization() {
+    }
+
+    public void addTeam(GithubTeam t) {
+        teams.add(t);
+        t.setOrganization(this);
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public List<GithubTeam> getTeams() {
+        return teams;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getId() {
-        return id;
+    public String getToken() {
+        return token;
     }
 
-    public String getMembershipState() {
-        return membershipState;
-    }
-
-    public void setMembershipState(String membershipState) {
-        this.membershipState = membershipState;
-    }
-
-    public GithubOrganization getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(GithubOrganization organization) {
-        this.organization = organization;
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        sb.append(" Org name: " + name);
+        sb.append(" Teams: ");
+        for (GithubTeam t : teams){
+            sb.append('[');
+            sb.append("Team name=" + t.getName() + " Id=" + t.getId());
+            sb.append("] ");
+        }
+        sb.append('}');
+        return sb.toString();
     }
 }

@@ -1,12 +1,13 @@
 package org.jboss.mjolnir.client;
 
-import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 
 /**
  * Singleton holding authenticated user (for client side usage).
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
+@Deprecated
 public class CurrentUser {
     private static KerberosUser currentUser;
 

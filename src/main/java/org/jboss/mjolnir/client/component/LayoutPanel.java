@@ -18,7 +18,7 @@ import org.jboss.mjolnir.client.EntryPage;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.component.administration.RegisteredUsersScreen;
 import org.jboss.mjolnir.client.component.administration.SubscriptionSummaryScreen;
-import org.jboss.mjolnir.client.domain.ReportType;
+import org.jboss.mjolnir.shared.domain.ReportType;
 import org.jboss.mjolnir.client.service.LoginService;
 import org.jboss.mjolnir.client.service.LoginServiceAsync;
 
@@ -30,6 +30,7 @@ import java.util.List;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
+@Deprecated
 public class LayoutPanel extends Composite {
 
     interface Binder extends UiBinder<Widget, LayoutPanel> {}

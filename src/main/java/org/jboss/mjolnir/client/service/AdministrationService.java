@@ -1,14 +1,16 @@
 package org.jboss.mjolnir.client.service;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
-import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.domain.EntityUpdateResult;
-import org.jboss.mjolnir.client.domain.Subscription;
-import org.jboss.mjolnir.client.domain.SubscriptionSummary;
+import org.jboss.mjolnir.client.XsrfUtil;
+import org.jboss.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
+import org.jboss.mjolnir.shared.domain.EntityUpdateResult;
+import org.jboss.mjolnir.shared.domain.Subscription;
+import org.jboss.mjolnir.shared.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 
 import java.util.Collection;
@@ -54,6 +56,7 @@ public interface AdministrationService extends RemoteService {
             if (instance == null) {
                 instance = GWT.create(AdministrationService.class);
             }
+            XsrfUtil.putToken((HasRpcToken) instance);
             return instance;
         }
     }

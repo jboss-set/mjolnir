@@ -38,7 +38,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 import org.jboss.mjolnir.client.service.LoginService;
 import org.jboss.mjolnir.client.service.LoginServiceAsync;
 
@@ -49,9 +49,10 @@ import org.jboss.mjolnir.client.service.LoginServiceAsync;
  * @author Tomas Hofman (thofman@redhat.com)
  */
 
+@Deprecated
 public abstract class LoginScreen extends Composite {
 
-    private LoginServiceAsync loginService = LoginService.Util.getInstance();
+    private LoginServiceAsync loginService;
 
     interface Binder extends UiBinder<Widget, LoginScreen> {}
     private static Binder uiBinder = GWT.create(Binder.class);

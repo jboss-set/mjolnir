@@ -22,14 +22,8 @@
 
 package org.jboss.mjolnir.server.service;
 
-import com.sun.security.auth.login.ConfigFile;
-import org.hibernate.HibernateException;
-import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.authentication.LoginFailedException;
-import org.jboss.mjolnir.client.service.LoginService;
-import org.jboss.mjolnir.server.bean.ApplicationParameters;
-import org.jboss.mjolnir.server.bean.UserRepository;
-import org.jboss.mjolnir.server.util.KerberosUtils;
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 import javax.ejb.EJB;
 import javax.security.auth.callback.Callback;
@@ -39,8 +33,15 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import java.io.IOException;
-import java.net.URISyntaxException;
+
+import com.sun.security.auth.login.ConfigFile;
+import org.hibernate.HibernateException;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
+import org.jboss.mjolnir.authentication.LoginFailedException;
+import org.jboss.mjolnir.client.service.LoginService;
+import org.jboss.mjolnir.server.bean.ApplicationParameters;
+import org.jboss.mjolnir.server.bean.UserRepository;
+import org.jboss.mjolnir.server.util.KerberosUtils;
 
 /**
  * Provides authentication methods.
@@ -71,6 +72,7 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
         try {
             validateCredentials(krb5Name, password);
             user = userRepository.getOrCreateUser(KerberosUtils.normalizeUsername(krb5Name));
+            user.setLoggedIn(true);
             setAuthenticatedUser(user);
         } catch (LoginException e) {
             log("LoginException caught from JaaS. Problem with login credentials.");
@@ -78,7 +80,7 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
 
             // The user-password combination is not correct. We should simply return false and allow the user to
             // re-enter their password.
-            return null;
+            return new KerberosUser();
         } catch (URISyntaxException e) {
             // Here there is a problem, so the onFailure() part will be called on the client side
             log("URISyntaxException caught. Big problem here.");

@@ -14,8 +14,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.component.ConfirmationDialog;
 import org.jboss.mjolnir.client.component.LoadingPanel;
-import org.jboss.mjolnir.client.domain.Subscription;
-import org.jboss.mjolnir.client.domain.SubscriptionSummary;
+import org.jboss.mjolnir.shared.domain.Subscription;
+import org.jboss.mjolnir.shared.domain.SubscriptionSummary;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
 
@@ -26,6 +26,7 @@ import java.util.List;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
+@Deprecated
 public class SubscriptionSummaryScreen extends Composite {
 
     interface Templates extends SafeHtmlTemplates {

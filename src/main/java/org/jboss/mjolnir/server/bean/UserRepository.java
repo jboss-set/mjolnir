@@ -1,6 +1,6 @@
 package org.jboss.mjolnir.server.bean;
 
-import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 
 import java.util.Collection;
 import java.util.List;

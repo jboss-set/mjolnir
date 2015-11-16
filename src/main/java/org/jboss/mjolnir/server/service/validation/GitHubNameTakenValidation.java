@@ -1,8 +1,8 @@
 package org.jboss.mjolnir.server.service.validation;
 
 import org.hibernate.HibernateException;
-import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.domain.ValidationResult;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
+import org.jboss.mjolnir.shared.domain.ValidationResult;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.bean.UserRepository;
 

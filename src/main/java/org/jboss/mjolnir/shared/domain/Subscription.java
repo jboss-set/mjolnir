@@ -1,6 +1,4 @@
-package org.jboss.mjolnir.client.domain;
-
-import org.jboss.mjolnir.authentication.KerberosUser;
+package org.jboss.mjolnir.shared.domain;
 
 import java.io.Serializable;
 

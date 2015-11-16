@@ -5,14 +5,13 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.HasRpcToken;
-import com.google.gwt.user.client.rpc.XsrfToken;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.XsrfUtil;
-import org.jboss.mjolnir.client.domain.Report;
-import org.jboss.mjolnir.client.domain.ReportType;
+import org.jboss.mjolnir.shared.domain.Report;
+import org.jboss.mjolnir.shared.domain.ReportType;
 import org.jboss.mjolnir.client.service.ReportingService;
 import org.jboss.mjolnir.client.service.ReportingServiceAsync;
 
@@ -39,21 +38,16 @@ public class ReportScreen extends Composite {
             public void onClick(ClickEvent event) {
                 resultPanel.clear();
                 resultPanel.add(new LoadingPanel());
-                XsrfUtil.obtainToken(new XsrfUtil.Callback() {
+                XsrfUtil.putToken((HasRpcToken) reportingService);
+                reportingService.generateReport(reportType, new AsyncCallback<Report>() {
                     @Override
-                    public void onSuccess(XsrfToken token) {
-                        ((HasRpcToken) reportingService).setRpcToken(token);
-                        reportingService.generateReport(reportType, new AsyncCallback<Report>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                ExceptionHandler.handle(caught);
-                            }
+                    public void onFailure(Throwable caught) {
+                        ExceptionHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(Report result) {
-                                printReport(result, reportType);
-                            }
-                        });
+                    @Override
+                    public void onSuccess(Report result) {
+                        printReport(result, reportType);
                     }
                 });
             }
@@ -98,21 +92,16 @@ public class ReportScreen extends Composite {
         @Override
         public void onClick(ClickEvent event) {
             if (Window.confirm("About to perform action '" + actionName + "'. Proceed?")) {
-                XsrfUtil.obtainToken(new XsrfUtil.Callback() {
+                XsrfUtil.putToken((HasRpcToken) reportingService);
+                reportingService.performReportAction(reportType, report.getUuid(), actionName, new AsyncCallback<Void>() {
                     @Override
-                    public void onSuccess(XsrfToken token) {
-                        ((HasRpcToken) reportingService).setRpcToken(token);
-                        reportingService.performReportAction(reportType, report.getUuid(), actionName, new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                ExceptionHandler.handle("Action failed.", caught);
-                            }
+                    public void onFailure(Throwable caught) {
+                        ExceptionHandler.handle("Action failed.", caught);
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                Window.alert("Action successful.");
-                            }
-                        });
+                    @Override
+                    public void onSuccess(Void result) {
+                        Window.alert("Action successful.");
                     }
                 });
             }

@@ -5,6 +5,7 @@ import org.eclipse.egit.github.core.client.GitHubRequest;
 import org.eclipse.egit.github.core.client.GitHubResponse;
 import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.TeamService;
+import org.jboss.mjolnir.shared.domain.MembershipStates;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;

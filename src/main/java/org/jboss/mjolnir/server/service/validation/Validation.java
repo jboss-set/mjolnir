@@ -1,6 +1,6 @@
 package org.jboss.mjolnir.server.service.validation;
 
-import org.jboss.mjolnir.client.domain.ValidationResult;
+import org.jboss.mjolnir.shared.domain.ValidationResult;
 
 import java.io.Serializable;
 

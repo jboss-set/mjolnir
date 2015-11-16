@@ -11,14 +11,14 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
-import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.authentication.GithubTeam;
+import org.jboss.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.mjolnir.shared.domain.GithubTeam;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.XsrfUtil;
 import org.jboss.mjolnir.client.component.LoadingPanel;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
-import org.jboss.mjolnir.server.github.MembershipStates;
+import org.jboss.mjolnir.shared.domain.MembershipStates;
 
 import java.util.HashMap;
 import java.util.Map;

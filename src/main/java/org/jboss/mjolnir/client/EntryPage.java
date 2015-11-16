@@ -22,6 +22,9 @@
 
 package org.jboss.mjolnir.client;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -32,7 +35,7 @@ import com.google.gwt.user.client.rpc.XsrfTokenService;
 import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 import org.jboss.mjolnir.client.component.ErrorDialog;
 import org.jboss.mjolnir.client.component.LayoutPanel;
 import org.jboss.mjolnir.client.component.LoadingPanel;
@@ -40,16 +43,13 @@ import org.jboss.mjolnir.client.component.LoginScreen;
 import org.jboss.mjolnir.client.service.LoginService;
 import org.jboss.mjolnir.client.service.LoginServiceAsync;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Application entry point
  *
  * @author navssurtani
  * @author Tomas Hofman (thofman@redhat.com)
  */
-
+@Deprecated
 public class EntryPage implements EntryPoint {
 
     /**
@@ -94,8 +94,8 @@ public class EntryPage implements EntryPoint {
 
             @Override
             public void onSuccess(XsrfToken result) {
-                loginService = LoginService.Util.getInstance();
-                ((HasRpcToken) loginService).setRpcToken(result);
+                XsrfUtil.setToken(result);
+                XsrfUtil.putToken((HasRpcToken) loginService);
 
                 loginService.getLoggedUser(new AsyncCallback<KerberosUser>() {
                     @Override

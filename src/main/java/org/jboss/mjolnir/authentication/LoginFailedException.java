@@ -26,7 +26,7 @@ package org.jboss.mjolnir.authentication;
  * @author: navssurtani
  * @since: 0.1
  */
-
+@Deprecated
 public class LoginFailedException extends RuntimeException {
     private String symbol;
 

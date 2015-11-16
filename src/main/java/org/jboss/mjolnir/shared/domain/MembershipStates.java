@@ -1,4 +1,4 @@
-package org.jboss.mjolnir.server.github;
+package org.jboss.mjolnir.shared.domain;
 
 /**
  * GitHub team membership states
