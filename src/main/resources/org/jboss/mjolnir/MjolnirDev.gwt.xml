@@ -7,7 +7,6 @@
         "http://google-web-toolkit.googlecode.com/svn/tags/2.5.1/distro-source/core/src/gwt-module.dtd">
 <module rename-to='mjolnir'>
     <!-- Inherit the core Web Toolkit stuff.-->
-    <!--<inherits name='com.google.gwt.user.User'/>-->
     <inherits name="com.gwtplatform.mvp.MvpWithEntryPoint"/>
 
     <!--Inherit the default GWT style sheet.-->
