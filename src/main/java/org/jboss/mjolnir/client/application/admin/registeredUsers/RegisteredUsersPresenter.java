@@ -1,5 +1,6 @@
-package org.jboss.mjolnir.client.application.admin.gitHubMembers;
+package org.jboss.mjolnir.client.application.admin.registeredUsers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,58 +20,42 @@ import org.jboss.mjolnir.client.application.security.IsAdminGatekeeper;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
 import org.jboss.mjolnir.client.service.DefaultCallback;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 import org.jboss.mjolnir.shared.domain.Subscription;
-import org.jboss.mjolnir.shared.domain.SubscriptionSummary;
 
 /**
- * Shows members of configured GitHub organizations.
- *
- * Allows to:
- * * whitelist
- * * unsubscribe from organization
+ * Shows users registered in Mjolnir internal database.
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyView, GitHubMembersPresenter.MyProxy>
-        implements GitHubMembersHandlers {
+public class RegisteredUsersPresenter extends Presenter<RegisteredUsersPresenter.MyView, RegisteredUsersPresenter.MyProxy>
+        implements RegisteredUsersHandlers {
 
-    public interface MyView extends View, HasUiHandlers<GitHubMembersHandlers> {
-        void setData(List<SubscriptionSummary> items);
+    public interface MyView extends View, HasUiHandlers<RegisteredUsersHandlers> {
+        void setData(List<Subscription> items);
         List<Subscription> getCurrentSubscriptionList();
         void refresh();
     }
 
     @ProxyStandard
-    @NameToken(NameTokens.GITHUB_MEMBERS)
+    @NameToken(NameTokens.REGISTERED_USERS)
     @UseGatekeeper(IsAdminGatekeeper.class)
-    public interface MyProxy extends ProxyPlace<GitHubMembersPresenter> {}
+    public interface MyProxy extends ProxyPlace<RegisteredUsersPresenter> {}
 
     private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
 
     @Inject
-    public GitHubMembersPresenter(EventBus eventBus, MyView view, MyProxy proxy) {
+    public RegisteredUsersPresenter(EventBus eventBus, MyView view, MyProxy proxy) {
         super(eventBus, view, proxy, ApplicationPresenter.SLOT_CONTENT);
         getView().setUiHandlers(this);
     }
 
     @Override
     protected void onReveal() {
-        administrationService.getOrganizationMembers(new DefaultCallback<List<SubscriptionSummary>>() {
+        administrationService.getRegisteredUsers(new DefaultCallback<List<Subscription>>() {
             @Override
-            public void onSuccess(List<SubscriptionSummary> result) {
+            public void onSuccess(List<Subscription> result) {
                 getView().setData(result);
-            }
-        });
-    }
-
-    @Override
-    public void unsubscribeUsers(final List<Subscription> selectedItems) {
-        administrationService.unsubscribe(selectedItems, new DefaultCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                // remove selected items from currently displayed list
-                getView().getCurrentSubscriptionList().removeAll(selectedItems);
-                getView().refresh();
             }
         });
     }
@@ -92,6 +77,40 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
                 getView().refresh();
             }
         });
+    }
+
+    @Override
+    public void delete(final List<Subscription> items) {
+        // collect list of KerberosUser entities
+        final List<KerberosUser> users = new ArrayList<>();
+        for (Subscription item : items) {
+            KerberosUser user = item.getKerberosUser();
+            if (user != null) {
+                users.add(user);
+            }
+        }
+
+        // call delete
+        administrationService.deleteUsers(users, new DefaultCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                for (Subscription item : items) {
+                    // remove object from the list
+                    getView().getCurrentSubscriptionList().remove(item);
+                }
+                getView().refresh();
+            }
+        });
+    }
+
+    @Override
+    public void edit(Subscription item) {
+        // TODO
+    }
+
+    @Override
+    public void register(Subscription item) {
+        // TODO
     }
 
 }

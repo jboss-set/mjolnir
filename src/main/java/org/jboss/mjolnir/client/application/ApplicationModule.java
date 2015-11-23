@@ -3,6 +3,8 @@ package org.jboss.mjolnir.client.application;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 import org.jboss.mjolnir.client.application.admin.gitHubMembers.GitHubMembersPresenter;
 import org.jboss.mjolnir.client.application.admin.gitHubMembers.GitHubMembersView;
+import org.jboss.mjolnir.client.application.admin.registeredUsers.RegisteredUsersPresenter;
+import org.jboss.mjolnir.client.application.admin.registeredUsers.RegisteredUsersView;
 import org.jboss.mjolnir.client.application.subscriptionSetting.SubscriptionSettingPresenter;
 import org.jboss.mjolnir.client.application.subscriptionSetting.SubscriptionSettingView;
 
@@ -25,5 +27,9 @@ public class ApplicationModule extends AbstractPresenterModule {
         bindPresenter(GitHubMembersPresenter.class, GitHubMembersPresenter.MyView.class,
                 GitHubMembersView.class,
                 GitHubMembersPresenter.MyProxy.class);
+
+        bindPresenter(RegisteredUsersPresenter.class, RegisteredUsersPresenter.MyView.class,
+                RegisteredUsersView.class,
+                RegisteredUsersPresenter.MyProxy.class);
     }
 }

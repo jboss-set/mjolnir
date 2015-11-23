@@ -9,4 +9,5 @@ import org.jboss.mjolnir.shared.domain.GithubTeam;
 public interface SubscribtionHandlers extends UiHandlers {
     void subscribe(GithubTeam team);
     void unsubscribe(GithubTeam team);
+    void modifyGitHubName(String username);
 }

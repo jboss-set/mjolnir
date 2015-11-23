@@ -7,11 +7,19 @@ import com.google.gwt.user.client.ui.SimplePanel;
 /**
  * @author Tomas Hofman (thofman@redhat.com)
  */
-class MenuLink extends SimplePanel {
+public class MenuLink extends SimplePanel {
+
+    private String nameToken;
+
     public MenuLink(String title, String nameToken) {
         super(Document.get().createLIElement());
         InlineHyperlink link = new InlineHyperlink(title, nameToken);
-        getElement().setInnerHTML(link.getElement().getString());
+//        getElement().setInnerHTML(link.getElement().getString());
+        setWidget(link);
+        this.nameToken = nameToken;
     }
 
+    public String getNameToken() {
+        return nameToken;
+    }
 }

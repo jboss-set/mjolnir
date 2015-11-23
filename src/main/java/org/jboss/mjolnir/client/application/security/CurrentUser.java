@@ -6,7 +6,7 @@ import org.jboss.mjolnir.shared.domain.KerberosUser;
  * (Managed by GIN)
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public class CurrentUser2 {
+public class CurrentUser {
 
     private KerberosUser user;
     private boolean loggedIn;

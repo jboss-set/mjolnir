@@ -9,16 +9,16 @@ import com.gwtplatform.mvp.client.proxy.Gatekeeper;
  */
 public class IsAdminGatekeeper implements Gatekeeper {
 
-    private CurrentUser2 currentUser2;
+    private CurrentUser currentUser;
 
     @Inject
-    public IsAdminGatekeeper(CurrentUser2 currentUser2) {
-        this.currentUser2 = currentUser2;
+    public IsAdminGatekeeper(CurrentUser currentUser) {
+        this.currentUser = currentUser;
     }
 
     @Override
     public boolean canReveal() {
-        return currentUser2.isLoggedIn() && currentUser2.getUser() != null
-                && currentUser2.getUser().isAdmin();
+        return currentUser.isLoggedIn() && currentUser.getUser() != null
+                && currentUser.getUser().isAdmin();
     }
 }

@@ -55,8 +55,8 @@
         </g:north>
         <g:west size="200">
             <g:FlowPanel styleName="{style.westPanel} menuPanel">
-                <menu:MainMenu ui:field="mainMenu"/>
-                <menu:AdminMenu ui:field="adminMenu"/>
+                <menu:Menu ui:field="mainMenu"/>
+                <menu:Menu ui:field="adminMenu"/>
             </g:FlowPanel>
         </g:west>
         <g:center>

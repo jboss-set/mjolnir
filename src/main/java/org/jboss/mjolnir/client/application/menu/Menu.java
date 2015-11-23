@@ -1,24 +1,25 @@
 package org.jboss.mjolnir.client.application.menu;
 
-import javax.inject.Inject;
+import java.util.List;
 
 import com.google.gwt.dom.client.UListElement;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import org.jboss.mjolnir.client.NameTokens;
-import org.jboss.mjolnir.client.application.security.IsAdminGatekeeper;
+import com.gwtplatform.mvp.client.proxy.Gatekeeper;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)
  */
-@SuppressWarnings("unused") // ApplicationView.ui.xml
-public class AdminMenu extends Composite {
+public class Menu extends Composite {
 
-    private IsAdminGatekeeper gatekeeper;
+    private Gatekeeper gatekeeper;
 
-    @Inject
-    public AdminMenu(IsAdminGatekeeper gatekeeper) {
+    public Menu(List<MenuLink> navigationItems) {
+        this(navigationItems, null);
+    }
+
+    public Menu(List<MenuLink> navigationItems, Gatekeeper gatekeeper) {
         this.gatekeeper = gatekeeper;
 
         FlowPanel panel = new FlowPanel();
@@ -29,13 +30,16 @@ public class AdminMenu extends Composite {
         panel.add(heading);
 
         FlowPanel list = new FlowPanel(UListElement.TAG);
-        list.add(new MenuLink("GitHub Organization Members", NameTokens.GITHUB_MEMBERS));
         panel.add(list);
+
+        for (MenuLink menuItem: navigationItems) {
+            list.add(menuItem);
+        }
     }
 
     @Override
     protected void onLoad() {
-        setVisible(gatekeeper.canReveal());
+        setVisible(gatekeeper == null || gatekeeper.canReveal());
     }
 
 }

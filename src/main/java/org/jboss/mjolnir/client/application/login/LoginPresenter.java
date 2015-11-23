@@ -14,7 +14,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
 import org.jboss.mjolnir.client.NameTokens;
 import org.jboss.mjolnir.client.XsrfUtil;
-import org.jboss.mjolnir.client.application.security.CurrentUser2;
+import org.jboss.mjolnir.client.application.security.CurrentUser;
 import org.jboss.mjolnir.client.service.DefaultCallback;
 import org.jboss.mjolnir.client.service.LoginService;
 import org.jboss.mjolnir.client.service.LoginServiceAsync;
@@ -36,12 +36,12 @@ public class LoginPresenter extends Presenter<LoginPresenter.MyView, LoginPresen
     @NoGatekeeper
     interface MyProxy extends ProxyPlace<LoginPresenter> {}
 
-    private CurrentUser2 currentUser;
+    private CurrentUser currentUser;
     private PlaceManager placeManager;
 
     @Inject
     public LoginPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager,
-                          CurrentUser2 currentUser) {
+                          CurrentUser currentUser) {
         super(eventBus, view, proxy, RevealType.Root);
         getView().setUiHandlers(this);
 

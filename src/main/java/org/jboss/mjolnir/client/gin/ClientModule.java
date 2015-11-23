@@ -9,7 +9,7 @@ import com.gwtplatform.mvp.client.gin.DefaultModule;
 import org.jboss.mjolnir.client.NameTokens;
 import org.jboss.mjolnir.client.application.ApplicationModule;
 import org.jboss.mjolnir.client.application.login.LoginModule;
-import org.jboss.mjolnir.client.application.security.CurrentUser2;
+import org.jboss.mjolnir.client.application.security.CurrentUser;
 import org.jboss.mjolnir.client.application.security.IsAdminGatekeeper;
 import org.jboss.mjolnir.client.application.security.LoggedInGatekeeper;
 
@@ -29,7 +29,7 @@ public class ClientModule extends AbstractPresenterModule {
         bindConstant().annotatedWith(ErrorPlace.class).to(NameTokens.ERROR);
         bindConstant().annotatedWith(UnauthorizedPlace.class).to(NameTokens.LOGIN);
 
-        bind(CurrentUser2.class).in(Singleton.class);
+        bind(CurrentUser.class).in(Singleton.class);
         bind(LoggedInGatekeeper.class).in(Singleton.class);
         bind(IsAdminGatekeeper.class).in(Singleton.class);
     }

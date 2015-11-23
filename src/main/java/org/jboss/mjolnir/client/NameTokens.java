@@ -9,6 +9,7 @@ public class NameTokens {
     public static final String ERROR = "!error";
 
     public static final String GITHUB_MEMBERS = "!github-members";
+    public static final String REGISTERED_USERS = "!registered-users";
 
     public static String getOnLoginDefaultPage() {
         return MY_SUBSCRIPTIONS;

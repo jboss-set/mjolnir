@@ -11,8 +11,8 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-import org.jboss.mjolnir.client.application.menu.AdminMenu;
-import org.jboss.mjolnir.client.application.menu.MainMenu;
+import org.jboss.mjolnir.client.application.menu.Menu;
+import org.jboss.mjolnir.client.application.security.IsAdminGatekeeper;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)
@@ -34,15 +34,15 @@ public class ApplicationView extends ViewWithUiHandlers<ApplicationUiHandlers> i
     Anchor logoutLink;
 
     @UiField(provided = true)
-    MainMenu mainMenu;
+    Menu mainMenu;
 
     @UiField(provided = true)
-    AdminMenu adminMenu;
+    Menu adminMenu;
 
     @Inject
-    public ApplicationView(Binder binder, MainMenu mainMenu, AdminMenu adminMenu) {
-        this.mainMenu = mainMenu;
-        this.adminMenu = adminMenu;
+    public ApplicationView(Binder binder, IsAdminGatekeeper gatekeeper) {
+        this.mainMenu = new Menu(ApplicationPresenter.MAIN_MENU);
+        this.adminMenu = new Menu(ApplicationPresenter.ADMIN_MENU, gatekeeper);
 
         initWidget(binder.createAndBindUi(this));
 

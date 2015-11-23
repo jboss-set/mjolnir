@@ -11,10 +11,10 @@ import com.gwtplatform.mvp.client.proxy.Gatekeeper;
 @DefaultGatekeeper
 public class LoggedInGatekeeper implements Gatekeeper {
 
-    private CurrentUser2 currentUser;
+    private CurrentUser currentUser;
 
     @Inject
-    public LoggedInGatekeeper(CurrentUser2 currentUser) {
+    public LoggedInGatekeeper(CurrentUser currentUser) {
         this.currentUser = currentUser;
     }
 
