@@ -95,10 +95,6 @@ public class ApplicationPresenter extends Presenter<ApplicationPresenter.MyView,
     }
 
     @Override
-    protected void onReset() {
-    }
-
-    @Override
     public void onNavigation(NavigationEvent navigationEvent) {
         String nameToken = navigationEvent.getRequest().getNameToken();
         selectMenuItemByToken(MAIN_MENU, nameToken);

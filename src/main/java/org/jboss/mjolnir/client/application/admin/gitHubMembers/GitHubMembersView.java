@@ -3,8 +3,7 @@ package org.jboss.mjolnir.client.application.admin.gitHubMembers;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
-
+import com.google.inject.Inject;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -14,7 +13,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import org.jboss.mjolnir.client.component.ConfirmationDialog;
-import org.jboss.mjolnir.client.component.administration.SubscriptionsTable2;
+import org.jboss.mjolnir.client.component.administration.SubscriptionsTable;
 import org.jboss.mjolnir.client.component.organizations.SelectionTable;
 import org.jboss.mjolnir.shared.domain.Subscription;
 import org.jboss.mjolnir.shared.domain.SubscriptionSummary;
@@ -32,7 +31,7 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
     private static final Templates TEMPLATES = GWT.create(Templates.class);
 
     private SelectionTable<SubscriptionSummary> organizationsTable;
-    private SubscriptionsTable2 subscriptionsTable;
+    private SubscriptionsTable subscriptionsTable;
 
     @Inject
     public GitHubMembersView() {
@@ -67,8 +66,8 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
         };
     }
 
-    private SubscriptionsTable2 createSubscriptionTable() {
-        SubscriptionsTable2 table = new SubscriptionsTable2() {
+    private SubscriptionsTable createSubscriptionTable() {
+        SubscriptionsTable table = new SubscriptionsTable() {
             @Override
             protected void dispatchWhitelist(List<Subscription> selectedItems, boolean whitelist) {
                 getUiHandlers().whitelist(selectedItems, whitelist);

@@ -1,7 +1,7 @@
 package org.jboss.mjolnir.client.application;
 
-import javax.inject.Inject;
 
+import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;

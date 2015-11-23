@@ -14,7 +14,6 @@ public class MenuLink extends SimplePanel {
     public MenuLink(String title, String nameToken) {
         super(Document.get().createLIElement());
         InlineHyperlink link = new InlineHyperlink(title, nameToken);
-//        getElement().setInnerHTML(link.getElement().getString());
         setWidget(link);
         this.nameToken = nameToken;
     }

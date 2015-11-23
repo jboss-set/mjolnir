@@ -1,5 +1,6 @@
 package org.jboss.mjolnir.client.application.login;
 
+import com.google.inject.Inject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -9,7 +10,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 /**
@@ -52,6 +52,7 @@ public class LoginView extends ViewWithUiHandlers<LoginHandlers> implements Logi
     @Override
     public void setFeedbackMessage(String message) {
         feedbackLabel.setText(message);
+        passwordField.setText("");
     }
 
     @Override

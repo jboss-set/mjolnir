@@ -48,7 +48,7 @@ import org.jboss.mjolnir.shared.domain.Subscription;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public abstract class SubscriptionsTable2 implements IsWidget {
+public abstract class SubscriptionsTable implements IsWidget {
 
     private static final int PAGE_SIZE = 50;
     private static final List<String> KRB_ACCOUNT_FILTER_OPTIONS = new ArrayList<>();
@@ -70,7 +70,7 @@ public abstract class SubscriptionsTable2 implements IsWidget {
     private List<HasCell<Subscription, ?>> hasCells = new ArrayList<>();
     private Column<Subscription, Subscription> actionColumn;
 
-    public SubscriptionsTable2() {
+    public SubscriptionsTable() {
         initStyles();
 
         initActionPanel();
@@ -151,12 +151,12 @@ public abstract class SubscriptionsTable2 implements IsWidget {
         // sorting
 
         sortHandler = new ColumnSortEvent.ListHandler<Subscription>(dataProvider.getList()) {
-                    @Override
-                    public void onColumnSort(ColumnSortEvent event) {
-                        super.onColumnSort(event);
-                        dataProvider.refresh();
-                    }
-                };
+            @Override
+            public void onColumnSort(ColumnSortEvent event) {
+                super.onColumnSort(event);
+                dataProvider.refresh();
+            }
+        };
         sortHandler.setComparator(krbNameCol, new KrbNameComparator());
         sortHandler.setComparator(gitHubNameCol, new GitHubNameComparator());
         sortHandler.setComparator(krbAccCol, new IsRegisteredComparator());
@@ -198,16 +198,15 @@ public abstract class SubscriptionsTable2 implements IsWidget {
     }
 
     /**
-     *
-     * @param caption button title
-     * @param clickHandler action clickHandler
-     * @param separator show separator in front of button
+     * @param caption           button title
+     * @param clickHandler      action clickHandler
+     * @param separator         show separator in front of button
      * @param isPermanentAction should the button be active even if no items are selected?
      */
     public void addAction(String caption, final ClickHandler clickHandler, boolean separator, boolean isPermanentAction) {
         Button button = new Button(caption, clickHandler);
 
-        if(isPermanentAction) {
+        if (isPermanentAction) {
             button.setEnabled(true);
         } else {
             button.setEnabled(false);
@@ -221,14 +220,14 @@ public abstract class SubscriptionsTable2 implements IsWidget {
             buttonsPanel.add(new HTMLPanel("span", " "));
         }
 
-        if(!isPermanentAction) {
+        if (!isPermanentAction) {
             actionButtons.add(button);
         }
         buttonsPanel.add(button);
     }
 
     private void enableActionButtons(boolean enable) {
-        for (Button button: actionButtons) {
+        for (Button button : actionButtons) {
             button.setEnabled(enable);
         }
     }

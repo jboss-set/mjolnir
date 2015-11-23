@@ -2,8 +2,7 @@ package org.jboss.mjolnir.client.application.admin.registeredUsers;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
+import com.google.inject.Inject;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -15,7 +14,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import org.jboss.mjolnir.client.component.ConfirmationDialog;
-import org.jboss.mjolnir.client.component.administration.SubscriptionsTable2;
+import org.jboss.mjolnir.client.component.administration.SubscriptionsTable;
 import org.jboss.mjolnir.client.component.administration.UserDialog;
 import org.jboss.mjolnir.client.component.table.ConditionalActionCell;
 import org.jboss.mjolnir.shared.domain.KerberosUser;
@@ -35,7 +34,7 @@ public class RegisteredUsersView extends ViewWithUiHandlers<RegisteredUsersHandl
     }
     private static final Templates TEMPLATES = GWT.create(Templates.class);
 
-    private SubscriptionsTable2 subscriptionsTable;
+    private SubscriptionsTable subscriptionsTable;
 
     @Inject
     public RegisteredUsersView() {
@@ -44,7 +43,7 @@ public class RegisteredUsersView extends ViewWithUiHandlers<RegisteredUsersHandl
 
         panel.add(new HTMLPanel("h2", "Users Registered in Mjolnir"));
 
-        subscriptionsTable = new SubscriptionsTable2() {
+        subscriptionsTable = new SubscriptionsTable() {
             @Override
             protected void addDefaultActionCells() {
                 // edit button

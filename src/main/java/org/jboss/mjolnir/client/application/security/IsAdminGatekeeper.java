@@ -1,7 +1,6 @@
 package org.jboss.mjolnir.client.application.security;
 
-import javax.inject.Inject;
-
+import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.proxy.Gatekeeper;
 
 /**

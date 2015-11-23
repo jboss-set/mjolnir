@@ -40,8 +40,7 @@ public abstract class ModifyGitHubNamePopup extends PopupPanel {
     @UiField
     HTML feedbackLabel;
 
-    /**
-     */
+
     public ModifyGitHubNamePopup() {
         super(false); // no auto hide
         setGlassEnabled(true); // forbid to click outside the popup

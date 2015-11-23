@@ -1,7 +1,6 @@
 package org.jboss.mjolnir.client.application;
 
-import javax.inject.Inject;
-
+import com.google.inject.Inject;
 import com.google.gwt.user.client.ui.Label;
 import com.gwtplatform.mvp.client.ViewImpl;
 

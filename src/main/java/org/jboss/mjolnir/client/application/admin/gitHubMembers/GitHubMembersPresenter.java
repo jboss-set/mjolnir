@@ -3,8 +3,7 @@ package org.jboss.mjolnir.client.application.admin.gitHubMembers;
 import java.util.Collection;
 import java.util.List;
 
-import javax.inject.Inject;
-
+import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
