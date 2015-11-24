@@ -13,6 +13,7 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplitBundle;
 import com.gwtplatform.mvp.client.annotations.UseGatekeeper;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
 import org.jboss.mjolnir.client.NameTokens;
 import org.jboss.mjolnir.client.application.ApplicationPresenter;
 import org.jboss.mjolnir.client.application.SplitBundles;
@@ -51,11 +52,17 @@ public class RegisteredUsersPresenter extends Presenter<RegisteredUsersPresenter
     }
 
     @Override
-    protected void onReveal() {
+    public boolean useManualReveal() {
+        return true;
+    }
+
+    @Override
+    public void prepareFromRequest(PlaceRequest request) {
         administrationService.getRegisteredUsers(new DefaultCallback<List<Subscription>>() {
             @Override
             public void onSuccess(List<Subscription> result) {
                 getView().setData(result);
+                getProxy().manualReveal(RegisteredUsersPresenter.this);
             }
         });
     }

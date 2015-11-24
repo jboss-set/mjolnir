@@ -68,7 +68,6 @@ public class SubscriptionSettingPresenter
             // set view data
             loadData();
         }
-
     }
 
     private void loadData() {
