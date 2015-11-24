@@ -9,11 +9,12 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyStandard;
+import com.gwtplatform.mvp.client.annotations.ProxyCodeSplitBundle;
 import com.gwtplatform.mvp.client.annotations.UseGatekeeper;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import org.jboss.mjolnir.client.NameTokens;
 import org.jboss.mjolnir.client.application.ApplicationPresenter;
+import org.jboss.mjolnir.client.application.SplitBundles;
 import org.jboss.mjolnir.client.application.security.IsAdminGatekeeper;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
@@ -39,7 +40,7 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
         void refresh();
     }
 
-    @ProxyStandard
+    @ProxyCodeSplitBundle(SplitBundles.ADMIN)
     @NameToken(NameTokens.GITHUB_MEMBERS)
     @UseGatekeeper(IsAdminGatekeeper.class)
     public interface MyProxy extends ProxyPlace<GitHubMembersPresenter> {}

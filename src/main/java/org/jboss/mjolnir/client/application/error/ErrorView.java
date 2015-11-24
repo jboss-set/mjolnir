@@ -1,4 +1,4 @@
-package org.jboss.mjolnir.client.application;
+package org.jboss.mjolnir.client.application.error;
 
 import com.google.inject.Inject;
 import com.google.gwt.user.client.ui.Label;

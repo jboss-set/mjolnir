@@ -5,6 +5,8 @@ import org.jboss.mjolnir.client.application.admin.gitHubMembers.GitHubMembersPre
 import org.jboss.mjolnir.client.application.admin.gitHubMembers.GitHubMembersView;
 import org.jboss.mjolnir.client.application.admin.registeredUsers.RegisteredUsersPresenter;
 import org.jboss.mjolnir.client.application.admin.registeredUsers.RegisteredUsersView;
+import org.jboss.mjolnir.client.application.error.ErrorPresenter;
+import org.jboss.mjolnir.client.application.error.ErrorView;
 import org.jboss.mjolnir.client.application.subscriptionSetting.SubscriptionSettingPresenter;
 import org.jboss.mjolnir.client.application.subscriptionSetting.SubscriptionSettingView;
 

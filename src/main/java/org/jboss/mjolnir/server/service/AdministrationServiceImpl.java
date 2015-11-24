@@ -62,7 +62,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         client.setOAuth2Token(token);
         UserService userService = new UserService(client);
 
-        validator = new Validator<KerberosUser>();
+        validator = new Validator<>();
 
         krbNameValidation = new KrbNameTakenValidation(userRepository);
         githubNameValidation = new GitHubNameTakenValidation(userRepository);

@@ -11,10 +11,11 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyStandard;
+import com.gwtplatform.mvp.client.annotations.ProxyCodeSplitBundle;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import org.jboss.mjolnir.client.NameTokens;
 import org.jboss.mjolnir.client.application.ApplicationPresenter;
+import org.jboss.mjolnir.client.application.SplitBundles;
 import org.jboss.mjolnir.client.application.security.CurrentUser;
 import org.jboss.mjolnir.client.component.ModifyGitHubNamePopup;
 import org.jboss.mjolnir.client.service.DefaultCallback;
@@ -42,7 +43,7 @@ public class SubscriptionSettingPresenter
         ModifyGitHubNamePopup getGitHubNamePopup();
     }
 
-    @ProxyStandard
+    @ProxyCodeSplitBundle(SplitBundles.BASE)
     @NameToken(NameTokens.MY_SUBSCRIPTIONS)
     public interface MyProxy extends ProxyPlace<SubscriptionSettingPresenter> {}
 

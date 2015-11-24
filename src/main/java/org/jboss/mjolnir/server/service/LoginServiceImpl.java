@@ -36,12 +36,12 @@ import javax.security.auth.login.LoginException;
 
 import com.sun.security.auth.login.ConfigFile;
 import org.hibernate.HibernateException;
-import org.jboss.mjolnir.shared.domain.KerberosUser;
-import org.jboss.mjolnir.authentication.LoginFailedException;
+import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.client.service.LoginService;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.UserRepository;
 import org.jboss.mjolnir.server.util.KerberosUtils;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 
 /**
  * Provides authentication methods.
@@ -62,7 +62,7 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
     private ApplicationParameters applicationParameters;
 
     @Override
-    public KerberosUser login(String krb5Name, String password) throws LoginFailedException {
+    public KerberosUser login(String krb5Name, String password) throws ApplicationException {
         // This will always be the first method called by the user upon hitting the web-app.
         // We will return true if the kerberos password is correct. Regardless of whether or not their details
         // already exist in the cache.
@@ -84,10 +84,10 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
         } catch (URISyntaxException e) {
             // Here there is a problem, so the onFailure() part will be called on the client side
             log("URISyntaxException caught. Big problem here.");
-            throw new LoginFailedException("There is a problem with the login on the server. Please contact " +
+            throw new ApplicationException("There is a problem with the login on the server. Please contact " +
                     "jboss-set@redhat.com");
         } catch (HibernateException e) {
-            throw new LoginFailedException(e.getMessage());
+            throw new ApplicationException(e.getMessage());
         }
         log("Login succeeded. Returning 'true'");
         return user;

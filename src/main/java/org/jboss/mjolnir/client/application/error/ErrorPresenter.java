@@ -1,4 +1,4 @@
-package org.jboss.mjolnir.client.application;
+package org.jboss.mjolnir.client.application.error;
 
 
 import com.google.inject.Inject;
@@ -16,12 +16,12 @@ import org.jboss.mjolnir.client.NameTokens;
  */
 public class ErrorPresenter extends Presenter<ErrorPresenter.MyView, ErrorPresenter.MyProxy> {
 
-    interface MyView extends View {}
+    public interface MyView extends View {}
 
     @ProxyStandard
     @NameToken(NameTokens.ERROR)
     @NoGatekeeper
-    interface MyProxy extends ProxyPlace<ErrorPresenter> {}
+    public interface MyProxy extends ProxyPlace<ErrorPresenter> {}
 
     @Inject
     public ErrorPresenter(EventBus eventBus, MyView view, MyProxy proxy) {
