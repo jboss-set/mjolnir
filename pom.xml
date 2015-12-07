@@ -116,11 +116,7 @@
 
         <plugins>
 
-            <!--<plugin>
-                <groupId>com.google.gwt</groupId>
-                <artifactId>gwt-codeserver</artifactId>
-                <version>${gwt.version}</version>
-            </plugin>-->
+            <!-- Build -->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -160,18 +156,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.jboss.as.plugins</groupId>
-                <artifactId>jboss-as-maven-plugin</artifactId>
-                <version>7.4.Final</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.wildfly.plugins</groupId>
-                <artifactId>wildfly-maven-plugin</artifactId>
-                <version>1.0.2.Final</version>
-            </plugin>
-
-            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
@@ -190,6 +174,22 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Deployment -->
+
+            <plugin>
+                <groupId>org.jboss.as.plugins</groupId>
+                <artifactId>jboss-as-maven-plugin</artifactId>
+                <version>7.4.Final</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.wildfly.plugins</groupId>
+                <artifactId>wildfly-maven-plugin</artifactId>
+                <version>1.0.2.Final</version>
+            </plugin>
+
+            <!-- Coding standards -->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

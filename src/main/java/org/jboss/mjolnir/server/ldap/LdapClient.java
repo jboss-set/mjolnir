@@ -22,6 +22,7 @@ public class LdapClient {
         env.put(Context.SECURITY_AUTHENTICATION, "simple");
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, ldapUrl);
+        env.put("com.sun.jndi.ldap.connect.pool", "true"); // enable connection pooling, prevents "Connection closed" problems
 
         ctx = new InitialDirContext(env);
 
