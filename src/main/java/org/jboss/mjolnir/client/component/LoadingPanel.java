@@ -11,6 +11,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 public class LoadingPanel extends Composite {
 
     public LoadingPanel() {
-        initWidget(new HTMLPanel("<center><div id='loading-panel'><img src='images/loading.gif' style='padding-top:3px;vertical-align:middle'/> Loading... </div></center>"));
+        initWidget(new HTMLPanel("<center><div id='loading-panel'><img src='images/loading.gif' style='padding-top:3px;vertical-align:middle'/></div></center>"));
     }
 }

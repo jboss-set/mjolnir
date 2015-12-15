@@ -34,7 +34,7 @@ public class ExceptionHandler {
                 return;
             }
         }
-        logger.log(Level.SEVERE, message, throwable);
+        logger.log(Level.SEVERE, message + ": ", throwable);
 
         final ErrorDialog errorDialog = new ErrorDialog(message, throwable);
         errorDialog.center();

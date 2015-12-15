@@ -83,7 +83,7 @@ public class ApplicationPresenter extends Presenter<ApplicationPresenter.MyView,
 
     private void redirectToLoginPage() {
         PlaceRequest placeRequest = new PlaceRequest.Builder()
-                .nameToken(NameTokens.getOnLoginDefaultPage())
+                .nameToken(NameTokens.LOGIN)
                 .build();
         placeManager.revealPlace(placeRequest);
     }

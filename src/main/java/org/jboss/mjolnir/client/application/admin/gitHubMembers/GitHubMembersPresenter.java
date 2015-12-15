@@ -16,7 +16,9 @@ import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
 import org.jboss.mjolnir.client.NameTokens;
 import org.jboss.mjolnir.client.application.ApplicationPresenter;
 import org.jboss.mjolnir.client.application.SplitBundles;
+import org.jboss.mjolnir.client.application.events.loadingIndicator.LoadingIndicationEvent;
 import org.jboss.mjolnir.client.application.security.IsAdminGatekeeper;
+import org.jboss.mjolnir.client.component.ProcessingIndicatorPopup;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
 import org.jboss.mjolnir.client.service.DefaultCallback;
@@ -33,7 +35,7 @@ import org.jboss.mjolnir.shared.domain.SubscriptionSummary;
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyView, GitHubMembersPresenter.MyProxy>
-        implements GitHubMembersHandlers {
+        implements GitHubMembersHandlers, LoadingIndicationEvent.LoadingIndicatorHandler {
 
     public interface MyView extends View, HasUiHandlers<GitHubMembersHandlers> {
         void setData(List<SubscriptionSummary> items);
@@ -61,13 +63,30 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
 
     @Override
     public void prepareFromRequest(PlaceRequest request) {
+        LoadingIndicationEvent.fire(this, true);
+
         administrationService.getOrganizationMembers(new DefaultCallback<List<SubscriptionSummary>>() {
             @Override
             public void onSuccess(List<SubscriptionSummary> result) {
                 getView().setData(result);
                 getProxy().manualReveal(GitHubMembersPresenter.this);
+                LoadingIndicationEvent.fire(GitHubMembersPresenter.this, false);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                super.onFailure(caught);
+                getProxy().manualRevealFailed();
+                LoadingIndicationEvent.fire(GitHubMembersPresenter.this, false);
             }
         });
+    }
+
+    @Override
+    protected void onBind() {
+        super.onBind();
+
+        addRegisteredHandler(LoadingIndicationEvent.TYPE, this);
     }
 
     @Override
@@ -99,6 +118,15 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
                 getView().refresh();
             }
         });
+    }
+
+    @Override
+    public void onLoadingEvent(LoadingIndicationEvent event) {
+        if (event.isStart()) {
+            ProcessingIndicatorPopup.center();
+        } else {
+            ProcessingIndicatorPopup.hide();
+        }
     }
 
 }

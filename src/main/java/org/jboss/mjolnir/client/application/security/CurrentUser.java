@@ -9,7 +9,6 @@ import org.jboss.mjolnir.shared.domain.KerberosUser;
 public class CurrentUser {
 
     private KerberosUser user;
-    private boolean loggedIn;
 
     public KerberosUser getUser() {
         return user;
@@ -17,17 +16,13 @@ public class CurrentUser {
 
     public void setUser(KerberosUser user) {
         this.user = user;
-        if (user != null) {
-            this.loggedIn = user.isLoggedIn();
-        }
     }
 
     public boolean isLoggedIn() {
-        return loggedIn;
+        return user != null && user.isLoggedIn();
     }
 
     public void reset() {
-        user = null;
-        loggedIn = false;
+        user = new KerberosUser();
     }
 }

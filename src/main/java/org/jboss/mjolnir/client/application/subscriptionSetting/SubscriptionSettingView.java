@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-import org.jboss.mjolnir.client.component.ModifyGitHubNamePopup;
 import org.jboss.mjolnir.client.component.organizations.SelectionTable;
 import org.jboss.mjolnir.shared.domain.GithubOrganization;
 import org.jboss.mjolnir.shared.domain.GithubTeam;
@@ -26,7 +25,7 @@ public class SubscriptionSettingView extends ViewWithUiHandlers<SubscribtionHand
     private MySubscriptionsWidget mySubscriptionsWidget;
     private SelectionTable<GithubOrganization> organizationsTable;
     private Label gitHubNameLabel;
-    private ModifyGitHubNamePopup modifyGitHubNamePopup;
+//    private ModifyGitHubNamePopup modifyGitHubNamePopup;
 
     @Inject
     public SubscriptionSettingView() {
@@ -42,8 +41,9 @@ public class SubscriptionSettingView extends ViewWithUiHandlers<SubscribtionHand
         flexTable.setWidget(0, 3, new Button("Edit", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                modifyGitHubNamePopup.enableCancelButton(true);
-                modifyGitHubNamePopup.center();
+                getUiHandlers().onGitHubNameNotSet();
+//                modifyGitHubNamePopup.enableCancelButton(true);
+//                modifyGitHubNamePopup.center();
             }
         }));
 
@@ -78,18 +78,18 @@ public class SubscriptionSettingView extends ViewWithUiHandlers<SubscribtionHand
             }
         });
 
-        modifyGitHubNamePopup = new ModifyGitHubNamePopup() {
+        /*modifyGitHubNamePopup = new ModifyGitHubNamePopup() {
             @Override
             public void onSubmit(String newUsername) {
                 getUiHandlers().modifyGitHubName(newUsername);
             }
-        };
+        };*/
     }
 
     @Override
     public void setGitHubName(String username) {
         gitHubNameLabel.setText(username);
-        modifyGitHubNamePopup.setUsername(username);
+//        modifyGitHubNamePopup.setUsername(username);
     }
 
     @Override
@@ -102,8 +102,8 @@ public class SubscriptionSettingView extends ViewWithUiHandlers<SubscribtionHand
         mySubscriptionsWidget.refresh();
     }
 
-    @Override
+    /*@Override
     public ModifyGitHubNamePopup getGitHubNamePopup() {
         return modifyGitHubNamePopup;
-    }
+    }*/
 }

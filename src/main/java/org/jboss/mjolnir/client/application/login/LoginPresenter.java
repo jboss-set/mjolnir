@@ -15,6 +15,7 @@ import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
 import org.jboss.mjolnir.client.NameTokens;
 import org.jboss.mjolnir.client.XsrfUtil;
 import org.jboss.mjolnir.client.application.security.CurrentUser;
+import org.jboss.mjolnir.client.component.ProcessingIndicatorPopup;
 import org.jboss.mjolnir.client.service.DefaultCallback;
 import org.jboss.mjolnir.client.service.LoginService;
 import org.jboss.mjolnir.client.service.LoginServiceAsync;
@@ -28,13 +29,15 @@ public class LoginPresenter extends Presenter<LoginPresenter.MyView, LoginPresen
 
     interface MyView extends View, HasUiHandlers<LoginHandlers> {
         void setFeedbackMessage(String message);
+
         void reset();
     }
 
     @ProxyStandard
     @NameToken(NameTokens.LOGIN)
     @NoGatekeeper
-    interface MyProxy extends ProxyPlace<LoginPresenter> {}
+    interface MyProxy extends ProxyPlace<LoginPresenter> {
+    }
 
     private CurrentUser currentUser;
     private PlaceManager placeManager;
@@ -50,7 +53,7 @@ public class LoginPresenter extends Presenter<LoginPresenter.MyView, LoginPresen
     }
 
     @Override
-    public void login(String username, String password) {
+    public void login(final String username, final String password) {
         LoginServiceAsync loginService = LoginService.Util.getInstance();
         loginService.login(username, password, new DefaultCallback<KerberosUser>() {
             @Override
@@ -68,8 +71,15 @@ public class LoginPresenter extends Presenter<LoginPresenter.MyView, LoginPresen
     }
 
     @Override
-    protected void onReveal() {
-        super.onReveal();
+    public boolean useManualReveal() {
+        return true;
+    }
+
+    // TODO: is there better way to determine whether user is already authenticated? This is sometimes causing
+    // exceptions due to cancelled RPC calls
+    @Override
+    public void prepareFromRequest(PlaceRequest request) {
+        super.prepareFromRequest(request);
 
         XsrfUtil.obtainToken(new XsrfUtil.Callback() {
             @Override
@@ -82,6 +92,13 @@ public class LoginPresenter extends Presenter<LoginPresenter.MyView, LoginPresen
                         if (currentUser.isLoggedIn()) {
                             redirectToHomePage();
                         }
+                        getProxy().manualReveal(LoginPresenter.this);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        super.onFailure(caught);
+                        getProxy().manualRevealFailed();
                     }
                 });
             }
@@ -89,6 +106,8 @@ public class LoginPresenter extends Presenter<LoginPresenter.MyView, LoginPresen
     }
 
     private void redirectToHomePage() {
+        ProcessingIndicatorPopup.center();
+
         PlaceRequest placeRequest = new PlaceRequest.Builder()
                 .nameToken(NameTokens.getOnLoginDefaultPage())
                 .build();

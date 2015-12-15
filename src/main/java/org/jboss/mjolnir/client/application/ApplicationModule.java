@@ -7,6 +7,8 @@ import org.jboss.mjolnir.client.application.admin.registeredUsers.RegisteredUser
 import org.jboss.mjolnir.client.application.admin.registeredUsers.RegisteredUsersView;
 import org.jboss.mjolnir.client.application.error.ErrorPresenter;
 import org.jboss.mjolnir.client.application.error.ErrorView;
+import org.jboss.mjolnir.client.application.githubSetting.GitHubSettingPresenter;
+import org.jboss.mjolnir.client.application.githubSetting.GitHubSettingView;
 import org.jboss.mjolnir.client.application.subscriptionSetting.SubscriptionSettingPresenter;
 import org.jboss.mjolnir.client.application.subscriptionSetting.SubscriptionSettingView;
 
@@ -25,6 +27,10 @@ public class ApplicationModule extends AbstractPresenterModule {
         bindPresenter(SubscriptionSettingPresenter.class, SubscriptionSettingPresenter.MyView.class,
                 SubscriptionSettingView.class,
                 SubscriptionSettingPresenter.MyProxy.class);
+
+        bindPresenter(GitHubSettingPresenter.class, GitHubSettingPresenter.MyView.class,
+                GitHubSettingView.class,
+                GitHubSettingPresenter.MyProxy.class);
 
         bindPresenter(GitHubMembersPresenter.class, GitHubMembersPresenter.MyView.class,
                 GitHubMembersView.class,

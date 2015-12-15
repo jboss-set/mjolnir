@@ -59,5 +59,6 @@ public class LoginView extends ViewWithUiHandlers<LoginHandlers> implements Logi
     public void reset() {
         usernameField.setText("");
         passwordField.setText("");
+        setFeedbackMessage("");
     }
 }

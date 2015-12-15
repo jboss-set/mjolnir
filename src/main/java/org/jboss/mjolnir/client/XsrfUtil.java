@@ -31,8 +31,8 @@ public class XsrfUtil {
         xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
             @Override
             public void onFailure(Throwable caught) {
-                log.info("Error while obtaining token.");
-                ExceptionHandler.handle("Cant get XSRF token.", caught);
+                log.warning("Error while obtaining token.");
+                ExceptionHandler.handle("Cant get XSRF token", caught);
             }
 
             @Override

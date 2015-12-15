@@ -13,18 +13,11 @@ import java.util.Hashtable;
  */
 public class LdapClient {
 
-    private InitialDirContext ctx;
     private SearchControls searchControls;
+    private String ldapUrl;
 
     public LdapClient(String ldapUrl) throws NamingException {
-        // prepare naming context
-        final Hashtable<String, Object> env = new Hashtable<String, Object>();
-        env.put(Context.SECURITY_AUTHENTICATION, "simple");
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(Context.PROVIDER_URL, ldapUrl);
-        env.put("com.sun.jndi.ldap.connect.pool", "true"); // enable connection pooling, prevents "Connection closed" problems
-
-        ctx = new InitialDirContext(env);
+        this.ldapUrl = ldapUrl;
 
         // prepare SearchControls instance
         searchControls = new SearchControls();
@@ -33,6 +26,15 @@ public class LdapClient {
     }
 
     public NamingEnumeration<SearchResult> search(String contextName, String filter) throws NamingException {
+        // prepare naming context
+        final Hashtable<String, Object> env = new Hashtable<>();
+        env.put(Context.SECURITY_AUTHENTICATION, "simple");
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        env.put(Context.PROVIDER_URL, ldapUrl);
+        env.put("com.sun.jndi.ldap.connect.pool", "true"); // enable connection pooling, prevents "Connection closed" problems
+
+        InitialDirContext ctx = new InitialDirContext(env);
+
         return ctx.search(contextName, filter, searchControls);
     }
 }
