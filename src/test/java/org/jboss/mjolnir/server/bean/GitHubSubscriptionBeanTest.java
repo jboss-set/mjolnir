@@ -2,10 +2,10 @@ package org.jboss.mjolnir.server.bean;
 
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.service.OrganizationService;
-import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.domain.Subscription;
-import org.jboss.mjolnir.client.domain.SubscriptionSummary;
+import org.jboss.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
+import org.jboss.mjolnir.shared.domain.Subscription;
+import org.jboss.mjolnir.shared.domain.SubscriptionSummary;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

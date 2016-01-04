@@ -1,10 +1,10 @@
 package org.jboss.mjolnir.server.report;
 
-import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.domain.Report;
-import org.jboss.mjolnir.client.domain.Subscription;
-import org.jboss.mjolnir.client.domain.SubscriptionSummary;
+import org.jboss.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
+import org.jboss.mjolnir.shared.domain.Report;
+import org.jboss.mjolnir.shared.domain.Subscription;
+import org.jboss.mjolnir.shared.domain.SubscriptionSummary;
 import org.jboss.mjolnir.server.bean.GitHubSubscriptionBean;
 import org.junit.Assert;
 import org.junit.Before;

@@ -1,8 +1,8 @@
 package org.jboss.mjolnir.server.report;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.mjolnir.client.domain.Subscription;
-import org.jboss.mjolnir.client.domain.SubscriptionSummary;
+import org.jboss.mjolnir.shared.domain.Subscription;
+import org.jboss.mjolnir.shared.domain.SubscriptionSummary;
 import org.jboss.mjolnir.server.bean.GitHubSubscriptionBean;
 
 import javax.ejb.EJB;

@@ -1,3 +1,7 @@
+body {
+    font: 12px/ 1.4 "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
 h1 {
 }
 
@@ -15,16 +19,14 @@ h1 {
 }
 .menuPanel .heading {
     padding: 10px;
-    background: rgb(252,255,244);
-    background: linear-gradient(#F9F9F9, #EEE);
-    border: 1px 0 solid #CFCFCF;
     color: #555;
+
+    background: #f9f9f9;
+    background: -webkit-linear-gradient(top, #f9f9f9, #eee);
+    border-top: 1px solid #cfcfcf;
+    border-bottom: 1px solid #cfcfcf;
 }
 
-button.gwt-Button.narrow {
-    padding: 0;
-    margin: 0 1px;
-}
 table th input[type=text] {
     width: 100px;
 }

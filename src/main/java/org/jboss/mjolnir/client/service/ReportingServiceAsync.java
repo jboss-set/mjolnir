@@ -1,8 +1,8 @@
 package org.jboss.mjolnir.client.service;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.jboss.mjolnir.client.domain.Report;
-import org.jboss.mjolnir.client.domain.ReportType;
+import org.jboss.mjolnir.shared.domain.Report;
+import org.jboss.mjolnir.shared.domain.ReportType;
 
 import java.util.Map;
 

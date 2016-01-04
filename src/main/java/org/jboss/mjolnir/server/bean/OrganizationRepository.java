@@ -1,6 +1,6 @@
 package org.jboss.mjolnir.server.bean;
 
-import org.jboss.mjolnir.authentication.GithubOrganization;
+import org.jboss.mjolnir.shared.domain.GithubOrganization;
 
 import java.sql.SQLException;
 import java.util.Set;

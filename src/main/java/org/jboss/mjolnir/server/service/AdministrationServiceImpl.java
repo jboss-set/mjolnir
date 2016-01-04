@@ -3,12 +3,12 @@ package org.jboss.mjolnir.server.service;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.UserService;
 import org.hibernate.HibernateException;
-import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.authentication.KerberosUser;
-import org.jboss.mjolnir.client.domain.EntityUpdateResult;
-import org.jboss.mjolnir.client.domain.Subscription;
-import org.jboss.mjolnir.client.domain.SubscriptionSummary;
-import org.jboss.mjolnir.client.domain.ValidationResult;
+import org.jboss.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
+import org.jboss.mjolnir.shared.domain.EntityUpdateResult;
+import org.jboss.mjolnir.shared.domain.Subscription;
+import org.jboss.mjolnir.shared.domain.SubscriptionSummary;
+import org.jboss.mjolnir.shared.domain.ValidationResult;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
@@ -62,7 +62,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         client.setOAuth2Token(token);
         UserService userService = new UserService(client);
 
-        validator = new Validator<KerberosUser>();
+        validator = new Validator<>();
 
         krbNameValidation = new KrbNameTakenValidation(userRepository);
         githubNameValidation = new GitHubNameTakenValidation(userRepository);

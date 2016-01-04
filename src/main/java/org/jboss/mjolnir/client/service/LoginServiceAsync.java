@@ -1,7 +1,7 @@
 package org.jboss.mjolnir.client.service;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 
 public interface  LoginServiceAsync {
 

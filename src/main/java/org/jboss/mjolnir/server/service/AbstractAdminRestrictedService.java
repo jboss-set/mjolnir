@@ -1,6 +1,6 @@
 package org.jboss.mjolnir.server.service;
 
-import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)

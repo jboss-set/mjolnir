@@ -14,10 +14,10 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.component.util.HTMLUtil;
-import org.jboss.mjolnir.client.domain.EntityUpdateResult;
+import org.jboss.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.mjolnir.client.service.AdministrationService;
 import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
 
@@ -81,7 +81,7 @@ public class UserDialog extends DialogBox {
         EDIT
     }
 
-    protected void onSave(KerberosUser savedUser) {
+    protected void onSave(KerberosUser savedUser, boolean activeAccount) {
     }
 
     private void setActiveKrbAccount(String uid) {
@@ -158,7 +158,7 @@ public class UserDialog extends DialogBox {
                                 user.setName(userToSave.getName());
                                 user.setGithubName(userToSave.getGithubName());
                             }
-                            onSave(userToSave);
+                            onSave(userToSave, activeAccountCheckBox.getValue());
                             UserDialog.this.hide();
                             UserDialog.this.removeFromParent();
                         } else {
@@ -211,7 +211,7 @@ public class UserDialog extends DialogBox {
                                 user.setName(user.getName());
                                 user.setGithubName(user.getGithubName());
                             }
-                            onSave(user);
+                            onSave(user, activeAccountCheckBox.getValue());
                             UserDialog.this.hide();
                             UserDialog.this.removeFromParent();
                         } else {

@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RPC;
 import com.google.gwt.user.server.rpc.RPCRequest;
 import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
-import org.jboss.mjolnir.authentication.KerberosUser;
+import org.jboss.mjolnir.shared.domain.KerberosUser;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.AuthenticationFilter;
 

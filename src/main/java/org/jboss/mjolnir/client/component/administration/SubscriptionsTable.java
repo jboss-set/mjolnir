@@ -1,5 +1,13 @@
 package org.jboss.mjolnir.client.component.administration;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -14,6 +22,7 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -21,28 +30,16 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import org.jboss.mjolnir.client.ExceptionHandler;
 import org.jboss.mjolnir.client.component.table.ConditionalActionCell;
+import org.jboss.mjolnir.client.component.table.DefaultCellTable;
 import org.jboss.mjolnir.client.component.table.DropDownCell;
 import org.jboss.mjolnir.client.component.table.TwoRowHeaderBuilder;
-import org.jboss.mjolnir.client.domain.Subscription;
-import org.jboss.mjolnir.client.service.AdministrationService;
-import org.jboss.mjolnir.client.service.AdministrationServiceAsync;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
+import org.jboss.mjolnir.shared.domain.Subscription;
 
 /**
  * Table composite displaying list of Subscriptions objects.
@@ -51,10 +48,10 @@ import java.util.logging.Logger;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public class SubscriptionsTable extends Composite {
+public abstract class SubscriptionsTable implements IsWidget {
 
     private static final int PAGE_SIZE = 50;
-    private static final List<String> KRB_ACCOUNT_FILTER_OPTIONS = new ArrayList<String>();
+    private static final List<String> KRB_ACCOUNT_FILTER_OPTIONS = new ArrayList<>();
 
     static {
         KRB_ACCOUNT_FILTER_OPTIONS.add("-");
@@ -62,36 +59,30 @@ public class SubscriptionsTable extends Composite {
         KRB_ACCOUNT_FILTER_OPTIONS.add("no");
     }
 
-    private static final Logger logger = Logger.getLogger(SubscriptionsTable.class.getName());
-
     protected HTMLPanel panel = new HTMLPanel("");
     private HTMLPanel buttonsPanel = new HTMLPanel("");
-    private HTMLPanel dataPanel = new HTMLPanel("");
-    private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
+    private List<Subscription> data;
     protected ListDataProvider<Subscription> dataProvider;
     protected SubscriptionSearchPredicate searchPredicate;
-    private List<Button> actionButtons = new ArrayList<Button>();
-    private Set<Subscription> selectedItems = new HashSet<Subscription>();
-    private List<Subscription> subscriptionList;
+    private List<Button> actionButtons = new ArrayList<>();
+    private Set<Subscription> selectedItems = new HashSet<>();
     private ColumnSortEvent.ListHandler<Subscription> sortHandler;
-    private List<HasCell<Subscription, ?>> hasCells = new ArrayList<HasCell<Subscription, ?>>();
+    private List<HasCell<Subscription, ?>> hasCells = new ArrayList<>();
     private Column<Subscription, Subscription> actionColumn;
 
-    public SubscriptionsTable(List<Subscription> subscriptions) {
-        initWidget(panel);
+    public SubscriptionsTable() {
         initStyles();
 
         initActionPanel();
 
-        final CellTable<Subscription> subscriptionTable = new CellTable<Subscription>();
+        final CellTable<Subscription> subscriptionTable = new DefaultCellTable<>();
         subscriptionTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
+        HTMLPanel dataPanel = new HTMLPanel("");
         dataPanel.add(subscriptionTable);
         panel.add(dataPanel);
 
-        subscriptionList = subscriptions;
         searchPredicate = new SubscriptionSearchPredicate();
-//        dataProvider = new FilteringListDataProvider<Subscription>(subscriptions, searchPredicate);
-        dataProvider = new ListDataProvider<Subscription>(subscriptionList);
+        dataProvider = new ListDataProvider<>();
         dataProvider.addDataDisplay(subscriptionTable);
 
 
@@ -159,13 +150,13 @@ public class SubscriptionsTable extends Composite {
 
         // sorting
 
-        sortHandler = new ColumnSortEvent.ListHandler<Subscription>(subscriptionList) {
-                    @Override
-                    public void onColumnSort(ColumnSortEvent event) {
-                        super.onColumnSort(event);
-                        dataProvider.refresh();
-                    }
-                };
+        sortHandler = new ColumnSortEvent.ListHandler<Subscription>(dataProvider.getList()) {
+            @Override
+            public void onColumnSort(ColumnSortEvent event) {
+                super.onColumnSort(event);
+                dataProvider.refresh();
+            }
+        };
         sortHandler.setComparator(krbNameCol, new KrbNameComparator());
         sortHandler.setComparator(gitHubNameCol, new GitHubNameComparator());
         sortHandler.setComparator(krbAccCol, new IsRegisteredComparator());
@@ -187,30 +178,35 @@ public class SubscriptionsTable extends Composite {
         subscriptionTable.setHeaderBuilder(new TwoRowHeaderBuilder(subscriptionTable, false, filterHeaders));
     }
 
+    @Override
+    public Widget asWidget() {
+        return panel;
+    }
+
     protected void initStyles() {
-        Style dataStyle = dataPanel.getElement().getStyle();
+        /*Style dataStyle = dataPanel.getElement().getStyle();
         dataStyle.setPosition(Style.Position.ABSOLUTE);
         dataStyle.setTop(140, Style.Unit.PX);
         dataStyle.setBottom(30, Style.Unit.PX);
         dataStyle.setLeft(1, Style.Unit.EM);
         dataStyle.setRight(1, Style.Unit.EM);
-        dataStyle.setOverflowY(Style.Overflow.AUTO);
+        dataStyle.setOverflowY(Style.Overflow.AUTO);*/
     }
 
-    public void addAction(String caption, final ActionDelegate delegate) {
-        addAction(caption, delegate, false, false);
+    public void addAction(String caption, final ClickHandler clickHandler) {
+        addAction(caption, clickHandler, false, false);
     }
 
-    public void addAction(String caption, final ActionDelegate delegate, boolean separator, boolean isPermanentAction) {
-        Button button = new Button(caption, new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                List<Subscription> selectedItemsCopy = new ArrayList<Subscription>(selectedItems);
-                delegate.execute(selectedItemsCopy);
-            }
-        });
+    /**
+     * @param caption           button title
+     * @param clickHandler      action clickHandler
+     * @param separator         show separator in front of button
+     * @param isPermanentAction should the button be active even if no items are selected?
+     */
+    public void addAction(String caption, final ClickHandler clickHandler, boolean separator, boolean isPermanentAction) {
+        Button button = new Button(caption, clickHandler);
 
-        if(isPermanentAction) {
+        if (isPermanentAction) {
             button.setEnabled(true);
         } else {
             button.setEnabled(false);
@@ -224,14 +220,14 @@ public class SubscriptionsTable extends Composite {
             buttonsPanel.add(new HTMLPanel("span", " "));
         }
 
-        if(!isPermanentAction) {
+        if (!isPermanentAction) {
             actionButtons.add(button);
         }
         buttonsPanel.add(button);
     }
 
     private void enableActionButtons(boolean enable) {
-        for (Button button: actionButtons) {
+        for (Button button : actionButtons) {
             button.setEnabled(enable);
         }
     }
@@ -240,40 +236,35 @@ public class SubscriptionsTable extends Composite {
         panel.add(buttonsPanel);
 
         Style style = buttonsPanel.getElement().getStyle();
-        style.setProperty("borderBottom", "1px solid #999");
+//        style.setProperty("borderBottom", "1px solid #999");
         style.setProperty("paddingBottom", "7px");
 
         addDefaultActions();
     }
 
     protected void addDefaultActions() {
-        addAction("Whitelist", new WhitelistDelegate(true));
-        addAction("Un-whitelist", new WhitelistDelegate(false));
+        addAction("Whitelist", new WhiteListClickHandler(true));
+        addAction("Un-whitelist", new WhiteListClickHandler(false));
     }
 
-    public Set<Subscription> getSelectedItems() {
-        return selectedItems;
+    public List<Subscription> getSelectedItems() {
+        return new ArrayList<>(selectedItems);
     }
 
-    public void clearSelectedItems() {
+    public void clearSelection() {
         selectedItems.clear();
         enableActionButtons(false);
     }
 
     public List<Subscription> getItemList() {
-        return subscriptionList;
-    }
-
-    public ListDataProvider<Subscription> getDataProvider() {
-        return dataProvider;
+        return data;
     }
 
     public void refresh() {
-        List<Subscription> filteredList = Lists.newArrayList(Iterables.filter(subscriptionList, searchPredicate));
-        clearSelectedItems();
+        List<Subscription> filteredList = Lists.newArrayList(Iterables.filter(data, searchPredicate));
+        clearSelection();
         dataProvider.setList(filteredList);
         sortHandler.setList(filteredList);
-
     }
 
     /**
@@ -282,7 +273,7 @@ public class SubscriptionsTable extends Composite {
      * @return list of headers
      */
     protected List<Header<?>> createFilterHeaders() {
-        final List<Header<?>> filterHeaders = new ArrayList<Header<?>>();
+        final List<Header<?>> filterHeaders = new ArrayList<>();
         filterHeaders.add(null);
 
         // krb name
@@ -381,7 +372,7 @@ public class SubscriptionsTable extends Composite {
     private Column<Subscription, Subscription> createActionColumn() {
         addDefaultActionCells();
 
-        final Cell<Subscription> cell = new CompositeCell<Subscription>(hasCells);
+        final Cell<Subscription> cell = new CompositeCell<>(hasCells);
         return new Column<Subscription, Subscription>(cell) {
             @Override
             public Subscription getValue(Subscription object) {
@@ -403,6 +394,14 @@ public class SubscriptionsTable extends Composite {
     protected void addActionCell(ConditionalActionCell<Subscription> actionCell) {
         hasCells.add(actionCell);
     }
+
+    public void setData(List<Subscription> data) {
+        this.data = data;
+        dataProvider.setList(data);
+        sortHandler.setList(data);
+    }
+
+    protected abstract void dispatchWhitelist(List<Subscription> selectedItems, boolean whitelist);
 
 
     // comparators
@@ -535,39 +534,17 @@ public class SubscriptionsTable extends Composite {
         }
     }
 
-    public interface ActionDelegate {
-        void execute(List<Subscription> selectedItems);
-    }
-
-    private class WhitelistDelegate implements ActionDelegate {
+    private class WhiteListClickHandler implements ClickHandler {
 
         private boolean whitelist;
 
-        public WhitelistDelegate(boolean whitelist) {
+        public WhiteListClickHandler(boolean whitelist) {
             this.whitelist = whitelist;
         }
 
         @Override
-        public void execute(final List<Subscription> selectedItems) {
-            administrationService.whitelist(selectedItems, whitelist, new AsyncCallback<Collection<Subscription>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    ExceptionHandler.handle(caught);
-                }
-
-                @Override
-                public void onSuccess(Collection<Subscription> result) {
-                    for (Subscription subscription: result) {
-                        int idx = subscriptionList.indexOf(subscription);
-                        if (idx > -1) {
-                            Subscription originalSubscription = subscriptionList.get(idx);
-                            originalSubscription.setKerberosUser(subscription.getKerberosUser());
-                        }
-                    }
-                    clearSelectedItems();
-                    dataProvider.refresh();
-                }
-            });
+        public void onClick(ClickEvent event) {
+            dispatchWhitelist(getSelectedItems(), whitelist);
         }
     }
 

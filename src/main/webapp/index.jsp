@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link type="text/css" rel="stylesheet" href="mjolnir.css">
-    <title>Mjolnir web-app</title>
+    <title>Mjolnir</title>
     <script type="text/javascript" language="javascript" src="mjolnir/mjolnir.nocache.js"></script>
 </head>
 <body>

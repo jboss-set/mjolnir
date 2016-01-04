@@ -1,7 +1,7 @@
 package org.jboss.mjolnir.server.bean;
 
-import org.jboss.mjolnir.authentication.GithubOrganization;
-import org.jboss.mjolnir.authentication.GithubTeam;
+import org.jboss.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.mjolnir.shared.domain.GithubTeam;
 import org.jboss.mjolnir.server.entities.GithubOrganizationEntity;
 import org.jboss.mjolnir.server.entities.GithubTeamEntity;
 

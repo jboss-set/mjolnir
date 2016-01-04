@@ -1,6 +1,6 @@
 package org.jboss.mjolnir.server.report;
 
-import org.jboss.mjolnir.client.domain.Report;
+import org.jboss.mjolnir.shared.domain.Report;
 import org.jboss.mjolnir.client.exception.ApplicationException;
 import org.jboss.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.mjolnir.server.bean.MailingBean;

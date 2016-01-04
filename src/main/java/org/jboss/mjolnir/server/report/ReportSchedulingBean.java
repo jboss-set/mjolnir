@@ -17,7 +17,7 @@ public class ReportSchedulingBean {
     @EJB
     private UnknownMembersReportBean unknownMembersReportBean;
 
-    @Schedule(dayOfWeek = "Mon", hour = "0", minute = "0", second = "0", persistent = true)
+    @Schedule(dayOfWeek = "Mon", hour = "0", minute = "0", second = "0", persistent = false)
     public void sendUnknownMembersReport() {
         unknownMembersReportBean.emailReport();
     }
