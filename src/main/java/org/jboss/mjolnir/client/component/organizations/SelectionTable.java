@@ -57,7 +57,9 @@ public abstract class SelectionTable<T> implements IsWidget {
         dataProvider.setList(values);
         selectionModel.clear();
         if (!values.isEmpty()) {
-            selectionModel.setSelected(values.get(0), true);
+            T selectedItem = values.get(0);
+            selectionModel.setSelected(selectedItem, true);
+            onSelectionChanged(selectedItem);
         }
     }
 

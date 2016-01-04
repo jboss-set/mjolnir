@@ -105,12 +105,16 @@ public class KerberosUser implements Serializable {
 
         KerberosUser that = (KerberosUser) o;
 
-        return githubName.equals(that.githubName);
+        if (krb5Name != null)
+            return krb5Name.equals(that.krb5Name);
+        else if (that.krb5Name != null)  // and this.krb5Name is null
+            return false;
+        return githubName != null && githubName.equals(that.githubName);
     }
 
     @Override
     public int hashCode() {
-        int result = 17;
+        int result = krb5Name != null ? krb5Name.hashCode() : 0;
         result = 31 * result + (githubName != null ? githubName.hashCode() : 0);
         return result;
     }

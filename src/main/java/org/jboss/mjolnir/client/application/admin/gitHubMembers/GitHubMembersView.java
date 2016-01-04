@@ -3,7 +3,6 @@ package org.jboss.mjolnir.client.application.admin.gitHubMembers;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.inject.Inject;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -11,6 +10,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import org.jboss.mjolnir.client.component.ConfirmationDialog;
 import org.jboss.mjolnir.client.component.administration.SubscriptionsTable;

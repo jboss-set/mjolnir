@@ -38,7 +38,6 @@ import org.jboss.mjolnir.server.bean.UserRepository;
 import org.jboss.mjolnir.server.github.ExtendedTeamService;
 import org.jboss.mjolnir.server.service.validation.GitHubNameExistsValidation;
 import org.jboss.mjolnir.server.service.validation.GitHubNameTakenValidation;
-import org.jboss.mjolnir.server.service.validation.Validation;
 import org.jboss.mjolnir.server.service.validation.Validator;
 
 import javax.ejb.EJB;
@@ -65,7 +64,6 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     private ExtendedTeamService teamService;
 
     private Validator<KerberosUser> validator;
-    private Validation<KerberosUser> githubNameTakenValidation;
 
     @Override
     public void init() throws ServletException {
@@ -79,8 +77,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
         UserService userService = new UserService(client);
 
         validator = new Validator<>();
-        githubNameTakenValidation = new GitHubNameTakenValidation(userRepository);
-        validator.addValidation(githubNameTakenValidation);
+        validator.addValidation(new GitHubNameTakenValidation(userRepository));
         validator.addValidation(new GitHubNameExistsValidation(userService));
     }
 
@@ -91,23 +88,18 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             final String krb5Name = getAuthenticatedUser().getName();
             final KerberosUser user = userRepository.getUser(krb5Name);
 
-            log("Changing githubName for KerberosUser " + krb5Name + ". Old name is " + user.getGithubName() + ". New name " +
-                    "is " + newGithubName);
-
-            if(user.getGithubName().equals(newGithubName)) {
-                validator.removeValidation(githubNameTakenValidation);
-            }
+            log(String.format("Changing githubName for user %s from %s to %s.",
+                    krb5Name, user.getGithubName(), newGithubName));
 
             user.setGithubName(newGithubName);
             ValidationResult validationResult = validator.validate(user);
-            validator.addValidation(githubNameTakenValidation);
             if (validationResult.isOK()) {
                 userRepository.saveOrUpdateUser(user);
                 setAuthenticatedUser(user); // update session with current instance
-                log("Successfully modified GithubName for KerberosUser " + krb5Name);
+                log(String.format("Successfully modified githubName for user %s", krb5Name));
                 return EntityUpdateResult.ok(user);
             } else {
-                log("Validation failure: " + validationResult);
+                log(String.format("Validation failure: %s", validationResult));
                 return EntityUpdateResult.validationFailure(validationResult);
             }
         } catch (HibernateException e) {
@@ -149,7 +141,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     public Set<GithubOrganization> getAvailableOrganizations() {
         try {
             final Set<GithubOrganization> organizations = organizationRepository.getOrganizations();
-            return new HashSet<GithubOrganization>(organizations);
+            return new HashSet<>(organizations);
         } catch (SQLException e) {
             throw new ApplicationException("Couldn't load GitHub organizations: " + e.getMessage(), e);
         }

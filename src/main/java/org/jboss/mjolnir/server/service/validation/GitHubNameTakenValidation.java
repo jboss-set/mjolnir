@@ -24,7 +24,7 @@ public class GitHubNameTakenValidation implements Validation<KerberosUser> {
         try {
             ValidationResult result = new ValidationResult();
             KerberosUser userByGitHubName = userRepository.getUserByGitHubName(entity.getGithubName());
-            if (userByGitHubName != null && userByGitHubName.equals(entity)) {
+            if (userByGitHubName != null && !userByGitHubName.equals(entity)) {
                 result.addFailure("This GitHub name is already taken by different user.");
             }
             return result;
