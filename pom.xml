@@ -125,6 +125,11 @@
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <packagingExcludes>WEB-INF/web-devel.xml</packagingExcludes>
+                    <archive>
+                        <manifestEntries>
+                            <Version>${project.version}</Version>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
 
@@ -199,7 +204,7 @@
                     <configLocation>jboss-as-checkstyle/checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                     <failOnViolation>true</failOnViolation>
-                    <useFile />
+                    <useFile/>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -289,7 +294,9 @@
         <profile>
             <id>dev</id>
             <activation>
-                <property><name>dev</name></property>
+                <property>
+                    <name>dev</name>
+                </property>
             </activation>
 
             <build>
