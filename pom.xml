@@ -7,7 +7,7 @@
     <!-- Setting up the basic information. As of now, we'll leave it as a JBoss.org project -->
     <groupId>org.jboss.mjolnir</groupId>
     <artifactId>mjolnir</artifactId>
-    <version>0.3.20160104</version>
+    <version>1.0.20160104</version>
     <packaging>war</packaging>
 
     <properties>
