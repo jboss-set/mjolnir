@@ -52,9 +52,6 @@ import org.jboss.mjolnir.shared.domain.KerberosUser;
 
 public class LoginServiceImpl extends AbstractServiceServlet implements LoginService {
 
-    private static final String KRB5_REALM_KEY = "krb5.realm";
-    private static final String KRB5_KDC_KEY = "krb5.kdc";
-
     @EJB
     private UserRepository userRepository;
 
@@ -136,8 +133,8 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
     }
 
     private void configureSystemProperties() {
-        String realm = applicationParameters.getParameter(KRB5_REALM_KEY);
-        String kdc = applicationParameters.getParameter(KRB5_KDC_KEY);
+        String realm = applicationParameters.getParameter(ApplicationParameters.KRB5_REALM_KEY);
+        String kdc = applicationParameters.getParameter(ApplicationParameters.KRB5_KDC_KEY);
         if (realm != null && kdc != null) {
             System.setProperty("java.security.krb5.realm", realm);
             System.setProperty("java.security.krb5.kdc", kdc);

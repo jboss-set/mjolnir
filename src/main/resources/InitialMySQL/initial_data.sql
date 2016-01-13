@@ -3,7 +3,7 @@ insert into application_parameters (param_name, param_value) values ('ldap.url',
 insert into application_parameters (param_name, param_value) values ('infinispan.path', '/home/jboss/infinispan.store');
 insert into application_parameters (param_name, param_value) values ('application.reporting_email', 'jboss-set@redhat.com');
 insert into application_parameters (param_name, param_value) values ('krb5.realm', 'REDHAT.COM');
-insert into application_parameters (param_name, param_value) values ('krb5.kdc', 'kerberos01.core.prod.int.ams2.redhat.com');
+insert into application_parameters (param_name, param_value) values ('krb5.kdc', 'kerberos.corp.redhat.com');
 
 insert into github_orgs (name) values ('some org');
 
