@@ -288,6 +288,46 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
+            <!-- Generates RPM -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <version>2.1.5</version>
+                <executions>
+                    <execution>
+                        <id>generate-rpm</id>
+                        <goals>
+                            <goal>rpm</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <group>JBoss SET/Tools</group>
+                    <packager>JBoss SET</packager>
+                    <mappings>
+                        <mapping>
+                            <directory>/usr/share</directory>
+                            <filemode>644</filemode>
+                            <username>jboss</username>
+                            <groupname>jboss</groupname>
+                            <artifact/>
+                        </mapping>
+                        <mapping>
+                            <directory>/usr/share/jbossas/standalone/deployments</directory>
+                            <filemode>644</filemode>
+                            <username>jboss</username>
+                            <groupname>jboss</groupname>
+                            <sources>
+                                <softlinkSource>
+                                    <location>/usr/share/${artifactId}.war</location>
+                                </softlinkSource>
+                            </sources>
+                        </mapping>
+                    </mappings>
+                </configuration>
+            </plugin>
+
         </plugins>
 
     </build>
@@ -326,6 +366,42 @@
                         <configuration combine.children="override">
                             <module>org.jboss.mjolnir.MjolnirDev</module>
                         </configuration>
+                    </plugin>
+
+                    <!-- disable RPM creation -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>rpm-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>generate-rpm</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- disable RPM creation -->
+        <profile>
+            <id>norpm</id>
+            <activation>
+                <property>
+                    <name>norpm</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>rpm-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>generate-rpm</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
