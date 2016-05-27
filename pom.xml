@@ -313,17 +313,6 @@
                             <groupname>jboss</groupname>
                             <artifact/>
                         </mapping>
-                        <mapping>
-                            <directory>/usr/share/jbossas/standalone/deployments</directory>
-                            <filemode>644</filemode>
-                            <username>jboss</username>
-                            <groupname>jboss</groupname>
-                            <sources>
-                                <softlinkSource>
-                                    <location>/usr/share/${artifactId}.war</location>
-                                </softlinkSource>
-                            </sources>
-                        </mapping>
                     </mappings>
                 </configuration>
             </plugin>
