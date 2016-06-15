@@ -16,7 +16,7 @@ import static org.eclipse.egit.github.core.client.IGitHubConstants.SEGMENT_TEAMS
 
 /**
  * Extension of TeamService which adds addMembership() method.
- * <p/>
+ *
  * (See https://developer.github.com/v3/orgs/teams/#add-team-membership).
  *
  * @author Tomas Hofman (thofman@redhat.com)

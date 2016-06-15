@@ -43,7 +43,7 @@ import org.jboss.mjolnir.shared.domain.Subscription;
 
 /**
  * Table composite displaying list of Subscriptions objects.
- * <p/>
+ *
  * Contains action button for editing and deleting related users. Allows filtering and sorting.
  *
  * @author Tomas Hofman (thofman@redhat.com)

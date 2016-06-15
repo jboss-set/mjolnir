@@ -197,7 +197,7 @@ public class GitHubSubscriptionBean {
      * Sets subscriptions of given GitHub user.
      *
      * @param gitHubName GitHub username
-     * @param subscriptions subscription map (team id => subscribe?)
+     * @param subscriptions subscription map (team id : subscribe?)
      */
     public void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions) {
             for (Map.Entry<Integer, Boolean> entry : subscriptions.entrySet()) {
