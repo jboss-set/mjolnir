@@ -12,7 +12,8 @@
         <connection>scm:git:git://github.com/jboss-set/mjolnir.git</connection>
         <developerConnection>scm:git:git@github.com:jboss-set/mjolnir.git</developerConnection>
         <url>https://github.com/jboss-set/mjolnir</url>
-    </scm>
+      <tag>HEAD</tag>
+  </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -290,7 +291,7 @@
                             <filemode>644</filemode>
                             <username>jboss</username>
                             <groupname>jboss</groupname>
-                            <artifact/>
+                            <artifact />
                         </mapping>
                     </mappings>
                 </configuration>
@@ -367,6 +368,20 @@
             <id>JBoss repository</id>
             <url>http://repository.jboss.org/nexus/content/groups/public/</url>
         </repository>
+    <repository>
+      <id>jboss-public-repository-group</id>
+      <name>JBoss Public Maven Repository Group</name>
+      <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+      <layout>default</layout>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </repository>
     </repositories>
 
 </project>
