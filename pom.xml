@@ -307,7 +307,7 @@
                     <packager>JBoss SET</packager>
                     <mappings>
                         <mapping>
-                            <directory>/usr/share</directory>
+                            <directory>/usr/share/mjolnir.war</directory>
                             <filemode>644</filemode>
                             <username>jboss</username>
                             <groupname>jboss</groupname>
