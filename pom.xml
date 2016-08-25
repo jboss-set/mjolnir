@@ -16,7 +16,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <devel.webapp-dir>${project.build.directory}/devel-web-inf</devel.webapp-dir>
 
         <gwt.version>2.7.0</gwt.version>
         <gwtp.version>1.5.1</gwtp.version>
@@ -128,7 +127,6 @@
                 <version>2.2</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <packagingExcludes>WEB-INF/web-devel.xml</packagingExcludes>
                     <archive>
                         <manifestEntries>
                             <Version>${project.version}</Version>
@@ -159,25 +157,6 @@
                     <execution>
                         <goals>
                             <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <tasks>
-                                <echo>Copying development web resources.</echo>
-                                <!-- copy web-devel.xml to temporary directory for use in 'devel' profile -->
-                                <copy file="${project.basedir}/src/main/webapp/WEB-INF/web-devel.xml" tofile="${devel.webapp-dir}/WEB-INF/web.xml" />
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -334,20 +313,6 @@
                 <finalName>mjolnir-dev</finalName>
 
                 <plugins>
-                    <!-- disables HTTPS security constraint -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <configuration combine.children="append">
-                            <webResources>
-                                <resource>
-                                    <!-- use development version of web.xml instead of default one -->
-                                    <directory>${devel.webapp-dir}</directory>
-                                </resource>
-                            </webResources>
-                        </configuration>
-                    </plugin>
-
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>gwt-maven-plugin</artifactId>
