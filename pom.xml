@@ -286,12 +286,21 @@
                     <group>JBoss SET/Tools</group>
                     <packager>JBoss SET</packager>
                     <mappings>
+                        <!-- not very elegant, but only way I found to ensure the proper files
+                             attributes were set was to "override" the first mapping with a second
+                             one ... -->
                         <mapping>
                             <directory>/usr/share/${project.name}</directory>
                             <filemode>644</filemode>
-                            <username>jboss</username>
-                            <groupname>jboss</groupname>
-                            <artifact />
+                            <username>root</username>
+                            <groupname>root</groupname>
+                            <artifact/>
+                        </mapping>
+                        <mapping>
+                            <directory>/usr/share/${project.name}</directory>
+                            <filemode>755</filemode>
+                            <username>root</username>
+                            <groupname>root</groupname>
                         </mapping>
                     </mappings>
                 </configuration>
