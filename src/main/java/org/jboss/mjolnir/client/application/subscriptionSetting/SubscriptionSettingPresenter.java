@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Strings;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -16,11 +19,13 @@ import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
+import org.jboss.mjolnir.client.UIMessages;
 import org.jboss.mjolnir.client.NameTokens;
 import org.jboss.mjolnir.client.application.ApplicationPresenter;
 import org.jboss.mjolnir.client.application.SplitBundles;
 import org.jboss.mjolnir.client.application.events.loadingIndicator.LoadingIndicationEvent;
 import org.jboss.mjolnir.client.application.security.CurrentUser;
+import org.jboss.mjolnir.client.component.NotificationDialog;
 import org.jboss.mjolnir.client.component.ProcessingIndicatorPopup;
 import org.jboss.mjolnir.client.service.DefaultCallback;
 import org.jboss.mjolnir.client.service.GitHubService;
@@ -52,6 +57,8 @@ public class SubscriptionSettingPresenter
     private List<GithubOrganization> organizations;
     private CurrentUser currentUser;
     private PlaceManager placeManager;
+
+    private UIMessages uiMessages = GWT.create(UIMessages.class);
 
     @Inject
     public SubscriptionSettingPresenter(EventBus eventBus, MyView view, MyProxy proxy, CurrentUser currentUser,
@@ -116,6 +123,10 @@ public class SubscriptionSettingPresenter
             public void onSuccess(String result) {
                 team.setMembershipState(result);
                 getView().refresh();
+
+                String url = uiMessages.organizationUrl(team.getOrganization().getName());
+                SafeHtml message = SafeHtmlUtils.fromTrustedString(uiMessages.invitationSentMessage(url));
+                new NotificationDialog(uiMessages.invitationSentCaption(), message).center();
             }
         });
     }
