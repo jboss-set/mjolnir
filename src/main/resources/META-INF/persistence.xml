@@ -5,10 +5,10 @@
     <persistence-unit name="MjolnirPU" transaction-type="JTA">
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
 
-        <class>org.jboss.mjolnir.server.entities.ApplicationParameterEntity</class>
-        <class>org.jboss.mjolnir.server.entities.GithubTeamEntity</class>
-        <class>org.jboss.mjolnir.server.entities.GithubOrganizationEntity</class>
-        <class>org.jboss.mjolnir.server.entities.UserEntity</class>
+        <class>org.jboss.set.mjolnir.server.entities.ApplicationParameterEntity</class>
+        <class>org.jboss.set.mjolnir.server.entities.GithubTeamEntity</class>
+        <class>org.jboss.set.mjolnir.server.entities.GithubOrganizationEntity</class>
+        <class>org.jboss.set.mjolnir.server.entities.UserEntity</class>
 
         <properties>
             <property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.JBossAppServerJtaPlatform" />

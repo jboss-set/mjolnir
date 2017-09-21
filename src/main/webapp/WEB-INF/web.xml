@@ -10,7 +10,7 @@
 
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>org.jboss.mjolnir.server.service.LoginServiceImpl</servlet-class>
+        <servlet-class>org.jboss.set.mjolnir.server.service.LoginServiceImpl</servlet-class>
     </servlet>
     
     <servlet-mapping>
@@ -20,7 +20,7 @@
 
     <servlet>
         <servlet-name>GitHubServlet</servlet-name>
-        <servlet-class>org.jboss.mjolnir.server.service.GitHubServiceImpl</servlet-class>
+        <servlet-class>org.jboss.set.mjolnir.server.service.GitHubServiceImpl</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -30,7 +30,7 @@
 
     <servlet>
         <servlet-name>AdministrationServlet</servlet-name>
-        <servlet-class>org.jboss.mjolnir.server.service.AdministrationServiceImpl</servlet-class>
+        <servlet-class>org.jboss.set.mjolnir.server.service.AdministrationServiceImpl</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -40,7 +40,7 @@
 
     <servlet>
         <servlet-name>ReportingServlet</servlet-name>
-        <servlet-class>org.jboss.mjolnir.server.service.ReportingServiceImpl</servlet-class>
+        <servlet-class>org.jboss.set.mjolnir.server.service.ReportingServiceImpl</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -68,7 +68,7 @@
 
     <filter>
         <filter-name>AuthenticationFilter</filter-name>
-        <filter-class>org.jboss.mjolnir.server.AuthenticationFilter</filter-class>
+        <filter-class>org.jboss.set.mjolnir.server.AuthenticationFilter</filter-class>
     </filter>
 
     <filter-mapping>
