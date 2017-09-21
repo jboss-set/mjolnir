@@ -51,7 +51,7 @@ public final class StatusCheckResult {
         private String message;
         private Throwable exception;
 
-        public Problem(String message, Throwable exception) {
+        Problem(String message, Throwable exception) {
             this.message = message;
             this.exception = exception;
         }

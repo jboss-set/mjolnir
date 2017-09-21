@@ -538,7 +538,7 @@ public abstract class SubscriptionsTable implements IsWidget {
 
         private boolean whitelist;
 
-        public WhiteListClickHandler(boolean whitelist) {
+        WhiteListClickHandler(boolean whitelist) {
             this.whitelist = whitelist;
         }
 

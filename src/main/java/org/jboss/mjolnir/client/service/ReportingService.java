@@ -24,7 +24,7 @@ public interface ReportingService extends RemoteService {
 
     void performReportAction(ReportType reportType, String uuid, String actionName) throws ReportDataNotAvailableException, ApplicationException;
 
-    public static class Util {
+    class Util {
         private static ReportingServiceAsync instance;
 
         public static ReportingServiceAsync getInstance() {
