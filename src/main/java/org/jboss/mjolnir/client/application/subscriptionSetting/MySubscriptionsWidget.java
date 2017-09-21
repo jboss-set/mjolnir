@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
@@ -11,6 +12,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import org.jboss.mjolnir.client.UIMessages;
 import org.jboss.mjolnir.client.component.table.DefaultCellTable;
 import org.jboss.mjolnir.shared.domain.GithubTeam;
 import org.jboss.mjolnir.shared.domain.MembershipStates;
@@ -23,6 +25,7 @@ import org.jboss.mjolnir.shared.domain.MembershipStates;
 public abstract class MySubscriptionsWidget implements IsWidget {
 
     private ListDataProvider<GithubTeam> dataProvider = new ListDataProvider<>();
+    private UIMessages uiMessages = GWT.create(UIMessages.class);
 
     @Override
     public Widget asWidget() {
@@ -37,29 +40,29 @@ public abstract class MySubscriptionsWidget implements IsWidget {
                 return team.getName();
             }
         };
-        cellTable.addColumn(nameColumn, "Team");
+        cellTable.addColumn(nameColumn, uiMessages.team());
 
         final TextColumn<GithubTeam> subscribedColumn = new TextColumn<GithubTeam>() {
             @Override
             public String getValue(GithubTeam object) {
                 if (MembershipStates.NONE.equals(object.getMembershipState())) {
-                    return "no";
+                    return uiMessages.no();
                 } else if (MembershipStates.ACTIVE.equals(object.getMembershipState())) {
-                    return "yes";
+                    return uiMessages.yes();
                 } else if (MembershipStates.PENDING.equals(object.getMembershipState())) {
-                    return "pending";
+                    return uiMessages.subscribtionStatusPendnig();
                 }
                 return "?"; // unknown state
             }
         };
-        cellTable.addColumn(subscribedColumn, "Membership");
+        cellTable.addColumn(subscribedColumn, uiMessages.membership());
 
         final ButtonCell cell = new ButtonCell();
         final Column<GithubTeam, String> actionColumn = new Column<GithubTeam, String>(cell) {
             @Override
             public String getValue(GithubTeam object) {
                 return MembershipStates.NONE.equals(object.getMembershipState())
-                        ? "Subscribe" : "Unsubscribe";
+                        ? uiMessages.subscribe() : uiMessages.unsubscribe();
             }
         };
         actionColumn.setFieldUpdater(new FieldUpdater<GithubTeam, String>() {
@@ -72,7 +75,7 @@ public abstract class MySubscriptionsWidget implements IsWidget {
                 }
             }
         });
-        cellTable.addColumn(actionColumn, "(Un)subscribe");
+        cellTable.addColumn(actionColumn, uiMessages.subscribtion());
 
         return cellTable;
     }

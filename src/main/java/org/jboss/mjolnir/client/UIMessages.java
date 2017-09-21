@@ -20,4 +20,28 @@ public interface UIMessages extends Messages {
             "<p>(This is not necessary if you already were a member of this GitHub organization.)</p>")
     String invitationSentMessage(String organizationUrl);
 
+    @DefaultMessage("Yes")
+    String yes();
+
+    @DefaultMessage("No")
+    String no();
+
+    @DefaultMessage("pending (invitation sent)")
+    String subscribtionStatusPendnig();
+
+    @DefaultMessage("Subscribe")
+    String subscribe();
+
+    @DefaultMessage("Unsubscribe")
+    String unsubscribe();
+
+    @DefaultMessage("Subscribtion")
+    String subscribtion();
+
+    @DefaultMessage("Membership")
+    String membership();
+
+    @DefaultMessage("Team")
+    String team();
+
 }
