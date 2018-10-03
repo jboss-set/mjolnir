@@ -3,7 +3,6 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0">
     <persistence-unit name="MjolnirPU" transaction-type="JTA">
-        <provider>org.hibernate.ejb.HibernatePersistence</provider>
 
         <class>org.jboss.set.mjolnir.server.entities.ApplicationParameterEntity</class>
         <class>org.jboss.set.mjolnir.server.entities.GithubTeamEntity</class>

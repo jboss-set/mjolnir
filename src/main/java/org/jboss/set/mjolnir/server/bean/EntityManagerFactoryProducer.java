@@ -7,7 +7,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.persistence.EntityManagerFactory;
 
-import org.hibernate.ejb.HibernatePersistence;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.jboss.logging.Logger;
 import org.jboss.set.mjolnir.server.util.JndiUtils;
 
@@ -27,7 +27,7 @@ public class EntityManagerFactoryProducer {
         Map<String, String> properties = new HashMap<>();
         properties.put("hibernate.connection.datasource", "java:jboss/datasources/" + appName + "/MjolnirDS");
 
-        return new HibernatePersistence().createEntityManagerFactory("MjolnirPU", properties);
+        return new HibernatePersistenceProvider().createEntityManagerFactory("MjolnirPU", properties);
     }
 
 }
