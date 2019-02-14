@@ -3,7 +3,7 @@
         .loginPanel {
             background: white;
             margin: 2em auto;
-            width: 380px;
+            width: 480px;
             position: relative;
             top: 30%;
         }
@@ -33,7 +33,7 @@
                 <table>
                     <tr>
                         <td>Kerberos Username:</td>
-                        <td><g:TextBox ui:field="usernameField" width="200px"/></td>
+                        <td><g:TextBox ui:field="usernameField" width="200px"/> @redhat.com</td>
                     </tr>
                     <tr>
                         <td>Kerberos Password:</td>
