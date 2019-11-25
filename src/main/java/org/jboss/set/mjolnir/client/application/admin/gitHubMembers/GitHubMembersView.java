@@ -5,6 +5,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.inject.Inject;
@@ -36,6 +38,7 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
     private SelectionTable<GithubTeam> teamsTable;
     private SubscriptionsTable subscriptionsTable;
     private GithubOrganization selectedOrg;
+    private GithubTeam selectedTeam;
 
     @Inject
     public GitHubMembersView() {
@@ -51,6 +54,17 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
         panel.add(teamsTable = createTeamsTable());
 
         panel.add(new HTMLPanel("h3", "Organization Members"));
+        Anchor downloadLink = new Anchor("Download CSV", false);
+        downloadLink.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                String url = GWT.getModuleBaseURL()
+                        + "auth/download?org=" + selectedOrg.getName() + "&team="
+                        + (selectedTeam.getId() != null ? selectedTeam.getId() : "");
+                Window.open(url, "_blank", "");
+            }
+        });
+        panel.add(downloadLink);
         panel.add(subscriptionsTable = createSubscriptionTable());
     }
 
@@ -90,6 +104,7 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
 
             @Override
             protected void onSelectionChanged(GithubTeam selectedObject) {
+                selectedTeam = selectedObject;
                 subscriptionsTable.setData(Collections.<Subscription>emptyList());
                 if (selectedOrg != null) {
                     getUiHandlers().retrieveSubscriptions(selectedOrg, selectedObject);

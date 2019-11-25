@@ -83,9 +83,9 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @Override
     public List<Subscription> getMembers(GithubOrganization org, GithubTeam team) {
         if (team == null || team.getId() == null) {
-            return gitHubSubscriptionBean.getOrganizationSubscriptions(org);
+            return gitHubSubscriptionBean.getOrganizationSubscriptions(org.getName());
         } else {
-            return gitHubSubscriptionBean.getTeamSubscriptions(team);
+            return gitHubSubscriptionBean.getTeamSubscriptions(team.getId());
         }
     }
 

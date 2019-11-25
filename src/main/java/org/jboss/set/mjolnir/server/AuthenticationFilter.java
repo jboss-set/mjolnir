@@ -1,5 +1,7 @@
 package org.jboss.set.mjolnir.server;
 
+import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -28,17 +30,26 @@ public class AuthenticationFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
-        final HttpSession session = request.getSession();
-        if (session != null) {
-            if (session.getAttribute(AUTHENTICATED_USER_SESSION_KEY) != null) {
-                filterChain.doFilter(servletRequest, servletResponse);
-                return;
-            }
+        KerberosUser authenticatedUser = getAuthenticatedUser(request);
+        if (authenticatedUser != null && authenticatedUser.isLoggedIn()) {
+            filterChain.doFilter(servletRequest, servletResponse);
+        } else {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         }
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
     }
 
     @Override
     public void destroy() {
+    }
+
+    protected static KerberosUser getAuthenticatedUser(HttpServletRequest request) {
+        final HttpSession session = request.getSession();
+        if (session != null) {
+            Object user = session.getAttribute(AUTHENTICATED_USER_SESSION_KEY);
+            if (user instanceof KerberosUser) {
+                return (KerberosUser) user;
+            }
+        }
+        return null;
     }
 }

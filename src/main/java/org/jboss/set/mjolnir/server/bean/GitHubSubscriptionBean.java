@@ -61,12 +61,12 @@ public class GitHubSubscriptionBean {
     /**
      * Retrieves users subscribed to a team.
      *
-     * @param team GH team
+     * @param teamId GH team id
      * @return subscriptions
      */
-    public List<Subscription> getTeamSubscriptions(GithubTeam team) {
+    public List<Subscription> getTeamSubscriptions(int teamId) {
         try {
-            List<User> members = teamService.getMembers(team.getId());
+            List<User> members = teamService.getMembers(teamId);
             return createSubscriptions(members);
         } catch (IOException e) {
             throw new ApplicationException(e);
@@ -79,9 +79,9 @@ public class GitHubSubscriptionBean {
      * @param org GH organization
      * @return subscriptions
      */
-    public List<Subscription> getOrganizationSubscriptions(GithubOrganization org) {
+    public List<Subscription> getOrganizationSubscriptions(String org) {
         try {
-            List<User> members = organizationService.getMembers(org.getName());
+            List<User> members = organizationService.getMembers(org);
             return createSubscriptions(members);
         } catch (IOException e) {
             throw new ApplicationException(e);

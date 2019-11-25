@@ -58,22 +58,43 @@
         <url-pattern>/mjolnir/xsrf</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>download</servlet-name>
+        <servlet-class>org.jboss.set.mjolnir.server.DownloadServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>download</servlet-name>
+        <url-pattern>/mjolnir/auth/download</url-pattern>
+    </servlet-mapping>
+
     <context-param>
         <param-name>gwt.xsrf.session_cookie_name</param-name>
         <param-value>JSESSIONID</param-value>
     </context-param>
 
 
-    <!-- Security Filter -->
+    <!-- Security Filters -->
 
     <filter>
         <filter-name>AuthenticationFilter</filter-name>
         <filter-class>org.jboss.set.mjolnir.server.AuthenticationFilter</filter-class>
     </filter>
 
+    <filter>
+        <filter-name>AdminOnlyFilter</filter-name>
+        <filter-class>org.jboss.set.mjolnir.server.AdminOnlyFilter</filter-class>
+    </filter>
+
     <filter-mapping>
         <filter-name>AuthenticationFilter</filter-name>
         <url-pattern>/mjolnir/auth/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>AdminOnlyFilter</filter-name>
+        <url-pattern>/mjolnir/auth/download</url-pattern>
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
 
