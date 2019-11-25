@@ -1,8 +1,5 @@
 package org.jboss.set.mjolnir.client.application.admin.gitHubMembers;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -22,8 +19,12 @@ import org.jboss.set.mjolnir.client.component.ProcessingIndicatorPopup;
 import org.jboss.set.mjolnir.client.service.AdministrationService;
 import org.jboss.set.mjolnir.client.service.AdministrationServiceAsync;
 import org.jboss.set.mjolnir.client.service.DefaultCallback;
+import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.set.mjolnir.shared.domain.GithubTeam;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
-import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Shows members of configured GitHub organizations.
@@ -38,7 +39,8 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
         implements GitHubMembersHandlers, LoadingIndicationEvent.LoadingIndicatorHandler {
 
     public interface MyView extends View, HasUiHandlers<GitHubMembersHandlers> {
-        void setData(List<SubscriptionSummary> items);
+        void setOrganizations(List<GithubOrganization> items);
+        void setSubscriptions(List<Subscription> items);
         List<Subscription> getCurrentSubscriptionList();
         void refresh();
     }
@@ -65,12 +67,11 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
     public void prepareFromRequest(PlaceRequest request) {
         LoadingIndicationEvent.fire(this, true);
 
-        administrationService.getOrganizationMembers(new DefaultCallback<List<SubscriptionSummary>>() {
+        administrationService.getOrganizations(new DefaultCallback<List<GithubOrganization>>() {
             @Override
-            public void onSuccess(List<SubscriptionSummary> result) {
-                getView().setData(result);
+            public void onSuccess(List<GithubOrganization> result) {
+                getView().setOrganizations(result);
                 getProxy().manualReveal(GitHubMembersPresenter.this);
-                LoadingIndicationEvent.fire(GitHubMembersPresenter.this, false);
             }
 
             @Override
@@ -87,6 +88,27 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
         super.onBind();
 
         addRegisteredHandler(LoadingIndicationEvent.TYPE, this);
+    }
+
+    @Override
+    public void retrieveSubscriptions(GithubOrganization org, GithubTeam team) {
+        LoadingIndicationEvent.fire(this, true);
+
+        administrationService.getMembers(org, team, new DefaultCallback<List<Subscription>>() {
+            @Override
+            public void onSuccess(List<Subscription> subscriptions) {
+                getView().setSubscriptions(subscriptions);
+                getProxy().manualReveal(GitHubMembersPresenter.this);
+                LoadingIndicationEvent.fire(GitHubMembersPresenter.this, false);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                super.onFailure(throwable);
+                getProxy().manualRevealFailed();
+                LoadingIndicationEvent.fire(GitHubMembersPresenter.this, false);
+            }
+        });
     }
 
     @Override

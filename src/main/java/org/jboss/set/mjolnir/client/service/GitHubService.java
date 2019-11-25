@@ -28,13 +28,13 @@ import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
+import org.jboss.set.mjolnir.client.XsrfUtil;
+import org.jboss.set.mjolnir.client.exception.ApplicationException;
+import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
 import org.jboss.set.mjolnir.shared.domain.KerberosUser;
-import org.jboss.set.mjolnir.client.XsrfUtil;
-import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
-import org.jboss.set.mjolnir.client.exception.ApplicationException;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Service allowing user to modify his subscriptions.
@@ -50,8 +50,8 @@ public interface GitHubService extends RemoteService {
     EntityUpdateResult<KerberosUser> modifyGitHubName(String newGithubName) throws ApplicationException;
     String subscribe(int teamId) throws ApplicationException;
     void unsubscribe(int teamId) throws ApplicationException;
-    Set<GithubOrganization> getAvailableOrganizations() throws ApplicationException;
-    Set<GithubOrganization> getSubscriptions() throws ApplicationException;
+    List<GithubOrganization> getAvailableOrganizations() throws ApplicationException;
+    List<GithubOrganization> getSubscriptions() throws ApplicationException;
 
     class Util {
         private static GitHubServiceAsync instance;

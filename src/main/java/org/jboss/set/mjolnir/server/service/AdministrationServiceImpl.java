@@ -3,30 +3,31 @@ package org.jboss.set.mjolnir.server.service;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.UserService;
 import org.hibernate.HibernateException;
-import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
-import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
-import org.jboss.set.mjolnir.shared.domain.Subscription;
-import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
-import org.jboss.set.mjolnir.shared.domain.ValidationResult;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.client.service.AdministrationService;
 import org.jboss.set.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.set.mjolnir.server.bean.GitHubSubscriptionBean;
 import org.jboss.set.mjolnir.server.bean.LdapRepository;
+import org.jboss.set.mjolnir.server.bean.OrganizationRepository;
 import org.jboss.set.mjolnir.server.bean.UserRepository;
 import org.jboss.set.mjolnir.server.service.validation.GitHubNameExistsValidation;
 import org.jboss.set.mjolnir.server.service.validation.GitHubNameTakenValidation;
 import org.jboss.set.mjolnir.server.service.validation.KrbNameTakenValidation;
 import org.jboss.set.mjolnir.server.service.validation.Validation;
 import org.jboss.set.mjolnir.server.service.validation.Validator;
+import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
+import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.set.mjolnir.shared.domain.GithubTeam;
+import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.Subscription;
+import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
+import org.jboss.set.mjolnir.shared.domain.ValidationResult;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Performs administration tasks.
@@ -47,6 +48,9 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
 
     @EJB
     private LdapRepository ldapRepository;
+
+    @EJB
+    private OrganizationRepository organizationRepository;
 
     private Validator<KerberosUser> validator;
     private Validation<KerberosUser> krbNameValidation;
@@ -69,6 +73,20 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         validator.addValidation(krbNameValidation);
         validator.addValidation(githubNameValidation);
         validator.addValidation(new GitHubNameExistsValidation(userService));
+    }
+
+    @Override
+    public List<GithubOrganization> getOrganizations() throws ApplicationException {
+        return organizationRepository.getOrganizations();
+    }
+
+    @Override
+    public List<Subscription> getMembers(GithubOrganization org, GithubTeam team) {
+        if (team == null || team.getId() == null) {
+            return gitHubSubscriptionBean.getOrganizationSubscriptions(org);
+        } else {
+            return gitHubSubscriptionBean.getTeamSubscriptions(team);
+        }
     }
 
     /**
@@ -154,7 +172,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
      * @see GitHubSubscriptionBean#getSubscriptions(String)
      */
     @Override
-    public Set<GithubOrganization> getSubscriptions(String gitHubName) {
+    public List<GithubOrganization> getSubscriptions(String gitHubName) {
         return gitHubSubscriptionBean.getSubscriptions(gitHubName);
     }
 

@@ -1,21 +1,25 @@
 package org.jboss.set.mjolnir.client.service;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
+import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.set.mjolnir.shared.domain.GithubTeam;
+import org.jboss.set.mjolnir.shared.domain.KerberosUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public interface AdministrationServiceAsync {
+
+    void getOrganizations(AsyncCallback<List<GithubOrganization>> async);
+
+    void getMembers(GithubOrganization org, GithubTeam team, AsyncCallback<List<Subscription>> async);
 
     void getOrganizationMembers(AsyncCallback<List<SubscriptionSummary>> async);
 
@@ -31,7 +35,7 @@ public interface AdministrationServiceAsync {
 
     void editUser(KerberosUser user, boolean validateKrbName, boolean validateGHname, AsyncCallback<EntityUpdateResult<KerberosUser>> asyncCallback);
 
-    void getSubscriptions(String gitHubName, AsyncCallback<Set<GithubOrganization>> asyncCallback);
+    void getSubscriptions(String gitHubName, AsyncCallback<List<GithubOrganization>> asyncCallback);
 
     void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions, AsyncCallback<Void> asyncCallback);
 

@@ -6,17 +6,17 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.jboss.set.mjolnir.client.XsrfUtil;
-import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
+import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.set.mjolnir.shared.domain.GithubTeam;
+import org.jboss.set.mjolnir.shared.domain.KerberosUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
-import org.jboss.set.mjolnir.client.exception.ApplicationException;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Service providing administrative tasks.
@@ -26,6 +26,10 @@ import java.util.Set;
 @RemoteServiceRelativePath("auth/AdministrationService")
 @XsrfProtect
 public interface AdministrationService extends RemoteService {
+
+    List<GithubOrganization> getOrganizations() throws ApplicationException;
+
+    List<Subscription> getMembers(GithubOrganization org, GithubTeam team);
 
     List<SubscriptionSummary> getOrganizationMembers() throws ApplicationException;
 
@@ -41,7 +45,7 @@ public interface AdministrationService extends RemoteService {
 
     EntityUpdateResult<KerberosUser> editUser(KerberosUser user, boolean validateKrbName, boolean validateGHname) throws ApplicationException;
 
-    Set<GithubOrganization> getSubscriptions(String gitHubName) throws ApplicationException;
+    List<GithubOrganization> getSubscriptions(String gitHubName) throws ApplicationException;
 
     void unsubscribe(Collection<Subscription> subscriptions) throws ApplicationException;
 

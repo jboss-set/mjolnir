@@ -1,17 +1,17 @@
 package org.jboss.set.mjolnir.client.service;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
 import org.jboss.set.mjolnir.shared.domain.KerberosUser;
-import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 
-import java.util.Set;
+import java.util.List;
 
 public interface GitHubServiceAsync {
 
-    void getAvailableOrganizations(AsyncCallback<Set<GithubOrganization>> async);
+    void getAvailableOrganizations(AsyncCallback<List<GithubOrganization>> async);
 
-    void getSubscriptions(AsyncCallback<Set<GithubOrganization>> async);
+    void getSubscriptions(AsyncCallback<List<GithubOrganization>> async);
 
     void unsubscribe(int teamId, AsyncCallback<Void> async);
 

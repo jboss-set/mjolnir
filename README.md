@@ -13,7 +13,7 @@ Building
 This project is designed to be built by Apache Maven (developed on 3.0.4). You can deploy to an already running Wildfly 8, JBoss AS7 or JBoss EAP 6 server by the following:
 
 ```
-mvn clean jboss-as:deploy
+mvn clean wildfly:deploy
 ```
 
 When using `dev` profile, created WAR won't require HTTPS, enabling GWT codeserver to be used. It also limits number
@@ -35,3 +35,18 @@ After successful deployment, the application can be used by browsing (by default
 ```
 http://localhost:8080/<appName>
 ```
+
+Development / Debugging
+-----------
+
+1. Connect to VPN to get access to KRB server.
+2. Start H2 database and insert configuration data (see initial_data.sql in resources).
+   ```
+   $ ./start_db.sh
+   ```
+3. Start Wildfly and deploy the war.
+4. Run GWT Dev Mode:
+   ```
+   $ mvn gwt:run-codeserver
+   ```
+5. In Google Chrome, navigate to http://localhost:8080/mjolnir/ and activate GWT Dev Mode.

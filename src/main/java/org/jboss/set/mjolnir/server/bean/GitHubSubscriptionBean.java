@@ -5,24 +5,22 @@ import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.OrganizationService;
 import org.hibernate.HibernateException;
+import org.jboss.set.mjolnir.client.exception.ApplicationException;
+import org.jboss.set.mjolnir.server.github.ExtendedTeamService;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
 import org.jboss.set.mjolnir.shared.domain.GithubTeam;
 import org.jboss.set.mjolnir.shared.domain.KerberosUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
-import org.jboss.set.mjolnir.client.exception.ApplicationException;
-import org.jboss.set.mjolnir.server.github.ExtendedTeamService;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,6 +59,36 @@ public class GitHubSubscriptionBean {
     }
 
     /**
+     * Retrieves users subscribed to a team.
+     *
+     * @param team GH team
+     * @return subscriptions
+     */
+    public List<Subscription> getTeamSubscriptions(GithubTeam team) {
+        try {
+            List<User> members = teamService.getMembers(team.getId());
+            return createSubscriptions(members);
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    /**
+     * Retrieves users subscribed to an organization.
+     *
+     * @param org GH organization
+     * @return subscriptions
+     */
+    public List<Subscription> getOrganizationSubscriptions(GithubOrganization org) {
+        try {
+            List<User> members = organizationService.getMembers(org.getName());
+            return createSubscriptions(members);
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    /**
      * Provides list of all members of registered GitHub organizations together with information
      * whether they have an LDAP record.
      *
@@ -71,36 +99,16 @@ public class GitHubSubscriptionBean {
             final List<SubscriptionSummary> subscriptionSummaries = new ArrayList<SubscriptionSummary>();
 
             // create single SubscriptionSummary for each organization
-            final Set<GithubOrganization> organizations = organizationRepository.getOrganizations();
+            final List<GithubOrganization> organizations = organizationRepository.getOrganizations();
             for (GithubOrganization organization : organizations) {
                 final SubscriptionSummary summary = new SubscriptionSummary();
                 summary.setOrganization(organization);
 
                 // for each organization member create Subscription object
                 final List<User> members = organizationService.getMembers(organization.getName());
-                final Map<String, Subscription> ldapUsersToCheck = new HashMap<String, Subscription>();
-                for (User member: members) {
-                    final String gitHubName = member.getLogin();
 
-                    final Subscription subscription = new Subscription();
-                    subscription.setGitHubName(gitHubName);
-                    summary.getSubscriptions().add(subscription);
-
-                    final KerberosUser appUser = userRepository.getUserByGitHubName(gitHubName);
-                    if (appUser != null) { // if user is registered, LDAP check will be done
-                        subscription.setKerberosUser(appUser);
-                        ldapUsersToCheck.put(appUser.getName(), subscription);
-                    }
-                }
-
-                // check LDAP records for retrieved users
-                final Map<String, Boolean> checkedLdapUsers = ldapRepository.checkUsersExists(ldapUsersToCheck.keySet());
-                for (Map.Entry<String, Boolean> checkedLdapUser: checkedLdapUsers.entrySet()) {
-                    if (checkedLdapUser.getValue()) {
-                        ldapUsersToCheck.get(checkedLdapUser.getKey()).setActiveKerberosAccount(true);
-                    }
-                }
-
+                List<Subscription> subscriptions = createSubscriptions(members);
+                summary.getSubscriptions().addAll(subscriptions);
                 subscriptionSummaries.add(summary);
             }
 
@@ -176,9 +184,9 @@ public class GitHubSubscriptionBean {
      * @param gitHubName GitHub username
      * @return subscription data
      */
-    public Set<GithubOrganization> getSubscriptions(String gitHubName) {
+    public List<GithubOrganization> getSubscriptions(String gitHubName) {
         try {
-            final Set<GithubOrganization> organizations = organizationRepository.getOrganizations();
+            final List<GithubOrganization> organizations = organizationRepository.getOrganizations();
             for (GithubOrganization organization: organizations) {
                 for (GithubTeam team: organization.getTeams()) {
                     final String membershipState = teamService.getMembership(team.getId(), gitHubName);
@@ -186,8 +194,6 @@ public class GitHubSubscriptionBean {
                 }
             }
             return organizations;
-        } catch (SQLException e) {
-            throw new ApplicationException(e);
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
@@ -226,6 +232,40 @@ public class GitHubSubscriptionBean {
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
+    }
+
+    /**
+     * Takes a list of GH users and returns a list of Subcription objects. Adds information about linked KRB name
+     * and whether the KRB account is still active.
+     */
+    private List<Subscription> createSubscriptions(List<User> users) {
+        ArrayList<Subscription> subscriptions = new ArrayList<>();
+
+        // for each organization user create Subscription object
+        final Map<String, Subscription> ldapUsersToCheck = new HashMap<String, Subscription>();
+        for (User user: users) {
+            final String gitHubName = user.getLogin();
+
+            final Subscription subscription = new Subscription();
+            subscription.setGitHubName(gitHubName);
+            subscriptions.add(subscription);
+
+            final KerberosUser appUser = userRepository.getUserByGitHubName(gitHubName);
+            if (appUser != null) { // if user is registered, LDAP check will be done
+                subscription.setKerberosUser(appUser);
+                ldapUsersToCheck.put(appUser.getName(), subscription);
+            }
+        }
+
+        // check LDAP records for retrieved users
+        final Map<String, Boolean> checkedLdapUsers = ldapRepository.checkUsersExists(ldapUsersToCheck.keySet());
+        for (Map.Entry<String, Boolean> checkedLdapUser: checkedLdapUsers.entrySet()) {
+            if (checkedLdapUser.getValue()) {
+                ldapUsersToCheck.get(checkedLdapUser.getKey()).setActiveKerberosAccount(true);
+            }
+        }
+
+        return subscriptions;
     }
 
 

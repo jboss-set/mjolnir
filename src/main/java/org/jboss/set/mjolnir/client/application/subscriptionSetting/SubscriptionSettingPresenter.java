@@ -1,9 +1,5 @@
 package org.jboss.set.mjolnir.client.application.subscriptionSetting;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -19,8 +15,8 @@ import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
-import org.jboss.set.mjolnir.client.UIMessages;
 import org.jboss.set.mjolnir.client.NameTokens;
+import org.jboss.set.mjolnir.client.UIMessages;
 import org.jboss.set.mjolnir.client.application.ApplicationPresenter;
 import org.jboss.set.mjolnir.client.application.SplitBundles;
 import org.jboss.set.mjolnir.client.application.events.loadingIndicator.LoadingIndicationEvent;
@@ -33,6 +29,9 @@ import org.jboss.set.mjolnir.client.service.GitHubServiceAsync;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
 import org.jboss.set.mjolnir.shared.domain.GithubTeam;
 import org.jboss.set.mjolnir.shared.domain.MembershipStates;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Allows user to subscribe to github teams.
@@ -97,9 +96,9 @@ public class SubscriptionSettingPresenter
         getView().setGitHubName(currentUser.getUser().getGithubName());
 
         LoadingIndicationEvent.fire(this, true);
-        gitHubService.getSubscriptions(new DefaultCallback<Set<GithubOrganization>>() {
+        gitHubService.getSubscriptions(new DefaultCallback<List<GithubOrganization>>() {
             @Override
-            public void onSuccess(Set<GithubOrganization> result) {
+            public void onSuccess(List<GithubOrganization> result) {
                 organizations = new ArrayList<>(result);
                 getView().setData(organizations);
                 LoadingIndicationEvent.fire(SubscriptionSettingPresenter.this, false);

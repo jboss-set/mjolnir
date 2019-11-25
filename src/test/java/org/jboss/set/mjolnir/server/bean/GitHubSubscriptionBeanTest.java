@@ -65,7 +65,7 @@ public class GitHubSubscriptionBeanTest {
     @Test
     public void testGetSubscriptionSummaries() throws SQLException, IOException {
         // setup mocks
-        Mockito.when(organizationRepository.getOrganizations()).thenReturn(Collections.singleton(new GithubOrganization(ORG_NAME)));
+        Mockito.when(organizationRepository.getOrganizations()).thenReturn(Collections.singletonList(new GithubOrganization(ORG_NAME)));
         Mockito.when(organizationService.getMembers(ORG_NAME)).thenReturn(asList(gitHubUser));
         Mockito.when(userRepository.getUserByGitHubName(GITHUB_USERNAME)).thenReturn(appUser);
         Mockito.when(ldapRepository.checkUsersExists(Mockito.anySet())).thenReturn(Collections.singletonMap(KRB_USERNAME, true));
