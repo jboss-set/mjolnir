@@ -1,13 +1,12 @@
 package org.jboss.set.mjolnir.client.application.admin.gitHubMembers;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.inject.Inject;
@@ -15,8 +14,13 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import org.jboss.set.mjolnir.client.component.ConfirmationDialog;
 import org.jboss.set.mjolnir.client.component.administration.SubscriptionsTable;
 import org.jboss.set.mjolnir.client.component.organizations.SelectionTable;
+import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.set.mjolnir.shared.domain.GithubTeam;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
-import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)
@@ -30,8 +34,11 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
     }
     private static final Templates TEMPLATES = GWT.create(Templates.class);
 
-    private SelectionTable<SubscriptionSummary> organizationsTable;
+    private SelectionTable<GithubOrganization> organizationsTable;
+    private SelectionTable<GithubTeam> teamsTable;
     private SubscriptionsTable subscriptionsTable;
+    private GithubOrganization selectedOrg;
+    private GithubTeam selectedTeam;
 
     @Inject
     public GitHubMembersView() {
@@ -43,25 +50,74 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
         panel.add(new HTMLPanel("h3", "Organizations"));
         panel.add(organizationsTable = createOrganizationsTable());
 
+        panel.add(new HTMLPanel("h3", "Teams"));
+        panel.add(teamsTable = createTeamsTable());
+
         panel.add(new HTMLPanel("h3", "Organization Members"));
+        Anchor downloadLink = new Anchor("Download CSV", false);
+        downloadLink.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                String url = GWT.getModuleBaseURL()
+                        + "auth/download?org=" + selectedOrg.getName() + "&team="
+                        + (selectedTeam.getId() != null ? selectedTeam.getId() : "");
+                Window.open(url, "_blank", "");
+            }
+        });
+        panel.add(downloadLink);
         panel.add(subscriptionsTable = createSubscriptionTable());
     }
 
-    private SelectionTable<SubscriptionSummary> createOrganizationsTable() {
-        return new SelectionTable<SubscriptionSummary>() {
+    private SelectionTable<GithubOrganization> createOrganizationsTable() {
+        return new SelectionTable<GithubOrganization>() {
             @Override
-            protected Object getKey(SubscriptionSummary item) {
-                return item != null && item.getOrganization() != null ? item.getOrganization().getName() : null;
+            protected Object getKey(GithubOrganization item) {
+                return item != null ? item.getName() : null;
             }
 
             @Override
-            protected String getName(SubscriptionSummary item) {
-                return item != null && item.getOrganization() != null ? item.getOrganization().getName() : null;
+            protected String getName(GithubOrganization item) {
+                return item != null ? item.getName() : null;
             }
 
             @Override
-            protected void onSelectionChanged(SubscriptionSummary selectedObject) {
-                subscriptionsTable.setData(selectedObject != null ? selectedObject.getSubscriptions() : Collections.<Subscription>emptyList());
+            protected void onSelectionChanged(GithubOrganization selectedObject) {
+                selectedOrg = selectedObject;
+                subscriptionsTable.setData(Collections.<Subscription>emptyList());
+                teamsTable.setData(selectedObject != null ?
+                        selectedObject.getTeams() : Collections.<GithubTeam>emptyList());
+            }
+        };
+    }
+
+    private SelectionTable<GithubTeam> createTeamsTable() {
+        return new SelectionTable<GithubTeam>() {
+            @Override
+            protected Object getKey(GithubTeam item) {
+                return item != null ? item.getId() : null;
+            }
+
+            @Override
+            protected String getName(GithubTeam item) {
+                return item != null ? item.getName() : null;
+            }
+
+            @Override
+            protected void onSelectionChanged(GithubTeam selectedObject) {
+                selectedTeam = selectedObject;
+                subscriptionsTable.setData(Collections.<Subscription>emptyList());
+                if (selectedOrg != null) {
+                    getUiHandlers().retrieveSubscriptions(selectedOrg, selectedObject);
+                }
+            }
+
+            @Override
+            public void setData(List<GithubTeam> values) {
+                // prepend "All teams" option
+                values = new ArrayList<>(values);
+                GithubTeam allTeamsItem = new GithubTeam("All teams", null);
+                values.add(0, allTeamsItem);
+                super.setData(values);
             }
         };
     }
@@ -95,8 +151,13 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
     }
 
     @Override
-    public void setData(List<SubscriptionSummary> items) {
+    public void setOrganizations(List<GithubOrganization> items) {
         organizationsTable.setData(items);
+    }
+
+    @Override
+    public void setSubscriptions(List<Subscription> items) {
+        subscriptionsTable.setData(items);
     }
 
     @Override

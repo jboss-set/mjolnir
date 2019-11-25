@@ -25,11 +25,6 @@ package org.jboss.set.mjolnir.server.service;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.UserService;
 import org.hibernate.HibernateException;
-import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
-import org.jboss.set.mjolnir.shared.domain.GithubTeam;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
-import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
-import org.jboss.set.mjolnir.shared.domain.ValidationResult;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.client.service.GitHubService;
 import org.jboss.set.mjolnir.server.bean.ApplicationParameters;
@@ -39,13 +34,17 @@ import org.jboss.set.mjolnir.server.github.ExtendedTeamService;
 import org.jboss.set.mjolnir.server.service.validation.GitHubNameExistsValidation;
 import org.jboss.set.mjolnir.server.service.validation.GitHubNameTakenValidation;
 import org.jboss.set.mjolnir.server.service.validation.Validator;
+import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
+import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.set.mjolnir.shared.domain.GithubTeam;
+import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.ValidationResult;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@inheritDoc}
@@ -138,13 +137,9 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
      * @return organizations
      */
     @Override
-    public Set<GithubOrganization> getAvailableOrganizations() {
-        try {
-            final Set<GithubOrganization> organizations = organizationRepository.getOrganizations();
-            return new HashSet<>(organizations);
-        } catch (SQLException e) {
-            throw new ApplicationException("Couldn't load GitHub organizations: " + e.getMessage(), e);
-        }
+    public List<GithubOrganization> getAvailableOrganizations() {
+        final List<GithubOrganization> organizations = organizationRepository.getOrganizations();
+        return new ArrayList<>(organizations);
     }
 
     /**
@@ -154,9 +149,9 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
      * @return organizations
      */
     @Override
-    public Set<GithubOrganization> getSubscriptions() {
+    public List<GithubOrganization> getSubscriptions() {
         try {
-            final Set<GithubOrganization> organizations = getAvailableOrganizations();
+            final List<GithubOrganization> organizations = getAvailableOrganizations();
             final String gitHubName = getCurrentUserGitHubName();
 
             for (GithubOrganization organization : organizations) {
@@ -167,7 +162,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             }
             return organizations;
         } catch (IOException e) {
-            throw new ApplicationException(e);
+            throw new ApplicationException("Can't obtain membership information from GH API.", e);
         }
     }
 

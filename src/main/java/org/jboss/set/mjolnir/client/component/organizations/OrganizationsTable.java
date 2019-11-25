@@ -13,6 +13,8 @@ import org.jboss.set.mjolnir.client.component.table.DefaultCellTable;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
 
 /**
+ * Table displaying organizations user can subscribe to.
+ *
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public abstract class OrganizationsTable implements IsWidget {

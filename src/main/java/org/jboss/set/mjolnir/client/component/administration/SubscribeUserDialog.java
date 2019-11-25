@@ -11,18 +11,18 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
-import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
-import org.jboss.set.mjolnir.shared.domain.GithubTeam;
 import org.jboss.set.mjolnir.client.ExceptionHandler;
 import org.jboss.set.mjolnir.client.XsrfUtil;
 import org.jboss.set.mjolnir.client.component.LoadingPanel;
 import org.jboss.set.mjolnir.client.service.AdministrationService;
 import org.jboss.set.mjolnir.client.service.AdministrationServiceAsync;
+import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.set.mjolnir.shared.domain.GithubTeam;
 import org.jboss.set.mjolnir.shared.domain.MembershipStates;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)
@@ -86,14 +86,14 @@ public class SubscribeUserDialog extends DialogBox {
             @Override
             public void onSuccess(XsrfToken token) {
                 ((HasRpcToken) administrationService).setRpcToken(token);
-                administrationService.getSubscriptions(gitHubName, new AsyncCallback<Set<GithubOrganization>>() {
+                administrationService.getSubscriptions(gitHubName, new AsyncCallback<List<GithubOrganization>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         ExceptionHandler.handle("Couldn't get user's subscriptions.", caught);
                     }
 
                     @Override
-                    public void onSuccess(Set<GithubOrganization> result) {
+                    public void onSuccess(List<GithubOrganization> result) {
                         checkboxPanel.clear(); // remove loading indicator
 
                         for (GithubOrganization organization: result) {

@@ -30,7 +30,7 @@ import org.jboss.set.mjolnir.shared.domain.KerberosUser;
 public class GitHubSettingPresenter extends Presenter<GitHubSettingPresenter.MyView, GitHubSettingPresenter.MyProxy>
         implements GitHubSettingHandlers {
 
-    public static final String MISSING_NAME_MESSAGE = "We need to know your GitHub username, before you can set modify your subscriptions";
+    public static final String MISSING_NAME_MESSAGE = "We need to know your GitHub username, before you can modify your subscriptions";
 
     public interface MyView extends View, HasUiHandlers<GitHubSettingHandlers> {
         void setData(String gitHubName);

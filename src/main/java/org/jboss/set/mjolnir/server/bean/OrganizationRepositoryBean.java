@@ -1,20 +1,18 @@
 package org.jboss.set.mjolnir.server.bean;
 
-import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
-import org.jboss.set.mjolnir.shared.domain.GithubTeam;
 import org.jboss.set.mjolnir.server.entities.GithubOrganizationEntity;
 import org.jboss.set.mjolnir.server.entities.GithubTeamEntity;
+import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.set.mjolnir.shared.domain.GithubTeam;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * {@inheritDoc}
@@ -28,7 +26,7 @@ public class OrganizationRepositoryBean implements OrganizationRepository {
     private EntityManagerFactory entityManagerFactory;
 
     @Override
-    public Set<GithubOrganization> getOrganizations() throws SQLException {
+    public List<GithubOrganization> getOrganizations() {
         // load organizations into a map
         EntityManager em = entityManagerFactory.createEntityManager();
 
@@ -61,7 +59,7 @@ public class OrganizationRepositoryBean implements OrganizationRepository {
             }
         }
 
-        return new HashSet<>(orgMap.values());
+        return new ArrayList<>(orgMap.values());
     }
 
 }

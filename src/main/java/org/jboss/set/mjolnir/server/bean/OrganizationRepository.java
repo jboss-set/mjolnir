@@ -2,8 +2,7 @@ package org.jboss.set.mjolnir.server.bean;
 
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
 
-import java.sql.SQLException;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Provides access to configured GitHub organizations and teams.
@@ -16,8 +15,7 @@ public interface OrganizationRepository {
      * Retrieves configured organizations and their teams.
      *
      * @return organizations
-     * @throws SQLException
      */
-    Set<GithubOrganization> getOrganizations() throws SQLException;
+    List<GithubOrganization> getOrganizations();
 
 }

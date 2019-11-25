@@ -34,12 +34,11 @@ import java.io.Serializable;
 public class GithubTeam implements Serializable {
 
     private String name;
-    private int id;
+    private Integer id;
     private String membershipState;
     private GithubOrganization organization;
 
-    public GithubTeam(String name, int id) {
-        if (name == null || id == 0) throw new NullPointerException("Null params");
+    public GithubTeam(String name, Integer id) {
         this.name = name;
         this.id = id;
     }
@@ -51,7 +50,7 @@ public class GithubTeam implements Serializable {
         return name;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
