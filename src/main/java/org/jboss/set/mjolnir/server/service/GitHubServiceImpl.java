@@ -84,17 +84,18 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     public EntityUpdateResult<KerberosUser> modifyGitHubName(String newGithubName) {
         try {
             // reload authenticated user form database
-            final String krb5Name = getAuthenticatedUser().getName();
+            KerberosUser authenticatedUser = getAuthenticatedUser();
+            final String krb5Name = authenticatedUser.getName();
             final KerberosUser user = userRepository.getUser(krb5Name);
 
             log(String.format("Changing githubName for user %s from %s to %s.",
                     krb5Name, user.getGithubName(), newGithubName));
 
             user.setGithubName(newGithubName);
+            authenticatedUser.setGithubName(newGithubName);
             ValidationResult validationResult = validator.validate(user);
             if (validationResult.isOK()) {
                 userRepository.saveOrUpdateUser(user);
-                setAuthenticatedUser(user); // update session with current instance
                 log(String.format("Successfully modified githubName for user %s", krb5Name));
                 return EntityUpdateResult.ok(user);
             } else {
