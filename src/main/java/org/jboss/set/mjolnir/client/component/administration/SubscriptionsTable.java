@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.gwt.cell.client.AbstractInputCell;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -69,6 +70,7 @@ public abstract class SubscriptionsTable implements IsWidget {
     private ColumnSortEvent.ListHandler<Subscription> sortHandler;
     private List<HasCell<Subscription, ?>> hasCells = new ArrayList<>();
     private Column<Subscription, Subscription> actionColumn;
+    private List<AbstractInputCell> filterCells = new ArrayList<>();
 
     public SubscriptionsTable() {
         initStyles();
@@ -251,6 +253,10 @@ public abstract class SubscriptionsTable implements IsWidget {
         return new ArrayList<>(selectedItems);
     }
 
+    public SubscriptionSearchPredicate getSearchPredicate() {
+        return searchPredicate;
+    }
+
     public void clearSelection() {
         selectedItems.clear();
         enableActionButtons(false);
@@ -277,7 +283,8 @@ public abstract class SubscriptionsTable implements IsWidget {
         filterHeaders.add(null);
 
         // krb name
-        Cell<String> krbNameInputCell = new TextInputCell();
+        TextInputCell krbNameInputCell = new TextInputCell();
+        filterCells.add(krbNameInputCell);
         Header<String> krbNameFilterHeader = new Header<String>(krbNameInputCell) {
             @Override
             public String getValue() {
@@ -295,6 +302,7 @@ public abstract class SubscriptionsTable implements IsWidget {
 
         // github name
         TextInputCell gitHubNameInputCell = new TextInputCell();
+        filterCells.add(gitHubNameInputCell);
         Header<String> gitHubNameFilterHeader = new Header<String>(gitHubNameInputCell) {
             @Override
             public String getValue() {
@@ -312,6 +320,7 @@ public abstract class SubscriptionsTable implements IsWidget {
 
         // krb account
         final DropDownCell krbAccountSelectionCell = new DropDownCell(KRB_ACCOUNT_FILTER_OPTIONS);
+        filterCells.add(krbAccountSelectionCell);
         Header<String> krbAccountFilterHeader = new Header<String>(krbAccountSelectionCell) {
             @Override
             public String getValue() {
@@ -337,6 +346,7 @@ public abstract class SubscriptionsTable implements IsWidget {
 
         // whitelist
         final DropDownCell whitelistCell = new DropDownCell(KRB_ACCOUNT_FILTER_OPTIONS);
+        filterCells.add(whitelistCell);
         Header<String> whitelistFilterHeader = new Header<String>(whitelistCell) {
             @Override
             public String getValue() {
@@ -399,6 +409,12 @@ public abstract class SubscriptionsTable implements IsWidget {
         this.data = data;
         dataProvider.setList(data);
         sortHandler.setList(data);
+
+        // clear filtering fields
+        searchPredicate.reset();
+        for (AbstractInputCell filterCell: filterCells) {
+            filterCell.clearViewData("");
+        }
     }
 
     protected abstract void dispatchWhitelist(List<Subscription> selectedItems, boolean whitelist);
@@ -479,7 +495,7 @@ public abstract class SubscriptionsTable implements IsWidget {
      * <p/>
      * Any subscription with krb name and/or github name *containing* given strings qualifies.
      */
-    private class SubscriptionSearchPredicate implements Predicate<Subscription> {
+    public static class SubscriptionSearchPredicate implements Predicate<Subscription> {
 
         private String krbNameExpression;
         private String gitHubNameExpression;
@@ -521,6 +537,29 @@ public abstract class SubscriptionsTable implements IsWidget {
 
         public void setWhitelisted(Boolean whitelisted) {
             this.whitelisted = whitelisted;
+        }
+
+        public String getKrbNameExpression() {
+            return krbNameExpression;
+        }
+
+        public String getGitHubNameExpression() {
+            return gitHubNameExpression;
+        }
+
+        public Boolean getKrbAccount() {
+            return krbAccount;
+        }
+
+        public Boolean getWhitelisted() {
+            return whitelisted;
+        }
+
+        public void reset() {
+            this.gitHubNameExpression = "";
+            this.krbNameExpression = "";
+            this.krbAccount = null;
+            this.whitelisted = null;
         }
 
         @Override

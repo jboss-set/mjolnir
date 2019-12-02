@@ -58,9 +58,14 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
         downloadLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
+                SubscriptionsTable.SubscriptionSearchPredicate sp = subscriptionsTable.getSearchPredicate();
                 String url = GWT.getModuleBaseURL()
-                        + "auth/download?org=" + selectedOrg.getName() + "&team="
-                        + (selectedTeam.getId() != null ? selectedTeam.getId() : "");
+                        + "auth/download?org=" + selectedOrg.getName()
+                        + "&team=" + (selectedTeam.getId() != null ? selectedTeam.getId() : "")
+                        + "&krbName=" + sp.getKrbNameExpression()
+                        + "&ghName=" + sp.getGitHubNameExpression()
+                        + "&krbAccount=" + (sp.getKrbAccount() != null ? sp.getKrbAccount() : "")
+                        + "&whitelisted=" + (sp.getWhitelisted() != null ? sp.getWhitelisted() : "");
                 Window.open(url, "_blank", "");
             }
         });
