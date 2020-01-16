@@ -24,6 +24,12 @@ Running
 
 Application requires a datasource available under JNDI name "java:jboss/datasources/&lt;appName&gt;/MjolnirDS", where &lt;appName&gt; is name under which the application is deployed.
 
+Use this example to create the datasource (change the connection URL and JNDI name if needed):
+
+```
+data-source add --name=MjolnirDS --jndi-name=java:jboss/datasources/mjolnir/MjolnirDS --driver-name=h2 --connection-url=jdbc:h2:tcp://localhost/~/Projects/mjolnir/db/dbdata --user-name=sa
+```
+
 Database must be initialized with tables defined in src/main/resources/create_tables.sql and contain data from src/main/resources/initial_data.sql.
 
 Also you need to insert a valid GitHub token into application_parameters table: https://help.github.com/articles/creating-an-access-token-for-command-line-use/

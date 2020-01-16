@@ -76,11 +76,6 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
     private SelectionTable<GithubOrganization> createOrganizationsTable() {
         return new SelectionTable<GithubOrganization>() {
             @Override
-            protected Object getKey(GithubOrganization item) {
-                return item != null ? item.getName() : null;
-            }
-
-            @Override
             protected String getName(GithubOrganization item) {
                 return item != null ? item.getName() : null;
             }
@@ -98,21 +93,16 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
     private SelectionTable<GithubTeam> createTeamsTable() {
         return new SelectionTable<GithubTeam>() {
             @Override
-            protected Object getKey(GithubTeam item) {
-                return item != null ? item.getId() : null;
-            }
-
-            @Override
             protected String getName(GithubTeam item) {
                 return item != null ? item.getName() : null;
             }
 
             @Override
-            protected void onSelectionChanged(GithubTeam selectedObject) {
-                selectedTeam = selectedObject;
+            protected void onSelectionChanged(GithubTeam selectedTeam) {
+                GitHubMembersView.this.selectedTeam = selectedTeam;
                 subscriptionsTable.setData(Collections.<Subscription>emptyList());
                 if (selectedOrg != null) {
-                    getUiHandlers().retrieveSubscriptions(selectedOrg, selectedObject);
+                    getUiHandlers().retrieveSubscriptions(selectedOrg, selectedTeam);
                 }
             }
 

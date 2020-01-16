@@ -5,8 +5,8 @@ import java.util.List;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import org.jboss.set.mjolnir.client.component.table.DefaultCellTable;
@@ -21,20 +21,14 @@ public abstract class SelectionTable<T> implements IsWidget {
 
 
     @Override
-    public CellTable asWidget() {
-        ProvidesKey<T> providesKey = new ProvidesKey<T>() {
-            @Override
-            public Object getKey(T item) {
-                return SelectionTable.this.getKey(item);
-            }
-        };
-
-        CellTable<T> table = new DefaultCellTable<>(providesKey);
+    public Widget asWidget() {
+        CellTable<T> table = new DefaultCellTable<>();
+        table.getElement().addClassName("selectionTable");
 
         dataProvider = new ListDataProvider<>();
         dataProvider.addDataDisplay(table);
 
-        selectionModel = new SingleSelectionModel<>(providesKey);
+        selectionModel = new SingleSelectionModel<>();
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -62,8 +56,6 @@ public abstract class SelectionTable<T> implements IsWidget {
             onSelectionChanged(selectedItem);
         }
     }
-
-    protected abstract Object getKey(T item);
 
     protected abstract String getName(T item);
 

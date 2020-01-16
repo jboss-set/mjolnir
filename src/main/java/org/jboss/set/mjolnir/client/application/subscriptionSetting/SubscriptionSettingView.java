@@ -50,11 +50,6 @@ public class SubscriptionSettingView extends ViewWithUiHandlers<SubscribtionHand
         panel.add(new HTMLPanel("h3", "Organizations"));
         panel.add(organizationsTable = new SelectionTable<GithubOrganization>() {
             @Override
-            protected Object getKey(GithubOrganization item) {
-                return item != null ? item.getName() : null;
-            }
-
-            @Override
             protected String getName(GithubOrganization item) {
                 return item != null ? item.getName() : "";
             }

@@ -82,3 +82,14 @@ table th input[type=text] {
 #login-panel {
     margin: 5em auto;
 }
+
+.selectionTable tbody tr {
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.selectionTable tbody tr:hover {
+    background: #eee;
+    text-decoration: none;
+}
