@@ -119,6 +119,16 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <tagNameFormat>@{project.version}</tagNameFormat>
+                    <releaseProfiles>release</releaseProfiles>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
                 <version>${version.gwt}</version>
@@ -136,7 +146,6 @@
             </plugin>
 
             <!-- Deployment -->
-
             <plugin>
                 <groupId>org.wildfly.plugins</groupId>
                 <artifactId>wildfly-maven-plugin</artifactId>
@@ -144,7 +153,6 @@
             </plugin>
 
             <!-- Coding standards -->
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -243,47 +251,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
-            <!-- RPM generation -->
-            
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>rpm-maven-plugin</artifactId>
-                <version>2.1.5</version>
-                <executions>
-                    <execution>
-                        <id>generate-rpm</id>
-                        <goals>
-                            <goal>rpm</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <group>JBoss SET/Tools</group>
-                    <packager>JBoss SET</packager>
-                    <mappings>
-                        <!-- not very elegant, but only way I found to ensure the proper files
-                             attributes were set was to "override" the first mapping with a second
-                             one ... -->
-                        <mapping>
-                            <directory>/usr/share/${project.name}</directory>
-                            <filemode>644</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <artifact />
-                        </mapping>
-                        <mapping>
-                            <directory>/usr/share/${project.name}</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                        </mapping>
-                    </mappings>
-                </configuration>
-            </plugin>
-
         </plugins>
-
     </build>
 
     <profiles>
@@ -325,23 +293,44 @@
 
         <!-- disable RPM creation -->
         <profile>
-            <id>norpm</id>
-            <activation>
-                <property>
-                    <name>norpm</name>
-                </property>
-            </activation>
+            <id>release</id>
             <build>
                 <plugins>
+                    <!-- RPM generation -->
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>rpm-maven-plugin</artifactId>
+                        <version>2.1.5</version>
                         <executions>
                             <execution>
                                 <id>generate-rpm</id>
-                                <phase>none</phase>
+                                <goals>
+                                    <goal>rpm</goal>
+                                </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <group>JBoss SET/Tools</group>
+                            <packager>JBoss SET</packager>
+                            <mappings>
+                                <!-- not very elegant, but only way I found to ensure the proper files
+                                     attributes were set was to "override" the first mapping with a second
+                                     one ... -->
+                                <mapping>
+                                    <directory>/usr/share/${project.name}</directory>
+                                    <filemode>644</filemode>
+                                    <username>root</username>
+                                    <groupname>root</groupname>
+                                    <artifact />
+                                </mapping>
+                                <mapping>
+                                    <directory>/usr/share/${project.name}</directory>
+                                    <filemode>755</filemode>
+                                    <username>root</username>
+                                    <groupname>root</groupname>
+                                </mapping>
+                            </mappings>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
