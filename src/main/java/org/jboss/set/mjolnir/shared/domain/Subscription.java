@@ -10,7 +10,7 @@ import java.io.Serializable;
 public class Subscription implements Serializable {
 
     private String gitHubName;
-    private KerberosUser kerberosUser;
+    private RegisteredUser registeredUser;
     private boolean activeKerberosAccount;
 
     public String getGitHubName() {
@@ -21,12 +21,12 @@ public class Subscription implements Serializable {
         this.gitHubName = gitHubName;
     }
 
-    public KerberosUser getKerberosUser() {
-        return kerberosUser;
+    public RegisteredUser getRegisteredUser() {
+        return registeredUser;
     }
 
-    public void setKerberosUser(KerberosUser kerberosUser) {
-        this.kerberosUser = kerberosUser;
+    public void setRegisteredUser(RegisteredUser registeredUser) {
+        this.registeredUser = registeredUser;
     }
 
     public boolean isActiveKerberosAccount() {
@@ -38,18 +38,18 @@ public class Subscription implements Serializable {
     }
 
     public String getKerberosName() {
-        return kerberosUser != null ? kerberosUser.getName() : null;
+        return registeredUser != null ? registeredUser.getKrbName() : null;
     }
 
     public boolean isWhitelisted() {
-        return kerberosUser != null && kerberosUser.isWhitelisted();
+        return registeredUser != null && registeredUser.isWhitelisted();
     }
 
     @Override
     public String toString() {
         return "Subscription{" +
                 "gitHubName='" + gitHubName + '\'' +
-                ", kerberosUser=" + kerberosUser +
+                ", kerberosUser=" + registeredUser +
                 ", activeKerberosAccount=" + activeKerberosAccount +
                 '}';
     }
@@ -74,7 +74,7 @@ public class Subscription implements Serializable {
     @Override
     public int hashCode() {
         int result = gitHubName != null ? gitHubName.hashCode() : 0;
-        result = 31 * result + (kerberosUser != null ? kerberosUser.hashCode() : 0);
+        result = 31 * result + (registeredUser != null ? registeredUser.hashCode() : 0);
         return result;
     }
 }

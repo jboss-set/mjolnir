@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RPC;
 import com.google.gwt.user.server.rpc.RPCRequest;
 import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.server.AuthenticationFilter;
 
@@ -21,15 +21,15 @@ public abstract class AbstractServiceServlet extends XsrfProtectedServiceServlet
         return getThreadLocalRequest().getSession(true);
     }
 
-    protected KerberosUser getAuthenticatedUser() {
+    protected RegisteredUser getAuthenticatedUser() {
         final Object user = getSession().getAttribute(AuthenticationFilter.AUTHENTICATED_USER_SESSION_KEY);
-        if (user instanceof KerberosUser) {
-            return (KerberosUser) user;
+        if (user instanceof RegisteredUser) {
+            return (RegisteredUser) user;
         }
         return null;
     }
 
-    protected void setAuthenticatedUser(KerberosUser user) {
+    protected void setAuthenticatedUser(RegisteredUser user) {
         getSession().setAttribute(AuthenticationFilter.AUTHENTICATED_USER_SESSION_KEY, user);
     }
 

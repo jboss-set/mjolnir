@@ -25,26 +25,26 @@ package org.jboss.set.mjolnir.shared.domain;
 import java.io.Serializable;
 
 /**
- * User bean
+ * Bean representing a registered user (i.e. a user that has a record in our user database).
  *
- * @author: navssurtani
- * @since: 0.1
+ * Both GitHub name and Kerberos name must be unique, because it has to be possible
+ * to identify RegisteredUser record by either KRB name or GitHub username.
  */
 
-public class KerberosUser implements Serializable {
+public class RegisteredUser implements Serializable {
 
-    private String krb5Name;
+    private String krbName;
     private String githubName;
     private boolean admin;
     private boolean whitelisted;
     private boolean loggedIn;
 
-    public String getName() {
-        return krb5Name;
+    public String getKrbName() {
+        return krbName;
     }
 
-    public void setName(String krb5Name) {
-        this.krb5Name = krb5Name;
+    public void setKrbName(String krb5Name) {
+        this.krbName = krb5Name;
     }
 
     public String getGithubName() {
@@ -79,9 +79,9 @@ public class KerberosUser implements Serializable {
         this.loggedIn = loggedIn;
     }
 
-    public KerberosUser copy() {
-        KerberosUser copy = new KerberosUser();
-        copy.setName(this.getName());
+    public RegisteredUser copy() {
+        RegisteredUser copy = new RegisteredUser();
+        copy.setKrbName(this.getKrbName());
         copy.setGithubName(this.getGithubName());
         copy.setWhitelisted(this.isWhitelisted());
         return copy;
@@ -89,7 +89,7 @@ public class KerberosUser implements Serializable {
 
     @Override
     public String toString() {
-        return "{ krb5Name " + krb5Name + ": githubName " + githubName + " }";
+        return "{ krb5Name " + krbName + ": githubName " + githubName + " }";
     }
 
     /**
@@ -103,18 +103,18 @@ public class KerberosUser implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        KerberosUser that = (KerberosUser) o;
+        RegisteredUser that = (RegisteredUser) o;
 
-        if (krb5Name != null)
-            return krb5Name.equals(that.krb5Name);
-        else if (that.krb5Name != null)  // and this.krb5Name is null
+        if (krbName != null)
+            return krbName.equals(that.krbName);
+        else if (that.krbName != null)  // and this.krb5Name is null
             return false;
         return githubName != null && githubName.equals(that.githubName);
     }
 
     @Override
     public int hashCode() {
-        int result = krb5Name != null ? krb5Name.hashCode() : 0;
+        int result = krbName != null ? krbName.hashCode() : 0;
         result = 31 * result + (githubName != null ? githubName.hashCode() : 0);
         return result;
     }

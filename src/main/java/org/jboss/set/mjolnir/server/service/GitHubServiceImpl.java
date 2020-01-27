@@ -37,7 +37,7 @@ import org.jboss.set.mjolnir.server.service.validation.Validator;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
 import org.jboss.set.mjolnir.shared.domain.GithubTeam;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.ValidationResult;
 
 import javax.ejb.EJB;
@@ -62,7 +62,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
 
     private ExtendedTeamService teamService;
 
-    private Validator<KerberosUser> validator;
+    private Validator<RegisteredUser> validator;
 
     @Override
     public void init() throws ServletException {
@@ -81,12 +81,12 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     }
 
     @Override
-    public EntityUpdateResult<KerberosUser> modifyGitHubName(String newGithubName) {
+    public EntityUpdateResult<RegisteredUser> modifyGitHubName(String newGithubName) {
         try {
             // reload authenticated user form database
-            KerberosUser authenticatedUser = getAuthenticatedUser();
-            final String krb5Name = authenticatedUser.getName();
-            final KerberosUser user = userRepository.getUser(krb5Name);
+            RegisteredUser authenticatedUser = getAuthenticatedUser();
+            final String krb5Name = authenticatedUser.getKrbName();
+            final RegisteredUser user = userRepository.getUser(krb5Name);
 
             log(String.format("Changing githubName for user %s from %s to %s.",
                     krb5Name, user.getGithubName(), newGithubName));
@@ -168,7 +168,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     }
 
     private String getCurrentUserGitHubName() {
-        final KerberosUser user = getAuthenticatedUser();
+        final RegisteredUser user = getAuthenticatedUser();
         final String gitHubName = user.getGithubName();
         if (gitHubName == null) {
             throw new ApplicationException("Operation failed, user must set GitHub name first.");
@@ -179,7 +179,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     @Override
     protected boolean performAuthorization() {
         // user must be authenticated
-        final KerberosUser loggedUser = getAuthenticatedUser();
+        final RegisteredUser loggedUser = getAuthenticatedUser();
         return loggedUser != null;
     }
 

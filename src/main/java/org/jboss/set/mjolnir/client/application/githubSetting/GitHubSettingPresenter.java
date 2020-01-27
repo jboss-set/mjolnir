@@ -22,7 +22,7 @@ import org.jboss.set.mjolnir.client.service.DefaultCallback;
 import org.jboss.set.mjolnir.client.service.GitHubService;
 import org.jboss.set.mjolnir.client.service.GitHubServiceAsync;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)
@@ -72,9 +72,9 @@ public class GitHubSettingPresenter extends Presenter<GitHubSettingPresenter.MyV
 
     @Override
     public void saveSetting(String gitHubName) {
-        gitHubService.modifyGitHubName(gitHubName, new DefaultCallback<EntityUpdateResult<KerberosUser>>() {
+        gitHubService.modifyGitHubName(gitHubName, new DefaultCallback<EntityUpdateResult<RegisteredUser>>() {
             @Override
-            public void onSuccess(EntityUpdateResult<KerberosUser> result) {
+            public void onSuccess(EntityUpdateResult<RegisteredUser> result) {
                 if (result.isOK()) {
                     currentUser.getUser().setGithubName(result.getUpdatedEntity().getGithubName());
                     redirectToSubscriptionScreen();

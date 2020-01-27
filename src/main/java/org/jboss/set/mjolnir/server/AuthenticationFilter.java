@@ -1,6 +1,6 @@
 package org.jboss.set.mjolnir.server;
 
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -30,7 +30,7 @@ public class AuthenticationFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
-        KerberosUser authenticatedUser = getAuthenticatedUser(request);
+        RegisteredUser authenticatedUser = getAuthenticatedUser(request);
         if (authenticatedUser != null && authenticatedUser.isLoggedIn()) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
@@ -42,12 +42,12 @@ public class AuthenticationFilter implements Filter {
     public void destroy() {
     }
 
-    protected static KerberosUser getAuthenticatedUser(HttpServletRequest request) {
+    protected static RegisteredUser getAuthenticatedUser(HttpServletRequest request) {
         final HttpSession session = request.getSession();
         if (session != null) {
             Object user = session.getAttribute(AUTHENTICATED_USER_SESSION_KEY);
-            if (user instanceof KerberosUser) {
-                return (KerberosUser) user;
+            if (user instanceof RegisteredUser) {
+                return (RegisteredUser) user;
             }
         }
         return null;

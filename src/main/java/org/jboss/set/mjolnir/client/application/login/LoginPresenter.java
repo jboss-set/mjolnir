@@ -19,7 +19,7 @@ import org.jboss.set.mjolnir.client.component.ProcessingIndicatorPopup;
 import org.jboss.set.mjolnir.client.service.DefaultCallback;
 import org.jboss.set.mjolnir.client.service.LoginService;
 import org.jboss.set.mjolnir.client.service.LoginServiceAsync;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)
@@ -55,9 +55,9 @@ public class LoginPresenter extends Presenter<LoginPresenter.MyView, LoginPresen
     @Override
     public void login(final String username, final String password) {
         LoginServiceAsync loginService = LoginService.Util.getInstance();
-        loginService.login(username, password, new DefaultCallback<KerberosUser>() {
+        loginService.login(username, password, new DefaultCallback<RegisteredUser>() {
             @Override
-            public void onSuccess(KerberosUser user) {
+            public void onSuccess(RegisteredUser user) {
                 currentUser.setUser(user);
 
                 if (currentUser.isLoggedIn()) {
@@ -85,9 +85,9 @@ public class LoginPresenter extends Presenter<LoginPresenter.MyView, LoginPresen
             @Override
             public void onSuccess(XsrfToken token) {
                 LoginServiceAsync loginService = LoginService.Util.getInstance();
-                loginService.getLoggedUser(new DefaultCallback<KerberosUser>() {
+                loginService.getLoggedUser(new DefaultCallback<RegisteredUser>() {
                     @Override
-                    public void onSuccess(KerberosUser result) {
+                    public void onSuccess(RegisteredUser result) {
                         currentUser.setUser(result);
                         if (currentUser.isLoggedIn()) {
                             redirectToHomePage();

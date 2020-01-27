@@ -1,6 +1,6 @@
 package org.jboss.set.mjolnir.server;
 
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -15,7 +15,7 @@ public class AdminOnlyFilter extends AuthenticationFilter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         super.doFilter(servletRequest, servletResponse, filterChain);
-        KerberosUser authenticatedUser = getAuthenticatedUser((HttpServletRequest) servletRequest);
+        RegisteredUser authenticatedUser = getAuthenticatedUser((HttpServletRequest) servletRequest);
         if (authenticatedUser != null && authenticatedUser.isAdmin()) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {

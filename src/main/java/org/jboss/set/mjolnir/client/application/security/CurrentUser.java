@@ -1,6 +1,6 @@
 package org.jboss.set.mjolnir.client.application.security;
 
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 /**
  * (Managed by GIN)
@@ -8,13 +8,13 @@ import org.jboss.set.mjolnir.shared.domain.KerberosUser;
  */
 public class CurrentUser {
 
-    private KerberosUser user;
+    private RegisteredUser user;
 
-    public KerberosUser getUser() {
+    public RegisteredUser getUser() {
         return user;
     }
 
-    public void setUser(KerberosUser user) {
+    public void setUser(RegisteredUser user) {
         this.user = user;
     }
 
@@ -23,6 +23,6 @@ public class CurrentUser {
     }
 
     public void reset() {
-        user = new KerberosUser();
+        user = new RegisteredUser();
     }
 }

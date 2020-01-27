@@ -18,7 +18,7 @@ import org.jboss.set.mjolnir.server.service.validation.Validator;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
 import org.jboss.set.mjolnir.shared.domain.GithubTeam;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
 import org.jboss.set.mjolnir.shared.domain.ValidationResult;
@@ -52,9 +52,9 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @EJB
     private OrganizationRepository organizationRepository;
 
-    private Validator<KerberosUser> validator;
-    private Validation<KerberosUser> krbNameValidation;
-    private Validation<KerberosUser> githubNameValidation;
+    private Validator<RegisteredUser> validator;
+    private Validation<RegisteredUser> krbNameValidation;
+    private Validation<RegisteredUser> githubNameValidation;
 
     @Override
     public void init() throws ServletException {
@@ -110,7 +110,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     }
 
     @Override
-    public EntityUpdateResult<KerberosUser> registerUser(KerberosUser user) {
+    public EntityUpdateResult<RegisteredUser> registerUser(RegisteredUser user) {
         try {
             ValidationResult validationResult = validator.validate(user);
 
@@ -126,7 +126,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     }
 
     @Override
-    public void deleteUser(KerberosUser user) {
+    public void deleteUser(RegisteredUser user) {
         try {
             userRepository.deleteUser(user);
         } catch (HibernateException e) {
@@ -135,7 +135,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     }
 
     @Override
-    public void deleteUsers(Collection<KerberosUser> users) {
+    public void deleteUsers(Collection<RegisteredUser> users) {
         try {
             userRepository.deleteUsers(users);
         } catch (HibernateException e) {
@@ -144,7 +144,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     }
 
     @Override
-    public EntityUpdateResult<KerberosUser> editUser(KerberosUser user, boolean validateKrbName, boolean validateGHname) {
+    public EntityUpdateResult<RegisteredUser> editUser(RegisteredUser user, boolean validateKrbName, boolean validateGHname) {
         try {
             if(!validateKrbName) {
                 validator.removeValidation(krbNameValidation);
@@ -195,15 +195,15 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     public Collection<Subscription> whitelist(Collection<Subscription> subscriptions, boolean whitelist) {
         try {
             for (Subscription subscription : subscriptions) {
-                KerberosUser kerberosUser = subscription.getKerberosUser();
-                if (kerberosUser == null) {
-                    kerberosUser = new KerberosUser();
-                    subscription.setKerberosUser(kerberosUser);
-                    kerberosUser.setGithubName(subscription.getGitHubName());
-                    subscription.setKerberosUser(kerberosUser);
+                RegisteredUser registeredUser = subscription.getRegisteredUser();
+                if (registeredUser == null) {
+                    registeredUser = new RegisteredUser();
+                    subscription.setRegisteredUser(registeredUser);
+                    registeredUser.setGithubName(subscription.getGitHubName());
+                    subscription.setRegisteredUser(registeredUser);
                 }
-                kerberosUser.setWhitelisted(whitelist);
-                userRepository.saveOrUpdateUser(kerberosUser);
+                registeredUser.setWhitelisted(whitelist);
+                userRepository.saveOrUpdateUser(registeredUser);
             }
             return subscriptions;
         } catch (HibernateException e) {

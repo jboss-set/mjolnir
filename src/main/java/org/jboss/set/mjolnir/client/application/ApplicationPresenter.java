@@ -64,7 +64,7 @@ public class ApplicationPresenter extends Presenter<ApplicationPresenter.MyView,
         this.placeManager = placeManager;
 
         getView().setUiHandlers(this);
-        getView().setUsername(currentUser.getUser().getName());
+        getView().setUsername(currentUser.getUser().getKrbName());
     }
 
     @Override

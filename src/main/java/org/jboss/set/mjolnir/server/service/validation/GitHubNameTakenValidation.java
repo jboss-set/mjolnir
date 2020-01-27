@@ -1,7 +1,7 @@
 package org.jboss.set.mjolnir.server.service.validation;
 
 import org.hibernate.HibernateException;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.ValidationResult;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.server.bean.UserRepository;
@@ -11,7 +11,7 @@ import org.jboss.set.mjolnir.server.bean.UserRepository;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public class GitHubNameTakenValidation implements Validation<KerberosUser> {
+public class GitHubNameTakenValidation implements Validation<RegisteredUser> {
 
     private UserRepository userRepository;
 
@@ -20,10 +20,10 @@ public class GitHubNameTakenValidation implements Validation<KerberosUser> {
     }
 
     @Override
-    public ValidationResult validate(KerberosUser entity) {
+    public ValidationResult validate(RegisteredUser entity) {
         try {
             ValidationResult result = new ValidationResult();
-            KerberosUser userByGitHubName = userRepository.getUserByGitHubName(entity.getGithubName());
+            RegisteredUser userByGitHubName = userRepository.getUserByGitHubName(entity.getGithubName());
             if (userByGitHubName != null && !userByGitHubName.equals(entity)) {
                 result.addFailure("This GitHub name is already taken by different user.");
             }

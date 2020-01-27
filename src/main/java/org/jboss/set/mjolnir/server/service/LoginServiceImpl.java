@@ -41,7 +41,7 @@ import org.jboss.set.mjolnir.client.service.LoginService;
 import org.jboss.set.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.set.mjolnir.server.bean.UserRepository;
 import org.jboss.set.mjolnir.server.util.KerberosUtils;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 /**
  * Provides authentication methods.
@@ -59,13 +59,13 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
     private ApplicationParameters applicationParameters;
 
     @Override
-    public KerberosUser login(String krb5Name, String password) throws ApplicationException {
+    public RegisteredUser login(String krb5Name, String password) throws ApplicationException {
         // This will always be the first method called by the user upon hitting the web-app.
         // We will return true if the kerberos password is correct. Regardless of whether or not their details
         // already exist in the cache.
 
         log("login() called on servlet with username " + krb5Name);
-        final KerberosUser user;
+        final RegisteredUser user;
         try {
             validateCredentials(krb5Name, password);
             user = userRepository.getOrCreateUser(KerberosUtils.normalizeUsername(krb5Name));
@@ -77,7 +77,7 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
 
             // The user-password combination is not correct. We should simply return false and allow the user to
             // re-enter their password.
-            return new KerberosUser();
+            return new RegisteredUser();
         } catch (URISyntaxException e) {
             // Here there is a problem, so the onFailure() part will be called on the client side
             log("URISyntaxException caught. Big problem here.");
@@ -91,7 +91,7 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
     }
 
     @Override
-    public KerberosUser getLoggedUser() {
+    public RegisteredUser getLoggedUser() {
         return getAuthenticatedUser();
     }
 

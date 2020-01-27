@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
 import org.jboss.set.mjolnir.shared.domain.GithubTeam;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
 
@@ -27,13 +27,13 @@ public interface AdministrationServiceAsync {
 
     void checkUserExists(String userName, AsyncCallback<Boolean> async);
 
-    void registerUser(KerberosUser user, AsyncCallback<EntityUpdateResult<KerberosUser>> async);
+    void registerUser(RegisteredUser user, AsyncCallback<EntityUpdateResult<RegisteredUser>> async);
 
-    void deleteUser(KerberosUser user, AsyncCallback<Void> asyncCallback);
+    void deleteUser(RegisteredUser user, AsyncCallback<Void> asyncCallback);
 
-    void deleteUsers(Collection<KerberosUser> user, AsyncCallback<Void> asyncCallback);
+    void deleteUsers(Collection<RegisteredUser> user, AsyncCallback<Void> asyncCallback);
 
-    void editUser(KerberosUser user, boolean validateKrbName, boolean validateGHname, AsyncCallback<EntityUpdateResult<KerberosUser>> asyncCallback);
+    void editUser(RegisteredUser user, boolean validateKrbName, boolean validateGHname, AsyncCallback<EntityUpdateResult<RegisteredUser>> asyncCallback);
 
     void getSubscriptions(String gitHubName, AsyncCallback<List<GithubOrganization>> asyncCallback);
 

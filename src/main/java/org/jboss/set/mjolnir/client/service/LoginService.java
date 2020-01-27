@@ -30,7 +30,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.jboss.set.mjolnir.client.XsrfUtil;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 /**
  * @author: navssurtani
@@ -41,8 +41,8 @@ import org.jboss.set.mjolnir.shared.domain.KerberosUser;
 @XsrfProtect
 public interface LoginService extends RemoteService {
 
-    KerberosUser login(String krb5Name, String password) throws ApplicationException;
-    KerberosUser getLoggedUser() throws ApplicationException;
+    RegisteredUser login(String krb5Name, String password) throws ApplicationException;
+    RegisteredUser getLoggedUser() throws ApplicationException;
     void logout() throws ApplicationException;
 
     class Util {

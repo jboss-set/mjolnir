@@ -32,7 +32,7 @@ import org.jboss.set.mjolnir.client.XsrfUtil;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 import java.util.List;
 
@@ -47,7 +47,7 @@ import java.util.List;
 @XsrfProtect
 public interface GitHubService extends RemoteService {
 
-    EntityUpdateResult<KerberosUser> modifyGitHubName(String newGithubName) throws ApplicationException;
+    EntityUpdateResult<RegisteredUser> modifyGitHubName(String newGithubName) throws ApplicationException;
     String subscribe(int teamId) throws ApplicationException;
     void unsubscribe(int teamId) throws ApplicationException;
     List<GithubOrganization> getAvailableOrganizations() throws ApplicationException;

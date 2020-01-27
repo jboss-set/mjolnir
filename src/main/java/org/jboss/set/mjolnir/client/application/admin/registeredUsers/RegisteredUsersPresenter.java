@@ -23,7 +23,7 @@ import org.jboss.set.mjolnir.client.component.ProcessingIndicatorPopup;
 import org.jboss.set.mjolnir.client.service.AdministrationService;
 import org.jboss.set.mjolnir.client.service.AdministrationServiceAsync;
 import org.jboss.set.mjolnir.client.service.DefaultCallback;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 
 /**
@@ -97,7 +97,7 @@ public class RegisteredUsersPresenter extends Presenter<RegisteredUsersPresenter
                     int idx = currentSubscriptions.indexOf(subscription);
                     if (idx > -1) {
                         Subscription originalSubscription = currentSubscriptions.get(idx);
-                        originalSubscription.setKerberosUser(subscription.getKerberosUser());
+                        originalSubscription.setRegisteredUser(subscription.getRegisteredUser());
                     }
                 }
                 getView().refresh();
@@ -108,9 +108,9 @@ public class RegisteredUsersPresenter extends Presenter<RegisteredUsersPresenter
     @Override
     public void delete(final List<Subscription> items) {
         // collect list of KerberosUser entities
-        final List<KerberosUser> users = new ArrayList<>();
+        final List<RegisteredUser> users = new ArrayList<>();
         for (Subscription item : items) {
-            KerberosUser user = item.getKerberosUser();
+            RegisteredUser user = item.getRegisteredUser();
             if (user != null) {
                 users.add(user);
             }

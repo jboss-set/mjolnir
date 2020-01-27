@@ -1,6 +1,6 @@
 package org.jboss.set.mjolnir.server.bean;
 
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.server.entities.UserEntity;
 
@@ -27,18 +27,18 @@ public class UserRepositoryBean implements UserRepository {
     private EntityManagerFactory entityManagerFactory;
 
     @Override
-    public KerberosUser getUser(String kerberosName) {
+    public RegisteredUser getUser(String kerberosName) {
         return getUser(UserName.KERBEROS, kerberosName);
     }
 
     @Override
-    public KerberosUser getUserByGitHubName(String gitHubName) {
+    public RegisteredUser getUserByGitHubName(String gitHubName) {
         return getUser(UserName.GITHUB, gitHubName);
     }
 
-    private KerberosUser getUser(UserName userName, String param) {
+    private RegisteredUser getUser(UserName userName, String param) {
 
-        KerberosUser user = null;
+        RegisteredUser user = null;
 
         EntityManager em = entityManagerFactory.createEntityManager();
         TypedQuery<UserEntity> getUserQuery = null;
@@ -62,13 +62,13 @@ public class UserRepositoryBean implements UserRepository {
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void saveUser(KerberosUser user) {
+    public void saveUser(RegisteredUser user) {
         insertUser(user);
     }
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void saveOrUpdateUser(KerberosUser user) {
+    public void saveOrUpdateUser(RegisteredUser user) {
         if (!updateUser(user)) {
             insertUser(user);
         }
@@ -76,17 +76,17 @@ public class UserRepositoryBean implements UserRepository {
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public KerberosUser getOrCreateUser(String kerberosName) {
-        KerberosUser user = getUser(kerberosName);
+    public RegisteredUser getOrCreateUser(String kerberosName) {
+        RegisteredUser user = getUser(kerberosName);
         if (user == null) {
-            user = new KerberosUser();
-            user.setName(kerberosName);
+            user = new RegisteredUser();
+            user.setKrbName(kerberosName);
             insertUser(user);
         }
         return user;
     }
 
-    private void insertUser(KerberosUser user) {
+    private void insertUser(RegisteredUser user) {
         UserEntity userEntity = convertUser(user);
 
         EntityManager em = entityManagerFactory.createEntityManager();
@@ -94,7 +94,7 @@ public class UserRepositoryBean implements UserRepository {
         em.close();
     }
 
-    private boolean updateUser(KerberosUser user) {
+    private boolean updateUser(RegisteredUser user) {
 
         EntityManager em = entityManagerFactory.createEntityManager();
 
@@ -105,7 +105,7 @@ public class UserRepositoryBean implements UserRepository {
             return false;
         }
 
-        userEntity.setKerberosName(user.getName());
+        userEntity.setKerberosName(user.getKrbName());
         userEntity.setGithubName(user.getGithubName());
         userEntity.setAdmin(user.isAdmin());
         userEntity.setWhitelisted(user.isWhitelisted());
@@ -115,14 +115,14 @@ public class UserRepositoryBean implements UserRepository {
     }
 
     @Override
-    public List<KerberosUser> getAllUsers() {
+    public List<RegisteredUser> getAllUsers() {
         EntityManager em = entityManagerFactory.createEntityManager();
 
         List<UserEntity> entityList = em.createQuery("FROM UserEntity", UserEntity.class).getResultList();
-        final List<KerberosUser> users = new ArrayList<>();
+        final List<RegisteredUser> users = new ArrayList<>();
 
         for (UserEntity entity : entityList) {
-            final KerberosUser user = convertUserEntity(entity);
+            final RegisteredUser user = convertUserEntity(entity);
             users.add(user);
         }
 
@@ -130,7 +130,7 @@ public class UserRepositoryBean implements UserRepository {
     }
 
     @Override
-    public void deleteUser(KerberosUser user) {
+    public void deleteUser(RegisteredUser user) {
 
         EntityManager em = entityManagerFactory.createEntityManager();
 
@@ -145,8 +145,8 @@ public class UserRepositoryBean implements UserRepository {
     }
 
     @Override
-    public void deleteUsers(Collection<KerberosUser> users) {
-        for (KerberosUser user : users) {
+    public void deleteUsers(Collection<RegisteredUser> users) {
+        for (RegisteredUser user : users) {
             deleteUser(user);
         }
     }
@@ -156,9 +156,9 @@ public class UserRepositoryBean implements UserRepository {
         GITHUB
     }
 
-    private UserEntity convertUser(KerberosUser user) {
+    private UserEntity convertUser(RegisteredUser user) {
         UserEntity userEntity = new UserEntity();
-        userEntity.setKerberosName(user.getName());
+        userEntity.setKerberosName(user.getKrbName());
         userEntity.setGithubName(user.getGithubName());
         userEntity.setAdmin(user.isAdmin());
         userEntity.setWhitelisted(user.isWhitelisted());
@@ -166,17 +166,17 @@ public class UserRepositoryBean implements UserRepository {
         return userEntity;
     }
 
-    private KerberosUser convertUserEntity(UserEntity userEntity) {
-        KerberosUser kerberosUser = new KerberosUser();
-        kerberosUser.setName(userEntity.getKerberosName());
-        kerberosUser.setGithubName(userEntity.getGithubName());
-        kerberosUser.setAdmin(userEntity.isAdmin());
-        kerberosUser.setWhitelisted(userEntity.isWhitelisted());
+    private RegisteredUser convertUserEntity(UserEntity userEntity) {
+        RegisteredUser registeredUser = new RegisteredUser();
+        registeredUser.setKrbName(userEntity.getKerberosName());
+        registeredUser.setGithubName(userEntity.getGithubName());
+        registeredUser.setAdmin(userEntity.isAdmin());
+        registeredUser.setWhitelisted(userEntity.isWhitelisted());
 
-        return kerberosUser;
+        return registeredUser;
     }
 
-    private UserEntity getUserFromDB(KerberosUser user, EntityManager em) {
+    private UserEntity getUserFromDB(RegisteredUser user, EntityManager em) {
         if (user == null) {
             throw new ApplicationException("Cannot retrieve a null user from the DB.");
         }
@@ -194,7 +194,7 @@ public class UserRepositoryBean implements UserRepository {
         //kerberosName is unique in the DB
         if (userEntities.size() == 0) {
             userEntities = em.createQuery("FROM UserEntity WHERE kerberosName=:name", UserEntity.class)
-                    .setParameter("name", user.getName()).getResultList();
+                    .setParameter("name", user.getKrbName()).getResultList();
         }
 
         UserEntity userEntity = null;

@@ -1,7 +1,7 @@
 package org.jboss.set.mjolnir.server.report;
 
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.Report;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
@@ -88,8 +88,8 @@ public class UnknownMembersReportBeanTest {
         subscription.setGitHubName(gitHubName);
 
         if (krbName != null) {
-            subscription.setKerberosUser(new KerberosUser());
-            subscription.getKerberosUser().setName(krbName);
+            subscription.setRegisteredUser(new RegisteredUser());
+            subscription.getRegisteredUser().setKrbName(krbName);
             subscription.setActiveKerberosAccount(hasKrbAccount);
         }
 

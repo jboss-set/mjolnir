@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.client.ExceptionHandler;
 import org.jboss.set.mjolnir.client.component.util.HTMLUtil;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
@@ -59,7 +59,7 @@ public class UserDialog extends DialogBox {
     @UiField
     HTML feedbackLabel;
 
-    public UserDialog(final KerberosUser user, DialogType dialogType) {
+    public UserDialog(final RegisteredUser user, DialogType dialogType) {
         setGlassEnabled(true);
         setWidget(uiBinder.createAndBindUi(this));
 
@@ -81,7 +81,7 @@ public class UserDialog extends DialogBox {
         EDIT
     }
 
-    protected void onSave(KerberosUser savedUser, boolean activeAccount) {
+    protected void onSave(RegisteredUser savedUser, boolean activeAccount) {
     }
 
     private void setActiveKrbAccount(String uid) {
@@ -99,10 +99,10 @@ public class UserDialog extends DialogBox {
         });
     }
 
-    private void initEditDialog(final KerberosUser user) {
+    private void initEditDialog(final RegisteredUser user) {
         setText("Edit User");
 
-        if (user != null && user.getName() != null) { // username is not modifiable for existing users
+        if (user != null && user.getKrbName() != null) { // username is not modifiable for existing users
             kerberosNameBox.setEnabled(false);
         } else {                                        //GH name cannot be modified with null kerberos
             setKerberosNameBoxActiveValidation();
@@ -111,11 +111,11 @@ public class UserDialog extends DialogBox {
 
         // set field values
         if (user != null) {
-            kerberosNameBox.setText(user.getName());
+            kerberosNameBox.setText(user.getKrbName());
             gitHubNameBox.setText(user.getGithubName());
             adminCheckBox.setValue(user.isAdmin());
             whitelistedCheckBox.setValue(user.isWhitelisted());
-            setActiveKrbAccount(user.getName());
+            setActiveKrbAccount(user.getKrbName());
         }
 
 
@@ -123,17 +123,17 @@ public class UserDialog extends DialogBox {
             @Override
             public void onClick(ClickEvent event) {
                 // create new user instance, so we don't modify original instance with data that may not be accepted
-                final KerberosUser userToSave;
+                final RegisteredUser userToSave;
                 if (user != null) {
                     userToSave = user.copy();
                 } else {
-                    userToSave = new KerberosUser();
+                    userToSave = new RegisteredUser();
                 }
 
                 // set updated data
                 //krb name must be null, when not entered because of the unique constraint
                 String userName = kerberosNameBox.getText();
-                userToSave.setName(userName.isEmpty() ? null : userName);
+                userToSave.setKrbName(userName.isEmpty() ? null : userName);
 
                 if (userToSave.getGithubName().equals(gitHubNameBox.getText())) {
                     gitHubNameBox.setEnabled(false);
@@ -145,17 +145,17 @@ public class UserDialog extends DialogBox {
                 userToSave.setWhitelisted(whitelistedCheckBox.getValue());
 
                 // save
-                administrationService.editUser(userToSave, kerberosNameBox.isEnabled(), gitHubNameBox.isEnabled(), new AsyncCallback<EntityUpdateResult<KerberosUser>>() {
+                administrationService.editUser(userToSave, kerberosNameBox.isEnabled(), gitHubNameBox.isEnabled(), new AsyncCallback<EntityUpdateResult<RegisteredUser>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         ExceptionHandler.handle("Couldn't save user.", caught);
                     }
 
                     @Override
-                    public void onSuccess(EntityUpdateResult<KerberosUser> result) {
+                    public void onSuccess(EntityUpdateResult<RegisteredUser> result) {
                         if (result.isOK()) {
                             if (user != null) {
-                                user.setName(userToSave.getName());
+                                user.setKrbName(userToSave.getKrbName());
                                 user.setGithubName(userToSave.getGithubName());
                             }
                             onSave(userToSave, activeAccountCheckBox.getValue());
@@ -187,28 +187,28 @@ public class UserDialog extends DialogBox {
             @Override
             public void onClick(ClickEvent event) {
                 // create new user instance
-                final KerberosUser user = new KerberosUser();
+                final RegisteredUser user = new RegisteredUser();
 
                 //krb name must be null, when not entered because of the unique constraint
                 String userName = kerberosNameBox.getText();
 
-                user.setName(userName.isEmpty() ? null : userName);
+                user.setKrbName(userName.isEmpty() ? null : userName);
                 user.setGithubName(gitHubNameBox.getText());
                 user.setAdmin(adminCheckBox.getValue());
                 user.setWhitelisted(whitelistedCheckBox.getValue());
 
                 // save
-                administrationService.registerUser(user, new AsyncCallback<EntityUpdateResult<KerberosUser>>() {
+                administrationService.registerUser(user, new AsyncCallback<EntityUpdateResult<RegisteredUser>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         ExceptionHandler.handle("Couldn't save user.", caught);
                     }
 
                     @Override
-                    public void onSuccess(EntityUpdateResult<KerberosUser> result) {
+                    public void onSuccess(EntityUpdateResult<RegisteredUser> result) {
                         if (result.isOK()) {
                             if (user != null) {
-                                user.setName(user.getName());
+                                user.setKrbName(user.getKrbName());
                                 user.setGithubName(user.getGithubName());
                             }
                             onSave(user, activeAccountCheckBox.getValue());

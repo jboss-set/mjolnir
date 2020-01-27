@@ -3,7 +3,7 @@ package org.jboss.set.mjolnir.server.bean;
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.service.OrganizationService;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
 import org.junit.Assert;
@@ -30,7 +30,7 @@ public class GitHubSubscriptionBeanTest {
     private static final String KRB_USERNAME = "krb_user";
     private static final String GITHUB_USERNAME = "gh_user";
 
-    private KerberosUser appUser;
+    private RegisteredUser appUser;
     private User gitHubUser;
     private GitHubSubscriptionBean gitHubSubscriptionBean;
     private OrganizationRepository organizationRepository;
@@ -41,9 +41,9 @@ public class GitHubSubscriptionBeanTest {
     @Before
     public void setup() throws SQLException, IOException {
         // prepare working data
-        appUser = new KerberosUser();
+        appUser = new RegisteredUser();
         appUser.setAdmin(true);
-        appUser.setName(KRB_USERNAME);
+        appUser.setKrbName(KRB_USERNAME);
 
         gitHubUser = new User();
         gitHubUser.setLogin(GITHUB_USERNAME);
@@ -87,7 +87,7 @@ public class GitHubSubscriptionBeanTest {
     @Test
     public void getRegisteredUsersTest() throws SQLException {
         // setup mocks
-        final List<KerberosUser> registeredUsers = Arrays.asList(createUser("a", "a"), createUser("b", "b"));
+        final List<RegisteredUser> registeredUsers = Arrays.asList(createUser("a", "a"), createUser("b", "b"));
         final Map<String, Boolean> usersInLdap = new HashMap<String, Boolean>();
         usersInLdap.put("a", true);
         usersInLdap.put("b", false);
@@ -103,9 +103,9 @@ public class GitHubSubscriptionBeanTest {
         Assert.assertEquals(false, findSubscriptionByKrbName(result, "b").isActiveKerberosAccount());
     }
 
-    private KerberosUser createUser(String krbName, String gitHubName) {
-        final KerberosUser appUser = new KerberosUser();
-        appUser.setName(krbName);
+    private RegisteredUser createUser(String krbName, String gitHubName) {
+        final RegisteredUser appUser = new RegisteredUser();
+        appUser.setKrbName(krbName);
         appUser.setGithubName(gitHubName);
         return appUser;
     }

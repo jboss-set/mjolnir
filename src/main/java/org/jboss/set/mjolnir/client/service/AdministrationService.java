@@ -10,7 +10,7 @@ import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
 import org.jboss.set.mjolnir.shared.domain.GithubTeam;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
 
@@ -37,13 +37,13 @@ public interface AdministrationService extends RemoteService {
 
     Boolean checkUserExists(String userName);
 
-    EntityUpdateResult<KerberosUser> registerUser(KerberosUser user) throws ApplicationException;
+    EntityUpdateResult<RegisteredUser> registerUser(RegisteredUser user) throws ApplicationException;
 
-    void deleteUser(KerberosUser user) throws ApplicationException;
+    void deleteUser(RegisteredUser user) throws ApplicationException;
 
-    void deleteUsers(Collection<KerberosUser> user) throws ApplicationException;
+    void deleteUsers(Collection<RegisteredUser> user) throws ApplicationException;
 
-    EntityUpdateResult<KerberosUser> editUser(KerberosUser user, boolean validateKrbName, boolean validateGHname) throws ApplicationException;
+    EntityUpdateResult<RegisteredUser> editUser(RegisteredUser user, boolean validateKrbName, boolean validateGHname) throws ApplicationException;
 
     List<GithubOrganization> getSubscriptions(String gitHubName) throws ApplicationException;
 

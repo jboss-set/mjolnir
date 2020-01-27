@@ -3,7 +3,7 @@ package org.jboss.set.mjolnir.client.service;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 import java.util.List;
 
@@ -17,6 +17,6 @@ public interface GitHubServiceAsync {
 
     void subscribe(int teamId, AsyncCallback<String> async);
 
-    void modifyGitHubName(String newGithubName, AsyncCallback<EntityUpdateResult<KerberosUser>> async);
+    void modifyGitHubName(String newGithubName, AsyncCallback<EntityUpdateResult<RegisteredUser>> async);
 
 }

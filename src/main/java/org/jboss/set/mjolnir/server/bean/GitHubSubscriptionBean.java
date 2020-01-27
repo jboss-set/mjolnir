@@ -9,7 +9,7 @@ import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.server.github.ExtendedTeamService;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
 import org.jboss.set.mjolnir.shared.domain.GithubTeam;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
 
@@ -143,19 +143,19 @@ public class GitHubSubscriptionBean {
      */
     public List<Subscription> getRegisteredUsers() {
         try {
-            final List<KerberosUser> allUsers = userRepository.getAllUsers();
+            final List<RegisteredUser> allUsers = userRepository.getAllUsers();
 
             // fetch users and create Subscription objects
             final Map<String, Subscription> subscriptionMap = new HashMap<String, Subscription>(allUsers.size());
             //list needed to hold the null values, to avoid creating collection for each entry key
             final List<Subscription> result = new ArrayList<Subscription>();
-            for (KerberosUser user: allUsers) {
+            for (RegisteredUser user: allUsers) {
                 final Subscription subscription = new Subscription();
-                subscription.setKerberosUser(user);
+                subscription.setRegisteredUser(user);
                 subscription.setGitHubName(user.getGithubName());
 
-                if(user.getName() != null) {
-                    subscriptionMap.put(user.getName(), subscription);
+                if(user.getKrbName() != null) {
+                    subscriptionMap.put(user.getKrbName(), subscription);
                 } else {
                     //cannot be active when the value is null
                     subscription.setActiveKerberosAccount(false);
@@ -250,10 +250,10 @@ public class GitHubSubscriptionBean {
             subscription.setGitHubName(gitHubName);
             subscriptions.add(subscription);
 
-            final KerberosUser appUser = userRepository.getUserByGitHubName(gitHubName);
+            final RegisteredUser appUser = userRepository.getUserByGitHubName(gitHubName);
             if (appUser != null) { // if user is registered, LDAP check will be done
-                subscription.setKerberosUser(appUser);
-                ldapUsersToCheck.put(appUser.getName(), subscription);
+                subscription.setRegisteredUser(appUser);
+                ldapUsersToCheck.put(appUser.getKrbName(), subscription);
             }
         }
 

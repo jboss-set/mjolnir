@@ -1,6 +1,6 @@
 package org.jboss.set.mjolnir.server.service;
 
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)
@@ -10,7 +10,7 @@ public class AbstractAdminRestrictedService extends AbstractServiceServlet {
     @Override
     protected boolean performAuthorization() {
         // user must be admin
-        final KerberosUser user = getAuthenticatedUser();
+        final RegisteredUser user = getAuthenticatedUser();
         return user != null && user.isAdmin();
     }
 

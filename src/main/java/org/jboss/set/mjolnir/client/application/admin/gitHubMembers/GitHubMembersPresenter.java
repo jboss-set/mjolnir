@@ -134,7 +134,7 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
                     int idx = currentSubscriptions.indexOf(subscription);
                     if (idx > -1) {
                         Subscription originalSubscription = currentSubscriptions.get(idx);
-                        originalSubscription.setKerberosUser(subscription.getKerberosUser());
+                        originalSubscription.setRegisteredUser(subscription.getRegisteredUser());
                     }
                 }
                 getView().refresh();

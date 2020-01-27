@@ -3,7 +3,7 @@ package org.jboss.set.mjolnir.server.service;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RPCRequest;
 import com.google.gwt.user.server.rpc.impl.StandardSerializationPolicy;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.SubscriptionSummary;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.junit.Assert;
@@ -24,14 +24,14 @@ public class AdministrationServiceImplTest {
 
     private static final String KRB_USERNAME = "krb_user";
 
-    private KerberosUser appUser;
+    private RegisteredUser appUser;
 
     @Before
     public void setup() throws SQLException, IOException {
         // prepare working data
-        appUser = new KerberosUser();
+        appUser = new RegisteredUser();
         appUser.setAdmin(true);
-        appUser.setName(KRB_USERNAME);
+        appUser.setKrbName(KRB_USERNAME);
     }
 
     @Test
@@ -57,7 +57,7 @@ public class AdministrationServiceImplTest {
         Assert.assertTrue(response.startsWith("//OK"));
     }
 
-    private String testAuthorization(final KerberosUser appUser) throws NoSuchMethodException, SerializationException {
+    private String testAuthorization(final RegisteredUser appUser) throws NoSuchMethodException, SerializationException {
         // overridden administration service that doesn't do anything is used in this test
         final AdministrationServiceImpl noOpAdministrationService = new AdministrationServiceImpl() {
             @Override
@@ -66,7 +66,7 @@ public class AdministrationServiceImplTest {
             }
 
             @Override
-            protected KerberosUser getAuthenticatedUser() { // this is overridden to avoid getThreadLocalRequest() call
+            protected RegisteredUser getAuthenticatedUser() { // this is overridden to avoid getThreadLocalRequest() call
                 return appUser;
             }
         };

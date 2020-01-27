@@ -17,7 +17,7 @@ import org.jboss.set.mjolnir.client.component.ConfirmationDialog;
 import org.jboss.set.mjolnir.client.component.administration.SubscriptionsTable;
 import org.jboss.set.mjolnir.client.component.administration.UserDialog;
 import org.jboss.set.mjolnir.client.component.table.ConditionalActionCell;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 
 /**
@@ -104,14 +104,14 @@ public class RegisteredUsersView extends ViewWithUiHandlers<RegisteredUsersHandl
         @Override
         public void execute(final Subscription object) {
             // displays edit dialog
-            KerberosUser userToEdit = object.getKerberosUser();
+            RegisteredUser userToEdit = object.getRegisteredUser();
             if (userToEdit == null) { // if user is not yet in our database, create new object
-                userToEdit = new KerberosUser();
+                userToEdit = new RegisteredUser();
                 userToEdit.setGithubName(object.getGitHubName());
             }
             final UserDialog editDialog = new UserDialog(userToEdit, UserDialog.DialogType.EDIT) {
                 @Override
-                protected void onSave(KerberosUser savedUser, boolean activeAccount) {
+                protected void onSave(RegisteredUser savedUser, boolean activeAccount) {
                     onEdited(object, savedUser);
                 }
             };
@@ -125,9 +125,9 @@ public class RegisteredUsersView extends ViewWithUiHandlers<RegisteredUsersHandl
          * @param object    modified item
          * @param savedUser user instance that was actually saved on server
          */
-        protected void onEdited(Subscription object, KerberosUser savedUser) {
+        protected void onEdited(Subscription object, RegisteredUser savedUser) {
             // updates subscription item in the list with current user object
-            object.setKerberosUser(savedUser);
+            object.setRegisteredUser(savedUser);
             object.setGitHubName(savedUser.getGithubName());
             subscriptionsTable.refresh();
         }
@@ -144,16 +144,16 @@ public class RegisteredUsersView extends ViewWithUiHandlers<RegisteredUsersHandl
             //display register dialog
             final UserDialog registerDialog = new UserDialog(null, UserDialog.DialogType.REGISTER) {
                 @Override
-                protected void onSave(KerberosUser savedUser, boolean activeAccount) {
+                protected void onSave(RegisteredUser savedUser, boolean activeAccount) {
                     onRegistered(savedUser, activeAccount);
                 }
             };
             registerDialog.center();
         }
 
-        private void onRegistered(KerberosUser user, boolean isActiveKrb) {
+        private void onRegistered(RegisteredUser user, boolean isActiveKrb) {
             Subscription subscription = new Subscription();
-            subscription.setKerberosUser(user);
+            subscription.setRegisteredUser(user);
             subscription.setGitHubName(user.getGithubName());
             subscription.setActiveKerberosAccount(isActiveKrb);
             subscriptionsTable.getItemList().add(subscription);

@@ -2,7 +2,7 @@ package org.jboss.set.mjolnir.server.service.validation;
 
 import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.UserService;
-import org.jboss.set.mjolnir.shared.domain.KerberosUser;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.ValidationResult;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 
@@ -13,7 +13,7 @@ import java.io.IOException;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public class GitHubNameExistsValidation implements Validation<KerberosUser> {
+public class GitHubNameExistsValidation implements Validation<RegisteredUser> {
 
     private static final String CALL_FAILURE = "GitHub call failed.";
 
@@ -24,7 +24,7 @@ public class GitHubNameExistsValidation implements Validation<KerberosUser> {
     }
 
     @Override
-    public ValidationResult validate(KerberosUser entity) {
+    public ValidationResult validate(RegisteredUser entity) {
         ValidationResult result = new ValidationResult();
         try {
             if(entity.getGithubName().equals("")) {

@@ -73,7 +73,7 @@ public class UnknownMembersReportBean extends AbstractReportBean<List<Subscripti
                 if (subscription.getGitHubName().length() > gitHubNameMaxLen) {
                     gitHubNameMaxLen = subscription.getGitHubName().length();
                 }
-                if (subscription.getKerberosUser() != null && subscription.getKerberosName() != null
+                if (subscription.getRegisteredUser() != null && subscription.getKerberosName() != null
                         && subscription.getKerberosName().length() > registeredNameMaxLen) {
                     registeredNameMaxLen = subscription.getKerberosName().length();
                 }
