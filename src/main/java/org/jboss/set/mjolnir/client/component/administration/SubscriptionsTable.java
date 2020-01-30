@@ -31,6 +31,7 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -40,6 +41,7 @@ import org.jboss.set.mjolnir.client.component.table.ConditionalActionCell;
 import org.jboss.set.mjolnir.client.component.table.DefaultCellTable;
 import org.jboss.set.mjolnir.client.component.table.DropDownCell;
 import org.jboss.set.mjolnir.client.component.table.TwoRowHeaderBuilder;
+import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 
 /**
@@ -128,6 +130,15 @@ public abstract class SubscriptionsTable implements IsWidget {
         };
         gitHubNameCol.setSortable(true);
         subscriptionTable.addColumn(gitHubNameCol, "GitHub Username");
+
+        final TextColumn<Subscription> noteCol = new TextColumn<Subscription>() {
+            @Override
+            public String getValue(Subscription object) {
+                return object.getRegisteredUser() != null ? object.getRegisteredUser().getNote() : "";
+            }
+        };
+        noteCol.setSortable(false);
+        subscriptionTable.addColumn(noteCol, "Note");
 
         final TextColumn<Subscription> krbAccCol = new TextColumn<Subscription>() {
             @Override
@@ -318,6 +329,8 @@ public abstract class SubscriptionsTable implements IsWidget {
         });
         filterHeaders.add(gitHubNameFilterHeader);
 
+        filterHeaders.add(new TextHeader("")); // empty header for note column
+
         // krb account
         final DropDownCell krbAccountSelectionCell = new DropDownCell(KRB_ACCOUNT_FILTER_OPTIONS);
         filterCells.add(krbAccountSelectionCell);
@@ -393,7 +406,7 @@ public abstract class SubscriptionsTable implements IsWidget {
 
     protected void addDefaultActionCells() {
         // subscriptions button
-        addActionCell(new ConditionalActionCell<Subscription>(SafeHtmlUtils.fromString("Subscriptions"), new SubscribeDelegate()) {
+        addActionCell(new ConditionalActionCell<Subscription>(SafeHtmlUtils.fromString("Modify"), new ModifyUserDelegate()) {
             @Override
             public boolean isEnabled(Subscription value) {
                 return value.getGitHubName() != null;
@@ -425,7 +438,7 @@ public abstract class SubscriptionsTable implements IsWidget {
     /**
      * Compares Subscription objects by krb name.
      */
-    private class KrbNameComparator implements Comparator<Subscription> {
+    private static class KrbNameComparator implements Comparator<Subscription> {
         @Override
         public int compare(Subscription subscription, Subscription subscription2) {
             if (subscription == null || subscription.getKerberosName() == null) {
@@ -441,7 +454,7 @@ public abstract class SubscriptionsTable implements IsWidget {
     /**
      * Compares Subscription objects by GitHub name.
      */
-    private class GitHubNameComparator implements Comparator<Subscription> {
+    private static class GitHubNameComparator implements Comparator<Subscription> {
         @Override
         public int compare(Subscription subscription, Subscription subscription2) {
             if (subscription == null || subscription.getGitHubName() == null) {
@@ -457,7 +470,7 @@ public abstract class SubscriptionsTable implements IsWidget {
     /**
      * Compares Subscription objects according to whether they are related to a registered user.
      */
-    private class IsRegisteredComparator implements Comparator<Subscription> {
+    private static class IsRegisteredComparator implements Comparator<Subscription> {
         @Override
         public int compare(Subscription subscription, Subscription subscription2) {
             if (subscription == null) {
@@ -478,11 +491,16 @@ public abstract class SubscriptionsTable implements IsWidget {
     /**
      * Subscribe button delegate.
      */
-    private class SubscribeDelegate implements ActionCell.Delegate<Subscription> {
+    private class ModifyUserDelegate implements ActionCell.Delegate<Subscription> {
         @Override
         public void execute(final Subscription object) {
             // displays subscription dialog
-            final SubscribeUserDialog dialog = new SubscribeUserDialog(object.getGitHubName());
+            final UserAndSubscriptionsUserDialog dialog = new UserAndSubscriptionsUserDialog(object) {
+                @Override
+                protected void onUserSavedCallback(RegisteredUser registeredUser) {
+                    SubscriptionsTable.this.refresh();
+                }
+            };
             dialog.center();
         }
     }

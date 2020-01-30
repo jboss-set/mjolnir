@@ -26,6 +26,9 @@ public class UserEntity {
     @Column(name = "github_name", unique = true)
     private String githubName;
 
+    @Column
+    private String note;
+
     private boolean admin;
 
     private boolean whitelisted;
@@ -55,6 +58,14 @@ public class UserEntity {
 
     public void setGithubName(String githubName) {
         this.githubName = githubName;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
     public boolean isAdmin() {

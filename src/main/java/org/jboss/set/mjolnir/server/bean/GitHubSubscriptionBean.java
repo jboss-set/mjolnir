@@ -152,7 +152,7 @@ public class GitHubSubscriptionBean {
             for (RegisteredUser user: allUsers) {
                 final Subscription subscription = new Subscription();
                 subscription.setRegisteredUser(user);
-                subscription.setGitHubName(user.getGithubName());
+                subscription.setGitHubName(user.getGitHubName());
 
                 if(user.getKrbName() != null) {
                     subscriptionMap.put(user.getKrbName(), subscription);
@@ -250,10 +250,10 @@ public class GitHubSubscriptionBean {
             subscription.setGitHubName(gitHubName);
             subscriptions.add(subscription);
 
-            final RegisteredUser appUser = userRepository.getUserByGitHubName(gitHubName);
-            if (appUser != null) { // if user is registered, LDAP check will be done
-                subscription.setRegisteredUser(appUser);
-                ldapUsersToCheck.put(appUser.getKrbName(), subscription);
+            final RegisteredUser registeredUser = userRepository.getUserByGitHubName(gitHubName);
+            if (registeredUser != null) { // if user is registered, LDAP check will be done
+                subscription.setRegisteredUser(registeredUser);
+                ldapUsersToCheck.put(registeredUser.getKrbName(), subscription);
             }
         }
 

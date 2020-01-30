@@ -106,7 +106,7 @@ public class GitHubSubscriptionBeanTest {
     private RegisteredUser createUser(String krbName, String gitHubName) {
         final RegisteredUser appUser = new RegisteredUser();
         appUser.setKrbName(krbName);
-        appUser.setGithubName(gitHubName);
+        appUser.setGitHubName(gitHubName);
         return appUser;
     }
 

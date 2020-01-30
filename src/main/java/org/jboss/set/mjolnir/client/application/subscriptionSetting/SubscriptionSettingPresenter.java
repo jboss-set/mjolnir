@@ -76,7 +76,7 @@ public class SubscriptionSettingPresenter
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         // show github username form if the username is not set
-        if (Strings.isNullOrEmpty(currentUser.getUser().getGithubName())) {
+        if (Strings.isNullOrEmpty(currentUser.getUser().getGitHubName())) {
             getProxy().manualReveal(SubscriptionSettingPresenter.this);
             redirectToGitHubSetting();
         } else {
@@ -93,7 +93,7 @@ public class SubscriptionSettingPresenter
     }
 
     private void loadData() {
-        getView().setGitHubName(currentUser.getUser().getGithubName());
+        getView().setGitHubName(currentUser.getUser().getGitHubName());
 
         LoadingIndicationEvent.fire(this, true);
         gitHubService.getSubscriptions(new DefaultCallback<List<GithubOrganization>>() {

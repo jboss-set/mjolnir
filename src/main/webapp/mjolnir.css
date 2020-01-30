@@ -93,3 +93,24 @@ table th input[type=text] {
     background: #eee;
     text-decoration: none;
 }
+
+
+.form .row {
+    clear: both;
+    padding: 5px 0;
+}
+.form .label {
+    width: 100px;
+    float: left;
+    clear: both;
+}
+.form .help-text {
+    color: #aaa;
+}
+.form .help-link {
+    padding-left: 5px;
+}
+
+.error {
+    color: red;
+}

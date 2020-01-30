@@ -27,10 +27,10 @@ public class GitHubNameExistsValidation implements Validation<RegisteredUser> {
     public ValidationResult validate(RegisteredUser entity) {
         ValidationResult result = new ValidationResult();
         try {
-            if(entity.getGithubName().equals("")) {
+            if(entity.getGitHubName().equals("")) {
                 result.addFailure("GitHub name is required.");
             } else {
-                userService.getUser(entity.getGithubName()); // throws RequestException 404 if user doesn't exist
+                userService.getUser(entity.getGitHubName()); // throws RequestException 404 if user doesn't exist
             }
         } catch (RequestException e) {
             if (e.getStatus() == 404) {

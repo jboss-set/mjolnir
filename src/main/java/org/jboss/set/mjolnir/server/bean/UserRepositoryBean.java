@@ -106,7 +106,8 @@ public class UserRepositoryBean implements UserRepository {
         }
 
         userEntity.setKerberosName(user.getKrbName());
-        userEntity.setGithubName(user.getGithubName());
+        userEntity.setGithubName(user.getGitHubName());
+        userEntity.setNote(user.getNote());
         userEntity.setAdmin(user.isAdmin());
         userEntity.setWhitelisted(user.isWhitelisted());
         em.close();
@@ -159,7 +160,8 @@ public class UserRepositoryBean implements UserRepository {
     private UserEntity convertUser(RegisteredUser user) {
         UserEntity userEntity = new UserEntity();
         userEntity.setKerberosName(user.getKrbName());
-        userEntity.setGithubName(user.getGithubName());
+        userEntity.setGithubName(user.getGitHubName());
+        userEntity.setNote(user.getNote());
         userEntity.setAdmin(user.isAdmin());
         userEntity.setWhitelisted(user.isWhitelisted());
 
@@ -169,7 +171,8 @@ public class UserRepositoryBean implements UserRepository {
     private RegisteredUser convertUserEntity(UserEntity userEntity) {
         RegisteredUser registeredUser = new RegisteredUser();
         registeredUser.setKrbName(userEntity.getKerberosName());
-        registeredUser.setGithubName(userEntity.getGithubName());
+        registeredUser.setGitHubName(userEntity.getGithubName());
+        registeredUser.setNote(userEntity.getNote());
         registeredUser.setAdmin(userEntity.isAdmin());
         registeredUser.setWhitelisted(userEntity.isWhitelisted());
 
@@ -189,7 +192,7 @@ public class UserRepositoryBean implements UserRepository {
         //first check GH name because krb name can be null
         //githubName is unique in the DB
         userEntities = em.createQuery("FROM UserEntity WHERE githubName=:name", UserEntity.class)
-                .setParameter("name", user.getGithubName()).getResultList();
+                .setParameter("name", user.getGitHubName()).getResultList();
 
         //kerberosName is unique in the DB
         if (userEntities.size() == 0) {

@@ -1,5 +1,6 @@
 package org.jboss.set.mjolnir.server.service.validation;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.ValidationResult;
@@ -20,8 +21,12 @@ public class KrbNameTakenValidation implements Validation<RegisteredUser> {
     public ValidationResult validate(RegisteredUser entity) {
         try {
             ValidationResult result = new ValidationResult();
-            RegisteredUser user = userRepository.getUser(entity.getKrbName());
-            if (user != null && user.getKrbName() != null) {
+            if (StringUtils.isEmpty(entity.getKrbName())) {
+                return result; // OK
+            }
+
+            RegisteredUser existingEntity = userRepository.getUser(entity.getKrbName());
+            if (existingEntity != null && !existingEntity.equals(entity)) {
                 result.addFailure("This Kerberos name is already taken by different user.");
             }
             return result;

@@ -21,6 +21,7 @@ create table users (
     id bigint primary key AUTO_INCREMENT,
     krb_name varchar(255) unique,
     github_name varchar(255) unique,
+    note varchar(255),
     admin boolean not null default false,
     whitelisted boolean not null default false
 );

@@ -3,20 +3,17 @@ package org.jboss.set.mjolnir.client.application.admin.registeredUsers;
 import java.util.List;
 
 import com.google.inject.Inject;
-import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import org.jboss.set.mjolnir.client.component.ConfirmationDialog;
 import org.jboss.set.mjolnir.client.component.administration.SubscriptionsTable;
 import org.jboss.set.mjolnir.client.component.administration.UserDialog;
-import org.jboss.set.mjolnir.client.component.table.ConditionalActionCell;
 import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.Subscription;
 
@@ -44,13 +41,6 @@ public class RegisteredUsersView extends ViewWithUiHandlers<RegisteredUsersHandl
         panel.add(new HTMLPanel("h2", "Users Registered in Mjolnir"));
 
         subscriptionsTable = new SubscriptionsTable() {
-            @Override
-            protected void addDefaultActionCells() {
-                // edit button
-                addActionCell(new ConditionalActionCell<>(SafeHtmlUtils.fromString("Edit"), new EditDelegate()));
-                super.addDefaultActionCells();
-            }
-
             @Override
             protected void dispatchWhitelist(List<Subscription> selectedItems, boolean whitelist) {
 
@@ -97,44 +87,6 @@ public class RegisteredUsersView extends ViewWithUiHandlers<RegisteredUsersHandl
     }
 
     /**
-     * Edit button delegate.
-     */
-    private class EditDelegate implements ActionCell.Delegate<Subscription> {
-
-        @Override
-        public void execute(final Subscription object) {
-            // displays edit dialog
-            RegisteredUser userToEdit = object.getRegisteredUser();
-            if (userToEdit == null) { // if user is not yet in our database, create new object
-                userToEdit = new RegisteredUser();
-                userToEdit.setGithubName(object.getGitHubName());
-            }
-            final UserDialog editDialog = new UserDialog(userToEdit, UserDialog.DialogType.EDIT) {
-                @Override
-                protected void onSave(RegisteredUser savedUser, boolean activeAccount) {
-                    onEdited(object, savedUser);
-                }
-            };
-            editDialog.center();
-        }
-
-
-        /**
-         * Called after item was modified.
-         *
-         * @param object    modified item
-         * @param savedUser user instance that was actually saved on server
-         */
-        protected void onEdited(Subscription object, RegisteredUser savedUser) {
-            // updates subscription item in the list with current user object
-            object.setRegisteredUser(savedUser);
-            object.setGitHubName(savedUser.getGithubName());
-            subscriptionsTable.refresh();
-        }
-
-    }
-
-    /**
      * Register button delegate.
      */
     private class RegisterHandler implements ClickHandler {
@@ -154,7 +106,7 @@ public class RegisteredUsersView extends ViewWithUiHandlers<RegisteredUsersHandl
         private void onRegistered(RegisteredUser user, boolean isActiveKrb) {
             Subscription subscription = new Subscription();
             subscription.setRegisteredUser(user);
-            subscription.setGitHubName(user.getGithubName());
+            subscription.setGitHubName(user.getGitHubName());
             subscription.setActiveKerberosAccount(isActiveKrb);
             subscriptionsTable.getItemList().add(subscription);
             subscriptionsTable.refresh();

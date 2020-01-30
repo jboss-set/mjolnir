@@ -11,7 +11,7 @@ import org.jboss.set.mjolnir.server.bean.LdapRepository;
 import org.jboss.set.mjolnir.server.bean.OrganizationRepository;
 import org.jboss.set.mjolnir.server.bean.UserRepository;
 import org.jboss.set.mjolnir.server.service.validation.GitHubNameExistsValidation;
-import org.jboss.set.mjolnir.server.service.validation.GitHubNameTakenValidation;
+import org.jboss.set.mjolnir.server.service.validation.GitHubNameRegisteredValidation;
 import org.jboss.set.mjolnir.server.service.validation.KrbNameTakenValidation;
 import org.jboss.set.mjolnir.server.service.validation.Validation;
 import org.jboss.set.mjolnir.server.service.validation.Validator;
@@ -52,9 +52,8 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @EJB
     private OrganizationRepository organizationRepository;
 
-    private Validator<RegisteredUser> validator;
-    private Validation<RegisteredUser> krbNameValidation;
-    private Validation<RegisteredUser> githubNameValidation;
+    private Validator<RegisteredUser> editUserValidator;
+    private Validator<RegisteredUser> addUserValidator;
 
     @Override
     public void init() throws ServletException {
@@ -66,13 +65,16 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         client.setOAuth2Token(token);
         UserService userService = new UserService(client);
 
-        validator = new Validator<>();
 
-        krbNameValidation = new KrbNameTakenValidation(userRepository);
-        githubNameValidation = new GitHubNameTakenValidation(userRepository);
-        validator.addValidation(krbNameValidation);
-        validator.addValidation(githubNameValidation);
-        validator.addValidation(new GitHubNameExistsValidation(userService));
+        Validation<RegisteredUser> krbNameTakenValidation = new KrbNameTakenValidation(userRepository);
+
+        editUserValidator = new Validator<>();
+        editUserValidator.addValidation(krbNameTakenValidation);
+
+        addUserValidator = new Validator<>();
+        addUserValidator.addValidation(krbNameTakenValidation);
+        addUserValidator.addValidation(new GitHubNameRegisteredValidation(userRepository));
+        addUserValidator.addValidation(new GitHubNameExistsValidation(userService));
     }
 
     @Override
@@ -112,7 +114,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @Override
     public EntityUpdateResult<RegisteredUser> registerUser(RegisteredUser user) {
         try {
-            ValidationResult validationResult = validator.validate(user);
+            ValidationResult validationResult = addUserValidator.validate(user);
 
             if (validationResult.isOK()) {
                 userRepository.saveUser(user);
@@ -146,16 +148,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @Override
     public EntityUpdateResult<RegisteredUser> editUser(RegisteredUser user, boolean validateKrbName, boolean validateGHname) {
         try {
-            if(!validateKrbName) {
-                validator.removeValidation(krbNameValidation);
-            }
-            if(!validateGHname) {
-                validator.removeValidation(githubNameValidation);
-            }
-            ValidationResult validationResult = validator.validate(user);
-            validator.addValidation(krbNameValidation);
-            validator.addValidation(githubNameValidation);
-
+            ValidationResult validationResult = editUserValidator.validate(user);
 
             if (validationResult.isOK()) {
                 userRepository.saveOrUpdateUser(user);
@@ -199,7 +192,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
                 if (registeredUser == null) {
                     registeredUser = new RegisteredUser();
                     subscription.setRegisteredUser(registeredUser);
-                    registeredUser.setGithubName(subscription.getGitHubName());
+                    registeredUser.setGitHubName(subscription.getGitHubName());
                     subscription.setRegisteredUser(registeredUser);
                 }
                 registeredUser.setWhitelisted(whitelist);

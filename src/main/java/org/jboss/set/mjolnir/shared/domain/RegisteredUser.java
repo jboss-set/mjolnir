@@ -34,7 +34,8 @@ import java.io.Serializable;
 public class RegisteredUser implements Serializable {
 
     private String krbName;
-    private String githubName;
+    private String gitHubName;
+    private String note;
     private boolean admin;
     private boolean whitelisted;
     private boolean loggedIn;
@@ -47,12 +48,12 @@ public class RegisteredUser implements Serializable {
         this.krbName = krb5Name;
     }
 
-    public String getGithubName() {
-        return githubName;
+    public String getGitHubName() {
+        return gitHubName;
     }
 
-    public void setGithubName(String githubName) {
-        this.githubName = githubName;
+    public void setGitHubName(String gitHubName) {
+        this.gitHubName = gitHubName;
     }
 
     public boolean isAdmin() {
@@ -79,17 +80,37 @@ public class RegisteredUser implements Serializable {
         this.loggedIn = loggedIn;
     }
 
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
     public RegisteredUser copy() {
         RegisteredUser copy = new RegisteredUser();
         copy.setKrbName(this.getKrbName());
-        copy.setGithubName(this.getGithubName());
+        copy.setGitHubName(this.getGitHubName());
         copy.setWhitelisted(this.isWhitelisted());
+        copy.setAdmin(this.isAdmin());
+        copy.setNote(this.getNote());
         return copy;
+    }
+
+    public void copyTo(RegisteredUser other) {
+        if (other == null) return;
+
+        other.setGitHubName(gitHubName);
+        other.setKrbName(krbName);
+        other.setNote(note);
+        other.setWhitelisted(whitelisted);
+        other.setAdmin(admin);
     }
 
     @Override
     public String toString() {
-        return "{ krb5Name " + krbName + ": githubName " + githubName + " }";
+        return "{ krb5Name " + krbName + ": githubName " + gitHubName + " }";
     }
 
     /**
@@ -105,17 +126,11 @@ public class RegisteredUser implements Serializable {
 
         RegisteredUser that = (RegisteredUser) o;
 
-        if (krbName != null)
-            return krbName.equals(that.krbName);
-        else if (that.krbName != null)  // and this.krb5Name is null
-            return false;
-        return githubName != null && githubName.equals(that.githubName);
+        return gitHubName != null && gitHubName.equals(that.gitHubName);
     }
 
     @Override
     public int hashCode() {
-        int result = krbName != null ? krbName.hashCode() : 0;
-        result = 31 * result + (githubName != null ? githubName.hashCode() : 0);
-        return result;
+        return gitHubName != null ? gitHubName.hashCode() : 0;
     }
 }

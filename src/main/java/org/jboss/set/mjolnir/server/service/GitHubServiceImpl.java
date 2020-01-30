@@ -32,7 +32,7 @@ import org.jboss.set.mjolnir.server.bean.OrganizationRepository;
 import org.jboss.set.mjolnir.server.bean.UserRepository;
 import org.jboss.set.mjolnir.server.github.ExtendedTeamService;
 import org.jboss.set.mjolnir.server.service.validation.GitHubNameExistsValidation;
-import org.jboss.set.mjolnir.server.service.validation.GitHubNameTakenValidation;
+import org.jboss.set.mjolnir.server.service.validation.GitHubNameRegisteredValidation;
 import org.jboss.set.mjolnir.server.service.validation.Validator;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
@@ -76,7 +76,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
         UserService userService = new UserService(client);
 
         validator = new Validator<>();
-        validator.addValidation(new GitHubNameTakenValidation(userRepository));
+        validator.addValidation(new GitHubNameRegisteredValidation(userRepository));
         validator.addValidation(new GitHubNameExistsValidation(userService));
     }
 
@@ -89,10 +89,10 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             final RegisteredUser user = userRepository.getUser(krb5Name);
 
             log(String.format("Changing githubName for user %s from %s to %s.",
-                    krb5Name, user.getGithubName(), newGithubName));
+                    krb5Name, user.getGitHubName(), newGithubName));
 
-            user.setGithubName(newGithubName);
-            authenticatedUser.setGithubName(newGithubName);
+            user.setGitHubName(newGithubName);
+            authenticatedUser.setGitHubName(newGithubName);
             ValidationResult validationResult = validator.validate(user);
             if (validationResult.isOK()) {
                 userRepository.saveOrUpdateUser(user);
@@ -169,7 +169,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
 
     private String getCurrentUserGitHubName() {
         final RegisteredUser user = getAuthenticatedUser();
-        final String gitHubName = user.getGithubName();
+        final String gitHubName = user.getGitHubName();
         if (gitHubName == null) {
             throw new ApplicationException("Operation failed, user must set GitHub name first.");
         }

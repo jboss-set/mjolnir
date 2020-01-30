@@ -1,5 +1,6 @@
 package org.jboss.set.mjolnir.server.service.validation;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.ValidationResult;
@@ -11,11 +12,11 @@ import org.jboss.set.mjolnir.server.bean.UserRepository;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public class GitHubNameTakenValidation implements Validation<RegisteredUser> {
+public class GitHubNameRegisteredValidation implements Validation<RegisteredUser> {
 
     private UserRepository userRepository;
 
-    public GitHubNameTakenValidation(UserRepository userRepository) {
+    public GitHubNameRegisteredValidation(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -23,9 +24,11 @@ public class GitHubNameTakenValidation implements Validation<RegisteredUser> {
     public ValidationResult validate(RegisteredUser entity) {
         try {
             ValidationResult result = new ValidationResult();
-            RegisteredUser userByGitHubName = userRepository.getUserByGitHubName(entity.getGithubName());
-            if (userByGitHubName != null && !userByGitHubName.equals(entity)) {
-                result.addFailure("This GitHub name is already taken by different user.");
+            if (!StringUtils.isEmpty(entity.getGitHubName())) {
+                RegisteredUser existingEntity = userRepository.getUserByGitHubName(entity.getGitHubName());
+                if (existingEntity != null) {
+                    result.addFailure("This GitHub name has already been registered.");
+                }
             }
             return result;
         } catch (HibernateException e) {

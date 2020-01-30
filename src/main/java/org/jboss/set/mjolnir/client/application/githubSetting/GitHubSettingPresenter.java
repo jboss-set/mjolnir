@@ -62,7 +62,7 @@ public class GitHubSettingPresenter extends Presenter<GitHubSettingPresenter.MyV
 
         getView().setFeedbackMessage(Collections.<String>emptyList());
         if (currentUser.getUser() != null) {
-            String githubName = currentUser.getUser().getGithubName();
+            String githubName = currentUser.getUser().getGitHubName();
             if (Strings.isNullOrEmpty(githubName)) {
                 getView().setFeedbackMessage(Collections.singletonList(MISSING_NAME_MESSAGE));
             }
@@ -76,7 +76,7 @@ public class GitHubSettingPresenter extends Presenter<GitHubSettingPresenter.MyV
             @Override
             public void onSuccess(EntityUpdateResult<RegisteredUser> result) {
                 if (result.isOK()) {
-                    currentUser.getUser().setGithubName(result.getUpdatedEntity().getGithubName());
+                    currentUser.getUser().setGitHubName(result.getUpdatedEntity().getGitHubName());
                     redirectToSubscriptionScreen();
                 } else {
                     getView().setFeedbackMessage(result.getValidationMessages());

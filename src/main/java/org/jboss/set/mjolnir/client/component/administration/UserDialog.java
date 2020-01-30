@@ -42,6 +42,9 @@ public class UserDialog extends DialogBox {
     TextBox gitHubNameBox;
 
     @UiField
+    TextBox noteBox;
+
+    @UiField
     CheckBox adminCheckBox;
 
     @UiField
@@ -112,7 +115,8 @@ public class UserDialog extends DialogBox {
         // set field values
         if (user != null) {
             kerberosNameBox.setText(user.getKrbName());
-            gitHubNameBox.setText(user.getGithubName());
+            gitHubNameBox.setText(user.getGitHubName());
+            noteBox.setText(user.getNote());
             adminCheckBox.setValue(user.isAdmin());
             whitelistedCheckBox.setValue(user.isWhitelisted());
             setActiveKrbAccount(user.getKrbName());
@@ -135,10 +139,10 @@ public class UserDialog extends DialogBox {
                 String userName = kerberosNameBox.getText();
                 userToSave.setKrbName(userName.isEmpty() ? null : userName);
 
-                if (userToSave.getGithubName().equals(gitHubNameBox.getText())) {
+                if (userToSave.getGitHubName().equals(gitHubNameBox.getText())) {
                     gitHubNameBox.setEnabled(false);
                 } else {
-                    userToSave.setGithubName(gitHubNameBox.getText());
+                    userToSave.setGitHubName(gitHubNameBox.getText());
                 }
 
                 userToSave.setAdmin(adminCheckBox.getValue());
@@ -156,7 +160,7 @@ public class UserDialog extends DialogBox {
                         if (result.isOK()) {
                             if (user != null) {
                                 user.setKrbName(userToSave.getKrbName());
-                                user.setGithubName(userToSave.getGithubName());
+                                user.setGitHubName(userToSave.getGitHubName());
                             }
                             onSave(userToSave, activeAccountCheckBox.getValue());
                             UserDialog.this.hide();
@@ -193,7 +197,8 @@ public class UserDialog extends DialogBox {
                 String userName = kerberosNameBox.getText();
 
                 user.setKrbName(userName.isEmpty() ? null : userName);
-                user.setGithubName(gitHubNameBox.getText());
+                user.setGitHubName(gitHubNameBox.getText());
+                user.setNote(noteBox.getText());
                 user.setAdmin(adminCheckBox.getValue());
                 user.setWhitelisted(whitelistedCheckBox.getValue());
 
@@ -207,9 +212,10 @@ public class UserDialog extends DialogBox {
                     @Override
                     public void onSuccess(EntityUpdateResult<RegisteredUser> result) {
                         if (result.isOK()) {
-                            if (user != null) {
-                                user.setKrbName(user.getKrbName());
-                                user.setGithubName(user.getGithubName());
+                            RegisteredUser savedUser = result.getUpdatedEntity();
+                            if (savedUser != null) {
+                                user.setKrbName(savedUser.getKrbName());
+                                user.setGitHubName(savedUser.getGitHubName());
                             }
                             onSave(user, activeAccountCheckBox.getValue());
                             UserDialog.this.hide();

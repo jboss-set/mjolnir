@@ -4,12 +4,16 @@
     <g:HTMLPanel>
         <table>
             <tr>
+                <td>GitHub Name: </td>
+                <td><g:TextBox ui:field="gitHubNameBox"/></td>
+            </tr>
+            <tr>
                 <td>Kerberos Name: </td>
                 <td><g:TextBox ui:field="kerberosNameBox"/></td>
             </tr>
             <tr>
-                <td>GitHub Name: </td>
-                <td><g:TextBox ui:field="gitHubNameBox"/></td>
+                <td>Note: </td>
+                <td><g:TextBox ui:field="noteBox"/></td>
             </tr>
             <tr>
                 <td>Admin: </td>
