@@ -57,12 +57,14 @@ public class DownloadServlet extends HttpServlet {
         ServletOutputStream os = resp.getOutputStream();
         os.println("KRB name" + CSV_DELIMITER
                 + "GH name" + CSV_DELIMITER
+                + "Note" + CSV_DELIMITER
                 + "Active KRB account" + CSV_DELIMITER
                 + "Whitelisted?");
 
         for (Subscription sub : subscriptions) {
             os.println(emptyOrValue(sub.getKerberosName()) + CSV_DELIMITER
                     + emptyOrValue(sub.getGitHubName()) + CSV_DELIMITER
+                    + emptyOrValue(sub.getRegisteredUser() != null ? sub.getRegisteredUser().getNote() : "") + CSV_DELIMITER
                     + sub.isActiveKerberosAccount() + CSV_DELIMITER
                     + sub.isWhitelisted());
         }

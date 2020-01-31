@@ -90,6 +90,7 @@ public class UnknownMembersReportBeanTest {
         if (krbName != null) {
             subscription.setRegisteredUser(new RegisteredUser());
             subscription.getRegisteredUser().setKrbName(krbName);
+            subscription.getRegisteredUser().setNote("Note...");
             subscription.setActiveKerberosAccount(hasKrbAccount);
         }
 

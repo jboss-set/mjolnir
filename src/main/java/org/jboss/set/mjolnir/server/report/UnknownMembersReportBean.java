@@ -26,7 +26,7 @@ public class UnknownMembersReportBean extends AbstractReportBean<List<Subscripti
     public static final String UNSUBSCRIBE_USERS_ACTION_NAME = "Unsubscribe unknown users";
 
     private static final String REPORT_NAME = "Unknown GitHub Subscribers";
-    private static final String[] TABLE_HEADERS = {"GitHub Name", "Registered As"};
+    private static final String[] TABLE_HEADERS = {"GitHub Name", "Kerberos Name", "Note"};
 
     @EJB
     private GitHubSubscriptionBean gitHubSubscriptionBean;
@@ -83,17 +83,22 @@ public class UnknownMembersReportBean extends AbstractReportBean<List<Subscripti
             sb.append(String.format("%" + gitHubNameMaxLen + "s", TABLE_HEADERS[0]))
                     .append(" | ")
                     .append(String.format("%" + registeredNameMaxLen + "s", TABLE_HEADERS[1]))
+                    .append(" | ")
+                    .append(String.format("%s", TABLE_HEADERS[2]))
                     .append("\n")
-                    .append(StringUtils.repeat('=', gitHubNameMaxLen + registeredNameMaxLen + 3))
+                    .append(StringUtils.repeat('=', gitHubNameMaxLen + registeredNameMaxLen + 11))
                     .append("\n");
 
 
             // print table
             for (Subscription subscription : summary.getSubscriptions()) {
                 final String krbName = subscription.getKerberosName() != null ? subscription.getKerberosName() : "-";
+                final String note = subscription.getRegisteredUser() != null ? subscription.getRegisteredUser().getNote() : "";
                 sb.append(String.format("%" + gitHubNameMaxLen + "s", subscription.getGitHubName()))
                         .append(" | ")
                         .append(String.format("%" + registeredNameMaxLen + "s", krbName))
+                        .append(" | ")
+                        .append(note)
                         .append("\n");
             }
 
