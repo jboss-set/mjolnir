@@ -35,3 +35,6 @@ classes
 src/main/resources/users.properties
 
 db
+
+# Don't version keycloak configuration files except for the example one.
+saml-config/*

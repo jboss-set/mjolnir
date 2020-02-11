@@ -1,9 +1,6 @@
 package org.jboss.set.mjolnir.client.application;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -15,13 +12,16 @@ import com.gwtplatform.mvp.client.proxy.NavigationEvent;
 import com.gwtplatform.mvp.client.proxy.NavigationHandler;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.Proxy;
-import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
 import org.jboss.set.mjolnir.client.NameTokens;
 import org.jboss.set.mjolnir.client.application.menu.MenuLink;
 import org.jboss.set.mjolnir.client.application.security.CurrentUser;
 import org.jboss.set.mjolnir.client.service.DefaultCallback;
 import org.jboss.set.mjolnir.client.service.LoginService;
 import org.jboss.set.mjolnir.client.service.LoginServiceAsync;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)
@@ -76,16 +76,9 @@ public class ApplicationPresenter extends Presenter<ApplicationPresenter.MyView,
             public void onSuccess(Void result) {
                 logger.info("Log out successful.");
                 currentUser.reset();
-                redirectToLoginPage();
+                Window.Location.replace("logout.html?GLO=true");
             }
         });
-    }
-
-    private void redirectToLoginPage() {
-        PlaceRequest placeRequest = new PlaceRequest.Builder()
-                .nameToken(NameTokens.LOGIN)
-                .build();
-        placeManager.revealPlace(placeRequest);
     }
 
     @Override

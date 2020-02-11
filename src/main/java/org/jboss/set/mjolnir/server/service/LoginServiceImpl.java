@@ -35,12 +35,10 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import com.sun.security.auth.login.ConfigFile;
-import org.hibernate.HibernateException;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.client.service.LoginService;
 import org.jboss.set.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.set.mjolnir.server.bean.UserRepository;
-import org.jboss.set.mjolnir.server.util.KerberosUtils;
 import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 /**
@@ -64,6 +62,9 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
         // We will return true if the kerberos password is correct. Regardless of whether or not their details
         // already exist in the cache.
 
+        // disabled, authenticate via SAML instead
+        return new RegisteredUser();
+        /*
         log("login() called on servlet with username " + krb5Name);
         final RegisteredUser user;
         try {
@@ -87,7 +88,7 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
             throw new ApplicationException(e.getMessage());
         }
         log("Login succeeded. Returning 'true'");
-        return user;
+        return user;*/
     }
 
     @Override
