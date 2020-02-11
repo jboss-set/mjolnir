@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
         <version>24</version>
     </parent>
-    
+
     <groupId>org.jboss.set.mjolnir</groupId>
     <artifactId>mjolnir</artifactId>
     <version>1.1.8-SNAPSHOT</version>
@@ -30,10 +31,26 @@
         <version.jboss-javaee-6.0>3.0.2.Final</version.jboss-javaee-6.0>
         <version.org.apache.commons>3.3.2</version.org.apache.commons>
         <version.org.wildfly.checkstyle-config>1.0.6.Final</version.org.wildfly.checkstyle-config>
+        <version.keycloak>8.0.1</version.keycloak>
+        <version.war.maven.plugin>3.2.3</version.war.maven.plugin>
+
+        <saml.file>keycloak-saml.xml</saml.file>
 
         <maven.compiler.target>1.7</maven.compiler.target>
         <maven.compiler.source>1.7</maven.compiler.source>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.keycloak.bom</groupId>
+                <artifactId>keycloak-adapter-bom</artifactId>
+                <version>${version.keycloak}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
 
@@ -86,6 +103,12 @@
             <artifactId>jboss-javaee-6.0</artifactId>
             <version>${version.jboss-javaee-6.0}</version>
             <type>pom</type>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-saml-adapter-api-public</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -160,7 +183,7 @@
                     <configLocation>wildfly-checkstyle/checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                     <failOnViolation>true</failOnViolation>
-                    <useFile />
+                    <useFile/>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -236,7 +259,8 @@
                             <stylesheet>fancy.xsl</stylesheet>
                             <!--<stylesheet>summary.xsl</stylesheet>-->
                             <fileMappers>
-                                <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
+                                <fileMapper
+                                        implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
                                     <targetExtension>.html</targetExtension>
                                 </fileMapper>
                             </fileMappers>
@@ -251,6 +275,58 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
+            <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-keycloak-saml-xml</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>${basedir}/saml-config/${saml.file}</sourceFile>
+                            <destinationFile>${project.build.directory}/${project.build.finalName}/WEB-INF/keycloak-saml.xml
+                            </destinationFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--
+             Enforce that `saml-config/keycloak-saml.xml` file exists. This file is used to configure
+             keycloak SAML adapter.
+             The actual file name can be changed by setting the ${saml.file} property,
+             e.g. by adding "-Dsaml.file=keycloak-saml-example.xml" switch, an existing sample
+             configuration file will be used.
+             -->
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-quickstart-realm-file-exist</id>
+                        <phase>validate</phase>
+                    </execution>
+                    <execution>
+                        <id>enforce-keycloak-saml-file-exist</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireFilesExist>
+                                    <files>
+                                        <file>${basedir}/saml-config/${saml.file}</file>
+                                    </files>
+                                </requireFilesExist>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -264,8 +340,6 @@
             </activation>
 
             <build>
-                <finalName>mjolnir-dev</finalName>
-
                 <plugins>
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
@@ -321,7 +395,7 @@
                                     <filemode>644</filemode>
                                     <username>root</username>
                                     <groupname>root</groupname>
-                                    <artifact />
+                                    <artifact/>
                                 </mapping>
                                 <mapping>
                                     <directory>/usr/share/${project.name}</directory>

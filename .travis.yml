@@ -2,5 +2,5 @@ language: java
 jdk:
  - openjdk8
 
-install: mvn install -Dnorpm -B -V
-
+install: mvn install -Dnorpm -B -V -DskipTests -Dsaml.file=keycloak-saml-example.xml
+script: mvn test -B -Dsaml.file=keycloak-saml-example.xml
