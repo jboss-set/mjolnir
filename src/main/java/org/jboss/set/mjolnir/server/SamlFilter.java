@@ -36,12 +36,6 @@ public class SamlFilter implements Filter {
 
         if (request.getUserPrincipal() instanceof SamlPrincipal) {
             SamlPrincipal samlPrincipal = (SamlPrincipal) request.getUserPrincipal();
-            LOG.debugf("SAML principal:");
-            LOG.debugf("  Name: %s", samlPrincipal.getName());
-            for (String attr: samlPrincipal.getAttributeNames()) {
-                LOG.debugf(" %s: %s", attr, samlPrincipal.getAttribute(attr));
-            }
-
             RegisteredUser oldUser = (RegisteredUser) request.getSession(true)
                     .getAttribute(AuthenticationFilter.AUTHENTICATED_USER_SESSION_KEY);
             if (oldUser == null || !oldUser.isLoggedIn()) {

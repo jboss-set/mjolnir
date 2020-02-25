@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Shows information about authenticated user.
@@ -31,7 +33,14 @@ public class SamlInfoServlet extends HttpServlet {
 
         if (req.getUserPrincipal() instanceof SamlPrincipal) {
             SamlPrincipal samlPrincipal = (SamlPrincipal) req.getUserPrincipal();
-            os.println("SamlPrincipal: " + samlPrincipal.getName());
+            os.println("SamlPrincipal:");
+            os.println("Name: " + samlPrincipal.getName());
+            os.println("NameIDFormat: " + samlPrincipal.getNameIDFormat());
+            for (Map.Entry<String, List<String>> entry: samlPrincipal.getAttributes().entrySet()) {
+                for (String value: entry.getValue()) {
+                    os.println("attribute " + entry.getKey() + ": " + value);
+                }
+            }
         } else {
             os.println("No SamlPrincipal: " +
                     (req.getUserPrincipal() != null ? req.getUserPrincipal().getClass().getName() : null));
