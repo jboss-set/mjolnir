@@ -17,7 +17,6 @@ import org.jboss.set.mjolnir.server.bean.ApplicationParameters;
 public class KerberosStatusCheck extends AbstractStatusCheck {
 
     private static final String TITLE = "Kerberos";
-    private static final String DEFAULT_KDC = "kerberos.corp.redhat.com";
 
     @EJB
     private ApplicationParameters applicationParameters;
@@ -32,7 +31,8 @@ public class KerberosStatusCheck extends AbstractStatusCheck {
 
         String kdc = applicationParameters.getParameter(ApplicationParameters.KRB5_KDC_KEY);
         if (kdc == null) {
-            kdc = DEFAULT_KDC;
+            result.addProblem("No krb server configured.");
+            return result;
         }
 
         Socket socket = null;

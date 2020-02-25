@@ -3,6 +3,7 @@ package org.jboss.set.mjolnir.server.service.statuscheck;
 import org.jboss.set.mjolnir.server.bean.ApplicationParameters;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -24,9 +25,9 @@ public class KerberosStatusCheckTest {
     @Test
     public void testKdcDoesntExist() {
         Mockito.when(applicationParameters.getParameter(ApplicationParameters.KRB5_KDC_KEY))
-                .thenReturn("non.existing.host");
+                .thenReturn("127.0.0.3"); // unreacha
         Mockito.when(applicationParameters.getMandatoryParameter(ApplicationParameters.KRB5_KDC_KEY))
-                .thenReturn("non.existing.host");
+                .thenReturn("127.0.0.3");
 
         KerberosStatusCheck check = new KerberosStatusCheck();
         check.setApplicationParameters(applicationParameters);
