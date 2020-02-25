@@ -33,7 +33,7 @@
         <version.keycloak>3.4.3.Final</version.keycloak>
         <version.war.maven.plugin>3.2.3</version.war.maven.plugin>
 
-        <saml.file>keycloak-saml.xml</saml.file>
+        <saml.file>keycloak-saml-example.xml</saml.file>
 
         <maven.compiler.target>1.7</maven.compiler.target>
         <maven.compiler.source>1.7</maven.compiler.source>
