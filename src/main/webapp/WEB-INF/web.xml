@@ -12,11 +12,13 @@
             <url-pattern>/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
-            <role-name>user</role-name>
+            <!-- currently the role information are not mapped correctly to the user principal,
+            so we allow any logged-in user -->
+            <role-name>**</role-name>
         </auth-constraint>
     </security-constraint>
 
-    <!-- Don't require authentication for some places. -->
+    <!-- Don't require authentication for these places: -->
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>mjolnir</web-resource-name>
@@ -33,7 +35,7 @@
     </login-config>
 
     <security-role>
-        <role-name>user</role-name>
+        <role-name>Employee</role-name>
     </security-role>
 
     <!-- Servlets -->

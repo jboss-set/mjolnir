@@ -31,7 +31,7 @@
         <version.jboss-javaee-6.0>3.0.2.Final</version.jboss-javaee-6.0>
         <version.org.apache.commons>3.3.2</version.org.apache.commons>
         <version.org.wildfly.checkstyle-config>1.0.6.Final</version.org.wildfly.checkstyle-config>
-        <version.keycloak>8.0.1</version.keycloak>
+        <version.keycloak>3.4.3.Final</version.keycloak>
         <version.war.maven.plugin>3.2.3</version.war.maven.plugin>
 
         <saml.file>keycloak-saml.xml</saml.file>
@@ -109,6 +109,11 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-saml-adapter-api-public</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-saml-adapter-core</artifactId>
             <scope>provided</scope>
         </dependency>
 
