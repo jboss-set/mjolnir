@@ -368,9 +368,9 @@
             </build>
         </profile>
 
-        <!-- disable RPM creation -->
+        <!-- enable RPM creation -->
         <profile>
-            <id>release</id>
+            <id>rpm</id>
             <build>
                 <plugins>
                     <!-- RPM generation -->

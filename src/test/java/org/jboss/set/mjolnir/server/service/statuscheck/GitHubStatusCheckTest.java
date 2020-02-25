@@ -9,7 +9,6 @@ import org.junit.Test;
  */
 public class GitHubStatusCheckTest {
 
-    @Ignore
     @Test
     public void testHostDoesntExist() {
         GitHubStatusCheck gitHubStatusCheck = new GitHubStatusCheck();
