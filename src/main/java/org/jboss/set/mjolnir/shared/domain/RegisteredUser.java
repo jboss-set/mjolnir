@@ -36,6 +36,7 @@ public class RegisteredUser implements Serializable {
     private String krbName;
     private String gitHubName;
     private String note;
+    private String responsiblePerson;
     private boolean admin;
     private boolean whitelisted;
     private boolean loggedIn;
@@ -54,6 +55,14 @@ public class RegisteredUser implements Serializable {
 
     public void setGitHubName(String gitHubName) {
         this.gitHubName = gitHubName;
+    }
+
+    public String getResponsiblePerson() {
+        return responsiblePerson;
+    }
+
+    public void setResponsiblePerson(String responsiblePerson) {
+        this.responsiblePerson = responsiblePerson;
     }
 
     public boolean isAdmin() {
@@ -95,6 +104,7 @@ public class RegisteredUser implements Serializable {
         copy.setWhitelisted(this.isWhitelisted());
         copy.setAdmin(this.isAdmin());
         copy.setNote(this.getNote());
+        copy.setResponsiblePerson(this.getResponsiblePerson());
         return copy;
     }
 
@@ -106,6 +116,7 @@ public class RegisteredUser implements Serializable {
         other.setNote(note);
         other.setWhitelisted(whitelisted);
         other.setAdmin(admin);
+        other.setResponsiblePerson(responsiblePerson);
     }
 
     @Override

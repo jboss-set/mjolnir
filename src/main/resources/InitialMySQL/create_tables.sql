@@ -23,7 +23,8 @@ create table users (
     github_name varchar(255) unique,
     note varchar(255),
     admin boolean not null default false,
-    whitelisted boolean not null default false
+    whitelisted boolean not null default false,
+    responsible_person varchar(255)
 );
 
 create table application_parameters (
