@@ -41,7 +41,7 @@ import java.util.Map;
  */
 public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
 
-    private static final String RESPONSIBLE_PERSON_BOX_ID = "responsiblePersonBox";
+    private static final String RESPONSIBLE_PERSON_ROW_ID = "Responsibleperson";
 
     private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
     private HTMLPanel checkboxPanel;
@@ -68,23 +68,18 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
             krbNameBox.setText(registeredUser.getKrbName());
             noteBox.setText(registeredUser.getNote());
             adminCheckBox.setValue(registeredUser.isAdmin());
-            whitelistedCheckBox.setValue(registeredUser.isWhitelisted()); //document.getElementById("myBtn").disabled = true;
+            whitelistedCheckBox.setValue(registeredUser.isWhitelisted());
             responsiblePersonBox.setValue(registeredUser.getResponsiblePerson());
-            responsiblePersonBox.getElement().setId(RESPONSIBLE_PERSON_BOX_ID);
-
-            if (!registeredUser.isWhitelisted())
-                responsiblePersonBox.getElement().getStyle().setDisplay(Style.Display.NONE);
         }
 
         whitelistedCheckBox.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 CheckBox checkBox = (CheckBox)event.getSource();
                 if (checkBox.getValue())
-                    DOM.getElementById(RESPONSIBLE_PERSON_BOX_ID).getStyle().setDisplay(Style.Display.BLOCK);
+                    DOM.getElementById(RESPONSIBLE_PERSON_ROW_ID).getStyle().setDisplay(Style.Display.BLOCK);
                 else
-                    DOM.getElementById(RESPONSIBLE_PERSON_BOX_ID).getStyle().setDisplay(Style.Display.NONE);
+                    DOM.getElementById(RESPONSIBLE_PERSON_ROW_ID).getStyle().setDisplay(Style.Display.NONE);
             }
         });
 
@@ -106,7 +101,7 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
         userForm.add(createRow("Note", "Additional notes about the user", noteBox));
         userForm.add(createRow("Admin", "Does user have admin privileges?", adminCheckBox));
         userForm.add(createRow("Whitelisted", "If true, this user will not appear in the email report of users without an active kerberos account.", whitelistedCheckBox));
-        userForm.add(createRow("Responsible person", "Responsible person", responsiblePersonBox));
+        userForm.add(createRow("Responsible person", "Responsible person", responsiblePersonBox, registeredUser.isWhitelisted()));
         userForm.add(feedback);
 
         panel.add(new HTMLPanel("h3", "GitHub Subscriptions"));
@@ -278,7 +273,12 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
     }
 
     private static Panel createRow(String label, String helpText, Widget formItem) {
+        return createRow(label, helpText, formItem, true);
+    }
+
+    private static Panel createRow(String label, String helpText, Widget formItem, boolean visible) {
         HTMLPanel row = new HTMLPanel("div", "");
+        row.getElement().setId(label.replaceAll("\\s+",""));
         row.getElement().addClassName("row");
         Anchor helpLink;
         final Panel helpTextPanel;
@@ -286,6 +286,9 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
         row.add(formItem);
         row.add(helpLink = createHelpLink());
         row.add(helpTextPanel = createHelpText(helpText));
+
+        if (!visible)
+            row.getElement().getStyle().setDisplay(Style.Display.NONE);
 
         helpLink.addClickHandler(new ClickHandler() {
             @Override

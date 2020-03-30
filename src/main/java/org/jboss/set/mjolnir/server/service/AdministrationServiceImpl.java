@@ -77,7 +77,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         addUserValidator.addValidation(krbNameTakenValidation);
         addUserValidator.addValidation(new GitHubNameRegisteredValidation(userRepository));
         addUserValidator.addValidation(new GitHubNameExistsValidation(userService));
-        //addUserValidator.addValidation(new ResponsiblePersonAddedValidation());
+        addUserValidator.addValidation(new ResponsiblePersonAddedValidation());
     }
 
     @Override

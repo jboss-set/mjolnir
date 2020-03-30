@@ -1,12 +1,14 @@
 package org.jboss.set.mjolnir.client.component.administration;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -43,6 +45,9 @@ public class UserDialog extends DialogBox {
 
     @UiField
     TextBox noteBox;
+
+    @UiField
+    TextBox responsiblePersonBox;
 
     @UiField
     CheckBox adminCheckBox;
@@ -119,6 +124,7 @@ public class UserDialog extends DialogBox {
             noteBox.setText(user.getNote());
             adminCheckBox.setValue(user.isAdmin());
             whitelistedCheckBox.setValue(user.isWhitelisted());
+            responsiblePersonBox.setValue(user.getResponsiblePerson());
             setActiveKrbAccount(user.getKrbName());
         }
 
@@ -147,6 +153,7 @@ public class UserDialog extends DialogBox {
 
                 userToSave.setAdmin(adminCheckBox.getValue());
                 userToSave.setWhitelisted(whitelistedCheckBox.getValue());
+                userToSave.setResponsiblePerson(responsiblePersonBox.getValue());
 
                 // save
                 administrationService.editUser(userToSave, kerberosNameBox.isEnabled(), gitHubNameBox.isEnabled(), new AsyncCallback<EntityUpdateResult<RegisteredUser>>() {
@@ -185,6 +192,24 @@ public class UserDialog extends DialogBox {
     private void initRegisterDialog() {
         setText("Register User");
 
+        responsiblePersonBox.getElement().setId("responsiblePersonBox");
+        responsiblePersonBox.setEnabled(whitelistedCheckBox.getValue());
+
+        whitelistedCheckBox.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                CheckBox checkBox = (CheckBox)event.getSource();
+
+                if (checkBox.getValue()) {
+                    DOM.getElementById("responsiblePersonBox").removeAttribute("disabled");
+                } else {
+                    Element responsiblePersonElement = DOM.getElementById("responsiblePersonBox");
+                    responsiblePersonElement.setAttribute("disabled", "disabled");
+                    TextBox.wrap(responsiblePersonElement).setValue("");
+                }
+           }
+        });
+
         setKerberosNameBoxActiveValidation();
 
         submitButton.addClickHandler(new ClickHandler() {
@@ -201,6 +226,7 @@ public class UserDialog extends DialogBox {
                 user.setNote(noteBox.getText());
                 user.setAdmin(adminCheckBox.getValue());
                 user.setWhitelisted(whitelistedCheckBox.getValue());
+                user.setResponsiblePerson(responsiblePersonBox.getValue());
 
                 // save
                 administrationService.registerUser(user, new AsyncCallback<EntityUpdateResult<RegisteredUser>>() {
