@@ -110,6 +110,7 @@ public class UserRepositoryBean implements UserRepository {
         userEntity.setNote(user.getNote());
         userEntity.setAdmin(user.isAdmin());
         userEntity.setWhitelisted(user.isWhitelisted());
+        userEntity.setResponsiblePerson(user.getResponsiblePerson());
         em.close();
 
         return true;
@@ -164,6 +165,7 @@ public class UserRepositoryBean implements UserRepository {
         userEntity.setNote(user.getNote());
         userEntity.setAdmin(user.isAdmin());
         userEntity.setWhitelisted(user.isWhitelisted());
+        userEntity.setResponsiblePerson((user.getResponsiblePerson()));
 
         return userEntity;
     }
@@ -175,6 +177,7 @@ public class UserRepositoryBean implements UserRepository {
         registeredUser.setNote(userEntity.getNote());
         registeredUser.setAdmin(userEntity.isAdmin());
         registeredUser.setWhitelisted(userEntity.isWhitelisted());
+        registeredUser.setResponsiblePerson(userEntity.getResponsiblePerson());
 
         return registeredUser;
     }

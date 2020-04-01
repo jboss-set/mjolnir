@@ -26,6 +26,9 @@ public class UserEntity {
     @Column(name = "github_name", unique = true)
     private String githubName;
 
+    @Column(name = "responsible_person")
+    private String responsiblePerson;
+
     @Column
     private String note;
 
@@ -62,6 +65,14 @@ public class UserEntity {
 
     public String getNote() {
         return note;
+    }
+
+    public void setResponsiblePerson(String responsiblePerson) {
+        this.responsiblePerson = responsiblePerson;
+    }
+
+    public String getResponsiblePerson() {
+        return responsiblePerson;
     }
 
     public void setNote(String note) {

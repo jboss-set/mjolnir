@@ -31,6 +31,10 @@ table th input[type=text] {
     width: 100px;
 }
 
+input[type=text]:disabled {
+  background: #dddddd;
+}
+
 .sendButton {
     display: block;
     font-size: 16pt;

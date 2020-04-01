@@ -13,6 +13,7 @@ import org.jboss.set.mjolnir.server.bean.UserRepository;
 import org.jboss.set.mjolnir.server.service.validation.GitHubNameExistsValidation;
 import org.jboss.set.mjolnir.server.service.validation.GitHubNameRegisteredValidation;
 import org.jboss.set.mjolnir.server.service.validation.KrbNameTakenValidation;
+import org.jboss.set.mjolnir.server.service.validation.ResponsiblePersonAddedValidation;
 import org.jboss.set.mjolnir.server.service.validation.Validation;
 import org.jboss.set.mjolnir.server.service.validation.Validator;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
@@ -70,11 +71,13 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
 
         editUserValidator = new Validator<>();
         editUserValidator.addValidation(krbNameTakenValidation);
+        editUserValidator.addValidation(new ResponsiblePersonAddedValidation());
 
         addUserValidator = new Validator<>();
         addUserValidator.addValidation(krbNameTakenValidation);
         addUserValidator.addValidation(new GitHubNameRegisteredValidation(userRepository));
         addUserValidator.addValidation(new GitHubNameExistsValidation(userService));
+        addUserValidator.addValidation(new ResponsiblePersonAddedValidation());
     }
 
     @Override

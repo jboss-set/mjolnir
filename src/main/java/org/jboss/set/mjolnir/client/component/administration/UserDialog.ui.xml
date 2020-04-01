@@ -23,6 +23,10 @@
                 <td>Whitelisted: </td>
                 <td><g:CheckBox ui:field="whitelistedCheckBox"/></td>
             </tr>
+            <tr id="responsiblePersonRow">
+                <td>Responsible Person: </td>
+                <td><g:TextBox ui:field="responsiblePersonBox"/></td>
+            </tr>
             <tr>
                 <td>Active Krb account: </td>
                 <td><g:CheckBox ui:field="activeAccountCheckBox"/></td>

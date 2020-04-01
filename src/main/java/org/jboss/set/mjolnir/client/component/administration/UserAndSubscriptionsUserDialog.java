@@ -3,6 +3,7 @@ package org.jboss.set.mjolnir.client.component.administration;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.HasRpcToken;
 import com.google.gwt.user.client.rpc.XsrfToken;
@@ -40,6 +41,8 @@ import java.util.Map;
  */
 public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
 
+    private static final String RESPONSIBLE_PERSON_ROW_ID = "Responsibleperson";
+
     private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
     private HTMLPanel checkboxPanel;
     private Map<Integer, CheckBox> checkBoxes = new HashMap<>();
@@ -48,6 +51,7 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
     private TextBox krbNameBox = new TextBox();
     private TextBox githubNameBox = new TextBox();
     private TextBox noteBox = new TextBox();
+    private TextBox responsiblePersonBox = new TextBox();
     private CheckBox adminCheckBox = new CheckBox();
     private CheckBox whitelistedCheckBox = new CheckBox();
     private HTML feedback = new HTML();
@@ -65,7 +69,19 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
             noteBox.setText(registeredUser.getNote());
             adminCheckBox.setValue(registeredUser.isAdmin());
             whitelistedCheckBox.setValue(registeredUser.isWhitelisted());
+            responsiblePersonBox.setValue(registeredUser.getResponsiblePerson());
         }
+
+        whitelistedCheckBox.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                CheckBox checkBox = (CheckBox)event.getSource();
+                if (checkBox.getValue())
+                    DOM.getElementById(RESPONSIBLE_PERSON_ROW_ID).getStyle().setDisplay(Style.Display.BLOCK);
+                else
+                    DOM.getElementById(RESPONSIBLE_PERSON_ROW_ID).getStyle().setDisplay(Style.Display.NONE);
+            }
+        });
 
         setText("User Details for " + subscription.getGitHubName());
         setGlassEnabled(true);
@@ -85,6 +101,7 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
         userForm.add(createRow("Note", "Additional notes about the user", noteBox));
         userForm.add(createRow("Admin", "Does user have admin privileges?", adminCheckBox));
         userForm.add(createRow("Whitelisted", "If true, this user will not appear in the email report of users without an active kerberos account.", whitelistedCheckBox));
+        userForm.add(createRow("Responsible person", "Responsible person", responsiblePersonBox, registeredUser.isWhitelisted()));
         userForm.add(feedback);
 
         panel.add(new HTMLPanel("h3", "GitHub Subscriptions"));
@@ -183,6 +200,7 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
         userToSave.setNote(noteBox.getText());
         userToSave.setAdmin(adminCheckBox.getValue());
         userToSave.setWhitelisted(whitelistedCheckBox.getValue());
+        userToSave.setResponsiblePerson(responsiblePersonBox.getValue());
 
         if (subscription.getRegisteredUser() != null) {
             // modify existing user
@@ -255,7 +273,12 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
     }
 
     private static Panel createRow(String label, String helpText, Widget formItem) {
+        return createRow(label, helpText, formItem, true);
+    }
+
+    private static Panel createRow(String label, String helpText, Widget formItem, boolean visible) {
         HTMLPanel row = new HTMLPanel("div", "");
+        row.getElement().setId(label.replaceAll("\\s+",""));
         row.getElement().addClassName("row");
         Anchor helpLink;
         final Panel helpTextPanel;
@@ -263,6 +286,9 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
         row.add(formItem);
         row.add(helpLink = createHelpLink());
         row.add(helpTextPanel = createHelpText(helpText));
+
+        if (!visible)
+            row.getElement().getStyle().setDisplay(Style.Display.NONE);
 
         helpLink.addClickHandler(new ClickHandler() {
             @Override
