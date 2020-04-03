@@ -33,8 +33,6 @@
         <version.keycloak>3.4.3.Final</version.keycloak>
         <version.war.maven.plugin>3.2.3</version.war.maven.plugin>
 
-        <saml.file>keycloak-saml-example.xml</saml.file>
-
         <maven.compiler.target>1.7</maven.compiler.target>
         <maven.compiler.source>1.7</maven.compiler.source>
     </properties>
@@ -278,58 +276,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
-            <plugin>
-                <groupId>com.coderplus.maven.plugins</groupId>
-                <artifactId>copy-rename-maven-plugin</artifactId>
-                <version>1.0.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-keycloak-saml-xml</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <sourceFile>${basedir}/saml-config/${saml.file}</sourceFile>
-                            <destinationFile>${project.build.directory}/${project.build.finalName}/WEB-INF/keycloak-saml.xml
-                            </destinationFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!--
-             Enforce that `saml-config/keycloak-saml.xml` file exists. This file is used to configure
-             keycloak SAML adapter.
-             The actual file name can be changed by setting the ${saml.file} property,
-             e.g. by adding "-Dsaml.file=keycloak-saml-example.xml" switch, an existing sample
-             configuration file will be used.
-             -->
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>enforce-quickstart-realm-file-exist</id>
-                        <phase>validate</phase>
-                    </execution>
-                    <execution>
-                        <id>enforce-keycloak-saml-file-exist</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireFilesExist>
-                                    <files>
-                                        <file>${basedir}/saml-config/${saml.file}</file>
-                                    </files>
-                                </requireFilesExist>
-                            </rules>
-                            <fail>true</fail>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
@@ -408,6 +354,38 @@
                                 </mapping>
                             </mappings>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>package-saml-config</id>
+            <activation>
+                <property>
+                    <name>saml.file</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.coderplus.maven.plugins</groupId>
+                        <artifactId>copy-rename-maven-plugin</artifactId>
+                        <version>1.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>copy-keycloak-saml-xml</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <sourceFile>${basedir}/${saml.file}</sourceFile>
+                                    <destinationFile>${project.build.directory}/${project.build.finalName}/WEB-INF/keycloak-saml.xml
+                                    </destinationFile>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
