@@ -49,11 +49,17 @@ public abstract class SelectionTable<T> implements IsWidget {
 
     public void setData(List<T> values) {
         dataProvider.setList(values);
+        T oldSelection = selectionModel.getSelectedObject();
         selectionModel.clear();
         if (!values.isEmpty()) {
             T selectedItem = values.get(0);
             selectionModel.setSelected(selectedItem, true);
-            onSelectionChanged(selectedItem);
+
+            // only trigger on-selection event if the old & new selection items are equal, otherwise it's triggered
+            // automatically by SelectionModel
+            if (selectedItem.equals(oldSelection)) {
+                onSelectionChanged(selectedItem);
+            }
         }
     }
 
