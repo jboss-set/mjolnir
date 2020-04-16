@@ -27,8 +27,8 @@ import java.io.Serializable;
 /**
  * Wrapper class that holds basic information of each team in the github-team-data.xml file.
  *
- * @author: navssurtani
- * @since: 0.1
+ * @author navssurtani
+ * @since 0.1
  */
 
 public class GithubTeam implements Serializable {
@@ -68,5 +68,30 @@ public class GithubTeam implements Serializable {
 
     public void setOrganization(GithubOrganization organization) {
         this.organization = organization;
+    }
+
+    // GWT quirk - must implement equals method for null IDs, otherwise CellTable doesn't redraw items correctly
+    // if an item with null id is displayed
+    // if both object IDs are null, objects are equal
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof GithubTeam)) {
+            return false;
+        }
+        GithubTeam that = (GithubTeam) o;
+        if (id == null && that.id == null) {
+            return true;
+        } else if (id == null || that.id == null) {
+            return false;
+        }
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        if (id == null) {
+            return 0;
+        }
+        return id;
     }
 }
