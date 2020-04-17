@@ -70,6 +70,7 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
         administrationService.getOrganizations(new DefaultCallback<List<GithubOrganization>>() {
             @Override
             public void onSuccess(List<GithubOrganization> result) {
+                LoadingIndicationEvent.fire(GitHubMembersPresenter.this, false);
                 getView().setOrganizations(result);
                 getProxy().manualReveal(GitHubMembersPresenter.this);
             }
