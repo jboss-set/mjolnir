@@ -57,12 +57,13 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
     private ApplicationParameters applicationParameters;
 
     @Override
+    @Deprecated
     public RegisteredUser login(String krb5Name, String password) throws ApplicationException {
         // This will always be the first method called by the user upon hitting the web-app.
         // We will return true if the kerberos password is correct. Regardless of whether or not their details
         // already exist in the cache.
 
-        // disabled, authenticate via SAML instead
+        // disabled, authenticate via SSO instead
         return new RegisteredUser();
         /*
         log("login() called on servlet with username " + krb5Name);
@@ -97,6 +98,7 @@ public class LoginServiceImpl extends AbstractServiceServlet implements LoginSer
     }
 
     @Override
+    @Deprecated
     public void logout() {
         setAuthenticatedUser(null);
     }

@@ -39,6 +39,7 @@ import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 @RemoteServiceRelativePath("LoginService")
 @XsrfProtect
+@Deprecated
 public interface LoginService extends RemoteService {
 
     RegisteredUser login(String krb5Name, String password) throws ApplicationException;

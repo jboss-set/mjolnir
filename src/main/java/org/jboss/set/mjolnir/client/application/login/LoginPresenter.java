@@ -24,6 +24,7 @@ import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 /**
  * @author Tomas Hofman (thofman@redhat.com)
  */
+@Deprecated
 public class LoginPresenter extends Presenter<LoginPresenter.MyView, LoginPresenter.MyProxy>
         implements LoginHandlers {
 
