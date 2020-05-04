@@ -24,6 +24,12 @@ public class EntityManagerFactoryProducer {
         String appName = (String) JndiUtils.lookup("java:app/AppName");
         logger.debugf("Detected application name: %s", appName);
 
+        // in openshift the app is going to be deployed under root context
+        if ("ROOT".equals(appName)) {
+            appName = "mjolnir";
+            logger.debugf("Overriding application name to: %s", appName);
+        }
+
         Map<String, String> properties = new HashMap<>();
         properties.put("hibernate.connection.datasource", "java:jboss/datasources/" + appName + "/MjolnirDS");
 

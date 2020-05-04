@@ -30,7 +30,7 @@
         <version.jboss-javaee-6.0>3.0.2.Final</version.jboss-javaee-6.0>
         <version.org.apache.commons>3.3.2</version.org.apache.commons>
         <version.org.wildfly.checkstyle-config>1.0.6.Final</version.org.wildfly.checkstyle-config>
-        <version.keycloak>3.4.3.Final</version.keycloak>
+        <version.keycloak>9.0.3</version.keycloak>
         <version.war.maven.plugin>3.2.3</version.war.maven.plugin>
 
         <maven.compiler.target>1.7</maven.compiler.target>
@@ -103,6 +103,7 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- SAML -->
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-saml-adapter-api-public</artifactId>
@@ -111,6 +112,12 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-saml-adapter-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- OpenID Connect -->
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-core</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -388,6 +395,19 @@
                         </executions>
                     </plugin>
                 </plugins>
+            </build>
+        </profile>
+
+        <!-- In OpenShift, deploy under the root context -->
+        <profile>
+            <id>openshift</id>
+            <activation>
+                <property>
+                    <name>openshift</name>
+                </property>
+            </activation>
+            <build>
+                <finalName>ROOT</finalName>
             </build>
         </profile>
     </profiles>

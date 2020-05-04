@@ -3,7 +3,8 @@ package org.jboss.set.mjolnir.client.service;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
-public interface  LoginServiceAsync {
+@Deprecated
+public interface LoginServiceAsync {
 
     void login(String krb5Name, String password, AsyncCallback<RegisteredUser> async);
 

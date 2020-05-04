@@ -15,9 +15,6 @@ import com.gwtplatform.mvp.client.proxy.Proxy;
 import org.jboss.set.mjolnir.client.NameTokens;
 import org.jboss.set.mjolnir.client.application.menu.MenuLink;
 import org.jboss.set.mjolnir.client.application.security.CurrentUser;
-import org.jboss.set.mjolnir.client.service.DefaultCallback;
-import org.jboss.set.mjolnir.client.service.LoginService;
-import org.jboss.set.mjolnir.client.service.LoginServiceAsync;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,15 +67,8 @@ public class ApplicationPresenter extends Presenter<ApplicationPresenter.MyView,
     @Override
     public void logout() {
         logger.info("Logging out.");
-        LoginServiceAsync loginService = LoginService.Util.getInstance();
-        loginService.logout(new DefaultCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                logger.info("Log out successful.");
-                currentUser.reset();
-                Window.Location.replace("logout.html?GLO=true");
-            }
-        });
+        currentUser.reset();
+        Window.Location.replace("logout");
     }
 
     @Override

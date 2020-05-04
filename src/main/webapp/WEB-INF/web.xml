@@ -24,7 +24,7 @@
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>mjolnir</web-resource-name>
-            <url-pattern>/saml-info</url-pattern>
+            <url-pattern>/sso-info</url-pattern>
         </web-resource-collection>
         <web-resource-collection>
             <web-resource-name>mjolnir</web-resource-name>
@@ -33,7 +33,7 @@
     </security-constraint>
 
     <login-config>
-        <auth-method>KEYCLOAK-SAML</auth-method>
+        <auth-method>KEYCLOAK</auth-method>
     </login-config>
 
     <security-role>
@@ -110,33 +110,42 @@
 
     <!-- Security Filters -->
 
+    <!--
     <filter>
         <filter-name>SamlFilter</filter-name>
         <filter-class>org.jboss.set.mjolnir.server.SamlFilter</filter-class>
     </filter>
-
-    <filter>
-        <filter-name>AuthenticationFilter</filter-name>
-        <filter-class>org.jboss.set.mjolnir.server.AuthenticationFilter</filter-class>
-    </filter>
-
-    <filter>
-        <filter-name>AdminOnlyFilter</filter-name>
-        <filter-class>org.jboss.set.mjolnir.server.AdminOnlyFilter</filter-class>
-    </filter>
-
     <filter-mapping>
         <filter-name>SamlFilter</filter-name>
         <url-pattern>/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
+    -->
 
+    <filter>
+        <filter-name>OpenIDFilter</filter-name>
+        <filter-class>org.jboss.set.mjolnir.server.OpenIDFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>OpenIDFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>AuthenticationFilter</filter-name>
+        <filter-class>org.jboss.set.mjolnir.server.AuthenticationFilter</filter-class>
+    </filter>
     <filter-mapping>
         <filter-name>AuthenticationFilter</filter-name>
         <url-pattern>/mjolnir/auth/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
 
+    <filter>
+        <filter-name>AdminOnlyFilter</filter-name>
+        <filter-class>org.jboss.set.mjolnir.server.AdminOnlyFilter</filter-class>
+    </filter>
     <filter-mapping>
         <filter-name>AdminOnlyFilter</filter-name>
         <url-pattern>/mjolnir/auth/download</url-pattern>
