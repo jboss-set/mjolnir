@@ -5,6 +5,7 @@ import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.OrganizationService;
 import org.hibernate.HibernateException;
+import org.jboss.logging.Logger;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.server.github.ExtendedTeamService;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
@@ -21,8 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Tomas Hofman (thofman@redhat.com)
@@ -66,7 +65,9 @@ public class GitHubSubscriptionBean {
      */
     public List<Subscription> getTeamSubscriptions(int teamId) {
         try {
+            logger.debug("Retrieving team members");
             List<User> members = teamService.getMembers(teamId);
+            logger.debugf("Retrieved %d users", members.size());
             return createSubscriptions(members);
         } catch (IOException e) {
             throw new ApplicationException(e);
@@ -81,7 +82,9 @@ public class GitHubSubscriptionBean {
      */
     public List<Subscription> getOrganizationSubscriptions(String org) {
         try {
+            logger.debug("Retrieving organization members");
             List<User> members = organizationService.getMembers(org);
+            logger.debugf("Retrieved %d users", members.size());
             return createSubscriptions(members);
         } catch (IOException e) {
             throw new ApplicationException(e);
@@ -95,8 +98,9 @@ public class GitHubSubscriptionBean {
      * @return subscription summaries for registered GitHub organizations
      */
     public List<SubscriptionSummary> getOrganizationMembers() {
+        logger.debug("getOrganizationMembers");
         try {
-            final List<SubscriptionSummary> subscriptionSummaries = new ArrayList<SubscriptionSummary>();
+            final List<SubscriptionSummary> subscriptionSummaries = new ArrayList<>();
 
             // create single SubscriptionSummary for each organization
             final List<GithubOrganization> organizations = organizationRepository.getOrganizations();
@@ -124,6 +128,7 @@ public class GitHubSubscriptionBean {
                 try {
                     organizationService.removeMember(org.getName(), gitHubName);
                 } catch (RequestException e) {
+                    //noinspection StatementWithEmptyBody
                     if (e.getStatus() == 404) {
                         // that's fine => user was not subscribed anyway
                     } else {
@@ -146,9 +151,9 @@ public class GitHubSubscriptionBean {
             final List<RegisteredUser> allUsers = userRepository.getAllUsers();
 
             // fetch users and create Subscription objects
-            final Map<String, Subscription> subscriptionMap = new HashMap<String, Subscription>(allUsers.size());
+            final Map<String, Subscription> subscriptionMap = new HashMap<>(allUsers.size());
             //list needed to hold the null values, to avoid creating collection for each entry key
-            final List<Subscription> result = new ArrayList<Subscription>();
+            final List<Subscription> result = new ArrayList<>();
             for (RegisteredUser user: allUsers) {
                 final Subscription subscription = new Subscription();
                 subscription.setRegisteredUser(user);
@@ -212,14 +217,14 @@ public class GitHubSubscriptionBean {
                     try {
                         teamService.addMembership(teamId, gitHubName);
                     } catch (IOException e) {
-                        logger.log(Level.WARNING, "Couldn't add membership", e);
+                        logger.warn("Couldn't add membership", e);
                         throw new ApplicationException("Couldn't add membership: user: " + gitHubName + ", team: " + teamId, e);
                     }
                 } else {
                     try {
                         teamService.removeMembership(teamId, gitHubName);
                     } catch (IOException e) {
-                        logger.log(Level.WARNING, "Couldn't remove membership", e);
+                        logger.warn("Couldn't remove membership", e);
                         throw new ApplicationException("Couldn't remove membership: user: " + gitHubName + ", team: " + teamId, e);
                     }
                 }
@@ -239,10 +244,11 @@ public class GitHubSubscriptionBean {
      * and whether the KRB account is still active.
      */
     private List<Subscription> createSubscriptions(List<User> users) {
+        logger.debugf("createSubscriptions");
         ArrayList<Subscription> subscriptions = new ArrayList<>();
 
         // for each organization user create Subscription object
-        final Map<String, Subscription> ldapUsersToCheck = new HashMap<String, Subscription>();
+        final Map<String, Subscription> ldapUsersToCheck = new HashMap<>();
         for (User user: users) {
             final String gitHubName = user.getLogin();
 
@@ -275,6 +281,7 @@ public class GitHubSubscriptionBean {
         this.ldapRepository = ldapRepository;
     }
 
+    @SuppressWarnings("unused")
     public void setApplicationParameters(ApplicationParameters applicationParameters) {
         this.applicationParameters = applicationParameters;
     }
@@ -291,6 +298,7 @@ public class GitHubSubscriptionBean {
         this.organizationService = organizationService;
     }
 
+    @SuppressWarnings("unused")
     public void setTeamService(ExtendedTeamService teamService) {
         this.teamService = teamService;
     }

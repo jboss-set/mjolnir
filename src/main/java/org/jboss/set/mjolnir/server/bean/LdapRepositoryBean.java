@@ -73,6 +73,7 @@ public class LdapRepositoryBean implements LdapRepository {
      */
     @Override
     public Map<String, Boolean> checkUsersExists(Set<String> users) {
+        logger.debugf("calling checkUsersExists for %d users", users.size());
         final Map<String, Boolean> result = new HashMap<String, Boolean>();
         final Iterator<String> iterator = users.iterator();
         final List<String> tempUserList = new ArrayList<String>(GROUPING_FACTOR);
@@ -89,6 +90,8 @@ public class LdapRepositoryBean implements LdapRepository {
 
     private Map<String, Boolean> checkUsersSubsetExists(List<String> users) {
         try {
+            logger.debugf("Querying LDAP for %d users", users.size());
+
             // build a query
             final StringBuilder query = new StringBuilder("(|");
             for (String uid: users) {
