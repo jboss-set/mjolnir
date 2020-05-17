@@ -67,7 +67,8 @@ public class GitHubSubscriptionBeanTest {
         // setup mocks
         Mockito.when(organizationRepository.getOrganizations()).thenReturn(Collections.singletonList(new GithubOrganization(ORG_NAME)));
         Mockito.when(organizationService.getMembers(ORG_NAME)).thenReturn(asList(gitHubUser));
-        Mockito.when(userRepository.getUserByGitHubName(GITHUB_USERNAME)).thenReturn(appUser);
+        Mockito.when(userRepository.getUsersByGitHubName(Collections.singletonList(GITHUB_USERNAME)))
+                .thenReturn(Collections.singletonMap(GITHUB_USERNAME, appUser));
         Mockito.when(ldapRepository.checkUsersExists(Mockito.anySet())).thenReturn(Collections.singletonMap(KRB_USERNAME, true));
 
         // perform a call

@@ -1,5 +1,6 @@
 package org.jboss.set.mjolnir.server.bean;
 
+import org.jboss.logging.Logger;
 import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.server.entities.UserEntity;
@@ -13,7 +14,9 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * {@inheritDoc}
@@ -22,6 +25,8 @@ import java.util.List;
  */
 @Stateless
 public class UserRepositoryBean implements UserRepository {
+
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
     @Inject
     private EntityManagerFactory entityManagerFactory;
@@ -36,28 +41,69 @@ public class UserRepositoryBean implements UserRepository {
         return getUser(UserName.GITHUB, gitHubName);
     }
 
-    private RegisteredUser getUser(UserName userName, String param) {
-
-        RegisteredUser user = null;
-
+    /**
+     * Retrieves users whose github name matches a name in given list.
+     *
+     * @param names github names we are looking for
+     * @return existing users with matching github name
+     */
+    public Map<String, RegisteredUser> getUsersByGitHubName(List<String> names) {
         EntityManager em = entityManagerFactory.createEntityManager();
-        TypedQuery<UserEntity> getUserQuery = null;
 
-        if (userName == UserName.KERBEROS) {
-            getUserQuery = em.createQuery("FROM UserEntity WHERE kerberosName=:name", UserEntity.class);
-        } else {
-            getUserQuery = em.createQuery("FROM UserEntity WHERE githubName=:name", UserEntity.class);
+        try {
+            logger.debugf("Retrieving %d users by github names", names.size());
+
+            final int batchSize = 1000;
+            final HashMap<String, RegisteredUser> users = new HashMap<>();
+
+            for (int i = 0; i < names.size(); i = i + batchSize) {
+                int highIndex = Math.min(i + batchSize, names.size());
+
+                logger.debugf("Retrieving indexes %d to %d", i, highIndex);
+
+                List<String> sublist = names.subList(i, highIndex);
+                TypedQuery<UserEntity> query = em.createQuery("FROM UserEntity WHERE githubName in (:list)", UserEntity.class);
+                List<UserEntity> result = query.setParameter("list", sublist).getResultList();
+
+                for (UserEntity user : result) {
+                    users.put(user.getGithubName(), convertUserEntity(user));
+                }
+            }
+
+            return users;
+        } finally {
+            em.close();
         }
+    }
 
-        List<UserEntity> result = getUserQuery.setParameter("name", param).getResultList();
+    private RegisteredUser getUser(UserName userName, String param) {
+        EntityManager em = entityManagerFactory.createEntityManager();
 
-        if (result.size() == 1) {
-            UserEntity userEntity = result.get(0);
-            user = convertUserEntity(userEntity);
+        try {
+            RegisteredUser user = null;
+
+//        EntityManager em = entityManager.createEntityManager();
+            TypedQuery<UserEntity> getUserQuery;
+
+            if (userName == UserName.KERBEROS) {
+                logger.debug("Retrieving user by krb name");
+                getUserQuery = em.createQuery("FROM UserEntity WHERE kerberosName=:name", UserEntity.class);
+            } else {
+                logger.debug("Retrieving user by github name");
+                getUserQuery = em.createQuery("FROM UserEntity WHERE githubName=:name", UserEntity.class);
+            }
+
+            List<UserEntity> result = getUserQuery.setParameter("name", param).getResultList();
+
+            if (result.size() == 1) {
+                UserEntity userEntity = result.get(0);
+                user = convertUserEntity(userEntity);
+            }
+
+            return user;
+        } finally {
+            em.close();
         }
-
-        em.close();
-        return user;
     }
 
     @Override
@@ -90,60 +136,71 @@ public class UserRepositoryBean implements UserRepository {
         UserEntity userEntity = convertUser(user);
 
         EntityManager em = entityManagerFactory.createEntityManager();
-        em.persist(userEntity);
-        em.close();
+        try {
+            em.persist(userEntity);
+        } finally {
+            em.close();
+        }
     }
 
     private boolean updateUser(RegisteredUser user) {
-
         EntityManager em = entityManagerFactory.createEntityManager();
 
-        UserEntity userEntity = getUserFromDB(user, em);
+        try {
+            UserEntity userEntity = getUserFromDB(user, em);
 
-        if (userEntity == null) {
-            //user is not stored in the DB
-            return false;
+            if (userEntity == null) {
+                //user is not stored in the DB
+                return false;
+            }
+
+            userEntity.setKerberosName(user.getKrbName());
+            userEntity.setGithubName(user.getGitHubName());
+            userEntity.setNote(user.getNote());
+            userEntity.setAdmin(user.isAdmin());
+            userEntity.setWhitelisted(user.isWhitelisted());
+            userEntity.setResponsiblePerson(user.getResponsiblePerson());
+
+            return true;
+        } finally {
+            em.close();
         }
-
-        userEntity.setKerberosName(user.getKrbName());
-        userEntity.setGithubName(user.getGitHubName());
-        userEntity.setNote(user.getNote());
-        userEntity.setAdmin(user.isAdmin());
-        userEntity.setWhitelisted(user.isWhitelisted());
-        userEntity.setResponsiblePerson(user.getResponsiblePerson());
-        em.close();
-
-        return true;
     }
 
     @Override
     public List<RegisteredUser> getAllUsers() {
         EntityManager em = entityManagerFactory.createEntityManager();
 
-        List<UserEntity> entityList = em.createQuery("FROM UserEntity", UserEntity.class).getResultList();
-        final List<RegisteredUser> users = new ArrayList<>();
+        try {
+            List<UserEntity> entityList = em.createQuery("FROM UserEntity", UserEntity.class).getResultList();
+            final List<RegisteredUser> users = new ArrayList<>();
 
-        for (UserEntity entity : entityList) {
-            final RegisteredUser user = convertUserEntity(entity);
-            users.add(user);
+            for (UserEntity entity : entityList) {
+                final RegisteredUser user = convertUserEntity(entity);
+                users.add(user);
+            }
+
+            return users;
+        } finally {
+            em.close();
         }
-
-        return users;
     }
 
     @Override
     public void deleteUser(RegisteredUser user) {
-
         EntityManager em = entityManagerFactory.createEntityManager();
 
-        UserEntity userEntity = getUserFromDB(user, em);
+        try {
+            UserEntity userEntity = getUserFromDB(user, em);
 
-        if (userEntity == null) {
-            throw new ApplicationException("Couldn't delete user - user not found.");
+            if (userEntity == null) {
+                throw new ApplicationException("Couldn't delete user - user not found.");
+            }
+
+            em.remove(userEntity);
+        } finally {
+            em.close();
         }
-
-        em.remove(userEntity);
-        em.close();
     }
 
     @Override

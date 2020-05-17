@@ -4,6 +4,7 @@ import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Manages registered users.
@@ -27,6 +28,14 @@ public interface UserRepository {
      * @return user instance or null
      */
     RegisteredUser getUserByGitHubName(String gitHubName);
+
+    /**
+     * Retrieves users whose github name matches a name in given list.
+     *
+     * @param names github names we are looking for
+     * @return existing users with matching github name
+     */
+    Map<String, RegisteredUser> getUsersByGitHubName(List<String> names);
 
     /**
      * Saves new user.
