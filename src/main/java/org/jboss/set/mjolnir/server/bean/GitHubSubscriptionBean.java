@@ -244,26 +244,30 @@ public class GitHubSubscriptionBean {
      * and whether the KRB account is still active.
      */
     private List<Subscription> createSubscriptions(List<User> users) {
-        logger.debugf("createSubscriptions");
-        ArrayList<Subscription> subscriptions = new ArrayList<>();
+        logger.debugf("Transforming %d GH users to Subscription entities", users.size());
 
         // for each organization user create Subscription object
+        final Map<String, Subscription> subscriptions = new HashMap<>();
         final Map<String, Subscription> ldapUsersToCheck = new HashMap<>();
         for (User user: users) {
             final String gitHubName = user.getLogin();
 
             final Subscription subscription = new Subscription();
             subscription.setGitHubName(gitHubName);
-            subscriptions.add(subscription);
+            subscriptions.put(gitHubName, subscription);
+        }
 
-            final RegisteredUser registeredUser = userRepository.getUserByGitHubName(gitHubName);
-            if (registeredUser != null) { // if user is registered, LDAP check will be done
-                subscription.setRegisteredUser(registeredUser);
-                ldapUsersToCheck.put(registeredUser.getKrbName(), subscription);
-            }
+        // find registered users by GH names
+        logger.debug("Looking for user registrations");
+        final Map<String, RegisteredUser> registeredUsers = userRepository.getUsersByGitHubName(new ArrayList<>(subscriptions.keySet()));
+        for (Map.Entry<String, RegisteredUser> entry: registeredUsers.entrySet()) {
+            Subscription subscription = subscriptions.get(entry.getKey());
+            subscription.setRegisteredUser(entry.getValue());
+            ldapUsersToCheck.put(entry.getValue().getKrbName(), subscription);
         }
 
         // check LDAP records for retrieved users
+        logger.debugf("Looking for LDAP accounts of %d users", ldapUsersToCheck.size());
         final Map<String, Boolean> checkedLdapUsers = ldapRepository.checkUsersExists(ldapUsersToCheck.keySet());
         for (Map.Entry<String, Boolean> checkedLdapUser: checkedLdapUsers.entrySet()) {
             if (checkedLdapUser.getValue()) {
@@ -271,7 +275,7 @@ public class GitHubSubscriptionBean {
             }
         }
 
-        return subscriptions;
+        return new ArrayList<>(subscriptions.values());
     }
 
 
