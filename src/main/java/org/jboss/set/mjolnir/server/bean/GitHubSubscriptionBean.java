@@ -254,7 +254,7 @@ public class GitHubSubscriptionBean {
 
             final Subscription subscription = new Subscription();
             subscription.setGitHubName(gitHubName);
-            subscriptions.put(gitHubName, subscription);
+            subscriptions.put(gitHubName.toLowerCase(), subscription);
         }
 
         // find registered users by GH names

@@ -17,7 +17,7 @@ import java.io.IOException;
 
 public class OpenIDFilter implements Filter {
 
-    private static final Logger LOG = Logger.getLogger(SamlFilter.class.getName());
+    private static final Logger LOG = Logger.getLogger(OpenIDFilter.class.getName());
 
     @EJB
     private UserRepository userRepository;

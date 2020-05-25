@@ -56,17 +56,19 @@ public class UserRepositoryBean implements UserRepository {
             final int batchSize = 1000;
             final HashMap<String, RegisteredUser> users = new HashMap<>();
 
+            names = toLowerCase(names);
             for (int i = 0; i < names.size(); i = i + batchSize) {
                 int highIndex = Math.min(i + batchSize, names.size());
 
                 logger.debugf("Retrieving indexes %d to %d", i, highIndex);
 
                 List<String> sublist = names.subList(i, highIndex);
-                TypedQuery<UserEntity> query = em.createQuery("FROM UserEntity WHERE githubName in (:list)", UserEntity.class);
+
+                TypedQuery<UserEntity> query = em.createQuery("FROM UserEntity WHERE lower(githubName) in (:list)", UserEntity.class);
                 List<UserEntity> result = query.setParameter("list", sublist).getResultList();
 
                 for (UserEntity user : result) {
-                    users.put(user.getGithubName(), convertUserEntity(user));
+                    users.put(user.getGithubName().toLowerCase(), convertUserEntity(user));
                 }
             }
 
@@ -267,5 +269,13 @@ public class UserRepositoryBean implements UserRepository {
         }
 
         return userEntity;
+    }
+
+    private static List<String> toLowerCase(final List<String> strings) {
+        final List<String> result = new ArrayList<>(strings.size());
+        for (String str: strings) {
+            result.add(str.toLowerCase());
+        }
+        return result;
     }
 }
