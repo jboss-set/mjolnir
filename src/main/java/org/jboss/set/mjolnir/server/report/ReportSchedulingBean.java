@@ -1,9 +1,7 @@
 package org.jboss.set.mjolnir.server.report;
 
 import javax.ejb.EJB;
-import javax.ejb.Schedule;
 import javax.ejb.Singleton;
-import javax.ejb.Startup;
 
 /**
  * Schedules report generating.
@@ -11,13 +9,14 @@ import javax.ejb.Startup;
  * @author Tomas Hofman (thofman@redhat.com)
  */
 @Singleton
-@Startup
+//@Startup
 public class ReportSchedulingBean {
 
     @EJB
     private UnknownMembersReportBean unknownMembersReportBean;
 
-    @Schedule(dayOfWeek = "Mon", hour = "0", minute = "0", second = "0", persistent = false)
+    // Report generation disabled
+//    @Schedule(dayOfWeek = "Mon", hour = "0", minute = "0", second = "0", persistent = false)
     public void sendUnknownMembersReport() {
         unknownMembersReportBean.emailReport();
     }
