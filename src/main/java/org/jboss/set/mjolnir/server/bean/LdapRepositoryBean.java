@@ -95,9 +95,7 @@ public class LdapRepositoryBean implements LdapRepository {
             // build a query
             final StringBuilder query = new StringBuilder("(|");
             for (String uid: users) {
-                query.append("(uid=")
-                        .append(KerberosUtils.normalizeUsername(uid))
-                        .append(")");
+                query.append(String.format("(|(uid=%s)(rhatPriorUid=%s))", uid, uid));
             }
             query.append(")");
 
