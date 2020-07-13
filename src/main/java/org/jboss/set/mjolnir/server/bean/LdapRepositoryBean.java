@@ -10,6 +10,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,9 +106,21 @@ public class LdapRepositoryBean implements LdapRepository {
             // fill the result map with found users
             final Map<String, Boolean> result = new HashMap<String, Boolean>();
             while (searchResults.hasMore()) {
-                final SearchResult next = searchResults.next();
-                String uid = (String) next.getAttributes().get("uid").get();
+                final SearchResult record = searchResults.next();
+
+                // add user's UID to the map of existing users
+                String uid = (String) record.getAttributes().get("uid").get();
                 result.put(uid, true);
+
+                // add user's prior UIDs to the map of existing users
+                Attribute priorUidAttr = record.getAttributes().get("rhatPriorUid");
+                if (priorUidAttr != null) {
+                    NamingEnumeration<?> priorUids = priorUidAttr.getAll();
+                    while (priorUids.hasMore()) {
+                        String priorUid = (String) priorUids.next();
+                        result.put(priorUid, true);
+                    }
+                }
             }
             searchResults.close();
 
