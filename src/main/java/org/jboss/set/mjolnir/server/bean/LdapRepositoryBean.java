@@ -55,8 +55,9 @@ public class LdapRepositoryBean implements LdapRepository {
     @Override
     public boolean checkUserExists(String uid) {
         try {
+            String normalizedUid = KerberosUtils.normalizeUsername(uid);
             final NamingEnumeration<SearchResult> results =
-                    ldapClient.search(CONTEXT_NAME, "uid=" + KerberosUtils.normalizeUsername(uid));
+                    ldapClient.search(CONTEXT_NAME, String.format("(|(uid=%s)(rhatPriorUid=%s))", normalizedUid, normalizedUid));
             final boolean found = results.hasMore();
             results.close();
             return found;
