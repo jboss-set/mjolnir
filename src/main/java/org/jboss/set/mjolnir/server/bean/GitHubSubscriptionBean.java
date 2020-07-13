@@ -170,9 +170,9 @@ public class GitHubSubscriptionBean {
 
             // check LDAP records for retrieved users
             final Map<String, Boolean> checkedLdapUsers = ldapRepository.checkUsersExists(subscriptionMap.keySet());
-            for (Map.Entry<String, Boolean> checkedLdapUser : checkedLdapUsers.entrySet()) {
-                if (checkedLdapUser.getValue()) {
-                    subscriptionMap.get(checkedLdapUser.getKey()).setActiveKerberosAccount(true);
+            for (Map.Entry<String, Subscription> entry : subscriptionMap.entrySet()) {
+                if (checkedLdapUsers.get(entry.getKey())) {
+                    entry.getValue().setActiveKerberosAccount(true);
                 }
             }
 
@@ -269,9 +269,9 @@ public class GitHubSubscriptionBean {
         // check LDAP records for retrieved users
         logger.debugf("Looking for LDAP accounts of %d users", ldapUsersToCheck.size());
         final Map<String, Boolean> checkedLdapUsers = ldapRepository.checkUsersExists(ldapUsersToCheck.keySet());
-        for (Map.Entry<String, Boolean> checkedLdapUser: checkedLdapUsers.entrySet()) {
-            if (checkedLdapUser.getValue()) {
-                ldapUsersToCheck.get(checkedLdapUser.getKey()).setActiveKerberosAccount(true);
+        for (Map.Entry<String, Subscription> entry : ldapUsersToCheck.entrySet()) {
+            if (checkedLdapUsers.get(entry.getKey())) {
+                entry.getValue().setActiveKerberosAccount(true);
             }
         }
 

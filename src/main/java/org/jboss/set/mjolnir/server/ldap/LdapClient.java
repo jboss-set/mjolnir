@@ -22,7 +22,7 @@ public class LdapClient {
         // prepare SearchControls instance
         searchControls = new SearchControls();
         searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        searchControls.setReturningAttributes(new String[] {"uid"});
+        searchControls.setReturningAttributes(new String[] {"uid", "rhatPriorUid"});
     }
 
     public NamingEnumeration<SearchResult> search(String contextName, String filter) throws NamingException {
