@@ -1,5 +1,6 @@
 package org.jboss.set.mjolnir.server.bean;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,4 +26,11 @@ public interface LdapRepository {
      * @return map with uid as key and boolean indicating indicating existing record as value
      */
     Map<String, Boolean> checkUsersExists(Set<String> users);
+
+    /**
+     * Returns list of user UIDs - i.e. his current UID and all his prior UIDs.
+     * @param uid prior or current UID
+     * @return list of current and prior UIDs
+     */
+    List<String> findAllUserUids(String uid);
 }

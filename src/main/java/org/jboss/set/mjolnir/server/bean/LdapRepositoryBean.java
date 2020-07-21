@@ -13,6 +13,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +30,7 @@ public class LdapRepositoryBean implements LdapRepository {
 
     private static final String CONTEXT_NAME = "ou=users,dc=redhat,dc=com";
     private static final int GROUPING_FACTOR = 50; // query for so many users at a time
-    private static final String LDAP_SEARCH_ERROR = "Couldn't create LDAP client instance";
+    private static final String LDAP_SEARCH_ERROR = "LDAP search error: ";
     private static final Logger logger = Logger.getLogger(LdapRepositoryBean.class);
 
     @EJB
@@ -76,9 +77,9 @@ public class LdapRepositoryBean implements LdapRepository {
     @Override
     public Map<String, Boolean> checkUsersExists(Set<String> users) {
         logger.debugf("calling checkUsersExists for %d users", users.size());
-        final Map<String, Boolean> result = new HashMap<String, Boolean>();
+        final Map<String, Boolean> result = new HashMap<>();
         final Iterator<String> iterator = users.iterator();
-        final List<String> tempUserList = new ArrayList<String>(GROUPING_FACTOR);
+        final List<String> tempUserList = new ArrayList<>(GROUPING_FACTOR);
         while (iterator.hasNext()) {
             tempUserList.add(iterator.next());
             if (tempUserList.size() >= GROUPING_FACTOR || !iterator.hasNext()) {
@@ -88,6 +89,37 @@ public class LdapRepositoryBean implements LdapRepository {
             }
         }
         return result;
+    }
+
+    @Override
+    public List<String> findAllUserUids(String uid) {
+        try {
+            final NamingEnumeration<SearchResult> results =
+                    ldapClient.search(CONTEXT_NAME, "(|(uid=" + uid + ")(rhatPriorUid=" + uid + "))");
+            if (results.hasMore()) {
+                ArrayList<String> uids = new ArrayList<>();
+
+                SearchResult searchResult = results.next();
+                String currentUid = (String) searchResult.getAttributes().get("uid").get();
+                uids.add(currentUid);
+
+                // add user's prior UIDs to the map of existing users
+                Attribute priorUidAttr = searchResult.getAttributes().get("rhatPriorUid");
+                if (priorUidAttr != null) {
+                    NamingEnumeration<?> priorUids = priorUidAttr.getAll();
+                    while (priorUids.hasMore()) {
+                        String priorUid = (String) priorUids.next();
+                        uids.add(priorUid);
+                    }
+                }
+
+                return uids;
+            } else {
+                return Collections.emptyList();
+            }
+        } catch (NamingException e) {
+            throw new ApplicationException(LDAP_SEARCH_ERROR + e.getMessage(), e);
+        }
     }
 
     private Map<String, Boolean> checkUsersSubsetExists(List<String> users) {
@@ -105,7 +137,7 @@ public class LdapRepositoryBean implements LdapRepository {
                     ldapClient.search(CONTEXT_NAME, query.toString());
 
             // fill the result map with found users
-            final Map<String, Boolean> result = new HashMap<String, Boolean>();
+            final Map<String, Boolean> result = new HashMap<>();
             while (searchResults.hasMore()) {
                 final SearchResult record = searchResults.next();
 
