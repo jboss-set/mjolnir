@@ -31,9 +31,29 @@ public class UserRepositoryBean implements UserRepository {
     @Inject
     private EntityManagerFactory entityManagerFactory;
 
+    @Inject
+    private LdapRepository ldapRepository;
+
     @Override
     public RegisteredUser getUser(String kerberosName) {
         return getUser(UserName.KERBEROS, kerberosName);
+    }
+
+    /**
+     * Returns users whose kerberos names are in the given list.
+     *
+     * @param krbNames list of krb names to search for
+     * @return list of users
+     */
+    List<UserEntity> getUsersByKrbNames(List<String> krbNames) {
+        EntityManager em = entityManagerFactory.createEntityManager();
+
+        try {
+            TypedQuery<UserEntity> query = em.createQuery("FROM UserEntity WHERE kerberosName in (:krbNames)", UserEntity.class);
+            return query.setParameter("krbNames", krbNames).getResultList();
+        } finally {
+            em.close();
+        }
     }
 
     @Override
@@ -84,7 +104,6 @@ public class UserRepositoryBean implements UserRepository {
         try {
             RegisteredUser user = null;
 
-//        EntityManager em = entityManager.createEntityManager();
             TypedQuery<UserEntity> getUserQuery;
 
             if (userName == UserName.KERBEROS) {
@@ -125,12 +144,26 @@ public class UserRepositoryBean implements UserRepository {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public RegisteredUser getOrCreateUser(String kerberosName) {
-        RegisteredUser user = getUser(kerberosName);
+        List<String> uids = ldapRepository.findAllUserUids(kerberosName);
+        List<UserEntity> userEntities = getUsersByKrbNames(uids);
+
+        if (userEntities.size() > 1) {
+            logger.warnf("Several possible registered users found for UID %s", kerberosName);
+        }
+
+        RegisteredUser user;
+        if (userEntities.size() == 1) {
+            user = convertUserEntity(userEntities.get(0));
+        } else {
+            user = getUser(kerberosName);
+        }
+
         if (user == null) {
             user = new RegisteredUser();
             user.setKrbName(kerberosName);
             insertUser(user);
         }
+
         return user;
     }
 
@@ -273,7 +306,7 @@ public class UserRepositoryBean implements UserRepository {
 
     private static List<String> toLowerCase(final List<String> strings) {
         final List<String> result = new ArrayList<>(strings.size());
-        for (String str: strings) {
+        for (String str : strings) {
             result.add(str.toLowerCase());
         }
         return result;
