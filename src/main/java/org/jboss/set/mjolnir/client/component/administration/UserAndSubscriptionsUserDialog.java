@@ -196,7 +196,8 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
         RegisteredUser userToSave = subscription.getRegisteredUser() == null
                 ? new RegisteredUser() : subscription.getRegisteredUser().copy();
         userToSave.setGitHubName(subscription.getGitHubName());
-        userToSave.setKrbName(krbNameBox.getText());
+        String userName = krbNameBox.getText();
+        userToSave.setKrbName(userName.isEmpty() ? null : userName);
         userToSave.setNote(noteBox.getText());
         userToSave.setAdmin(adminCheckBox.getValue());
         userToSave.setWhitelisted(whitelistedCheckBox.getValue());
