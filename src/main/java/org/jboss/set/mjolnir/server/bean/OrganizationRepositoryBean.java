@@ -31,7 +31,8 @@ public class OrganizationRepositoryBean implements OrganizationRepository {
         EntityManager em = entityManagerFactory.createEntityManager();
 
         final List<GithubOrganizationEntity> organizationsList =
-                em.createQuery("FROM GithubOrganizationEntity", GithubOrganizationEntity.class).getResultList();
+                em.createQuery("FROM GithubOrganizationEntity WHERE subscriptionsEnabled = true", GithubOrganizationEntity.class)
+                        .getResultList();
 
         em.close();
 
