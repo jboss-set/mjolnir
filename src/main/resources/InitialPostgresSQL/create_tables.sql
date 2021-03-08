@@ -2,7 +2,8 @@ create sequence sq_github_orgs;
 
 create table github_orgs (
     id bigint default nextval('sq_github_orgs') primary key,
-    name varchar(255) unique
+    name varchar(255) unique,
+    subscriptions_enabled boolean default true;
 );
 
 create sequence sq_github_teams;

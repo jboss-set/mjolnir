@@ -1,5 +1,6 @@
 package org.jboss.set.mjolnir.server.entities;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -21,6 +22,9 @@ public class GithubOrganizationEntity {
 
     private String name;
 
+    @Column(name = "subscriptions_enabled")
+    private boolean subscriptionsEnabled;
+
     public GithubOrganizationEntity() {
     }
 
@@ -38,5 +42,18 @@ public class GithubOrganizationEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Should it be possible to subscribe into this organization's teams in the UI?
+     *
+     * @return true - org will appear in the UI, false org will not appear in the UI.
+     */
+    public boolean isSubscriptionsEnabled() {
+        return subscriptionsEnabled;
+    }
+
+    public void setSubscriptionsEnabled(boolean subscriptionsEnabled) {
+        this.subscriptionsEnabled = subscriptionsEnabled;
     }
 }
