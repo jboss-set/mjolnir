@@ -23,18 +23,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <version.egit>2.1.2</version.egit>
-        <version.guava.gwt>18.0</version.guava.gwt>
-        <version.gwt>2.7.0</version.gwt>
-        <version.gwtp>1.5.1</version.gwtp>
+        <version.guava.gwt>31.0.1-jre</version.guava.gwt>
+        <version.gwt>2.9.0</version.gwt>
+        <version.gwtp>1.6</version.gwtp>
         <version.hibernate>5.1.10.Final</version.hibernate>
-        <version.jboss-javaee-6.0>3.0.2.Final</version.jboss-javaee-6.0>
+        <version.jboss-javaee>1.0.4.Final</version.jboss-javaee>
         <version.org.apache.commons>3.3.2</version.org.apache.commons>
         <version.org.wildfly.checkstyle-config>1.0.6.Final</version.org.wildfly.checkstyle-config>
         <version.keycloak>9.0.3</version.keycloak>
         <version.war.maven.plugin>3.2.3</version.war.maven.plugin>
 
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
     </properties>
 
     <dependencyManagement>
@@ -61,6 +61,15 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava-gwt</artifactId>
             <version>${version.guava.gwt}</version>
+        </dependency>
+
+        <!-- Make sure correct version of gwt-dev is used. The gwtp dependency bellow includes an older version of this,
+        which causes compilation issues in JDK 11. -->
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${version.gwt}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -97,8 +106,8 @@
 
         <dependency>
             <groupId>org.jboss.spec</groupId>
-            <artifactId>jboss-javaee-6.0</artifactId>
-            <version>${version.jboss-javaee-6.0}</version>
+            <artifactId>jboss-javaee-8.0</artifactId>
+            <version>${version.jboss-javaee}</version>
             <type>pom</type>
             <scope>provided</scope>
         </dependency>
@@ -167,6 +176,7 @@
                 <configuration>
                     <module>org.jboss.set.mjolnir.Mjolnir</module>
                     <extraJvmArgs>-Xmx1024m</extraJvmArgs>
+                    <logLevel>INFO</logLevel>
                 </configuration>
                 <executions>
                     <execution>
@@ -223,9 +233,11 @@
                 </executions>
             </plugin>
 
+            <!--
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.5</version>
                 <configuration>
                     <xmlOutput>true</xmlOutput>
                     <xmlOutputDirectory>target/findbugs</xmlOutputDirectory>
@@ -241,6 +253,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

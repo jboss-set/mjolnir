@@ -3,10 +3,13 @@
   When updating your version of GWT, you should also update this DTD reference,
   so that your app can take advantage of the latest GWT module capabilities.
 -->
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.5.1//EN"
-        "http://google-web-toolkit.googlecode.com/svn/tags/2.5.1/distro-source/core/src/gwt-module.dtd">
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.9.0//EN"
+        "http://gwtproject.org/doctype/2.9.0/gwt-module.dtd">
 <module rename-to='mjolnir'>
     <!-- Inherit the core Web Toolkit stuff.-->
+    <inherits name="com.google.gwt.user.User"/>
+    <inherits name="com.google.gwt.core.Core" />
+
     <inherits name="com.gwtplatform.mvp.MvpWithEntryPoint"/>
 
     <!--Inherit the default GWT style sheet.-->
