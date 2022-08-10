@@ -1,7 +1,8 @@
 package org.jboss.set.mjolnir.server.service.validation;
 
-import org.eclipse.egit.github.core.client.RequestException;
-import org.eclipse.egit.github.core.service.UserService;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.egit.github.core.User;
+import org.jboss.set.mjolnir.server.github.ExtendedUserService;
 import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.ValidationResult;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
@@ -15,11 +16,9 @@ import java.io.IOException;
  */
 public class GitHubNameExistsValidation implements Validation<RegisteredUser> {
 
-    private static final String CALL_FAILURE = "GitHub call failed.";
+    private final ExtendedUserService userService;
 
-    private UserService userService;
-
-    public GitHubNameExistsValidation(UserService userService) {
+    public GitHubNameExistsValidation(ExtendedUserService userService) {
         this.userService = userService;
     }
 
@@ -27,23 +26,14 @@ public class GitHubNameExistsValidation implements Validation<RegisteredUser> {
     public ValidationResult validate(RegisteredUser entity) {
         ValidationResult result = new ValidationResult();
         try {
-            if(entity.getGitHubName().equals("")) {
-                result.addFailure("GitHub name is required.");
-            } else {
-                userService.getUser(entity.getGitHubName()); // throws RequestException 404 if user doesn't exist
-            }
-        } catch (RequestException e) {
-            if (e.getStatus() == 404) {
-                result.addFailure("Specified GitHub name is not registered on GitHub.");
-            }
-            else if (e.getStatus() == 401) {
-                throw new ApplicationException("Specified Github token is invalid. Refer to README.md file for more information.", e);
-            }
-            else {
-                throw new ApplicationException(CALL_FAILURE, e);
+            if (StringUtils.isNotBlank(entity.getGitHubName())) {
+                User user = userService.getUserIfExists(entity.getGitHubName());
+                if (user == null) {
+                    result.addFailure("Specified GitHub name is not registered on GitHub.");
+                }
             }
         } catch (IOException e) {
-            throw new ApplicationException(CALL_FAILURE, e);
+            throw new ApplicationException("GitHub API call failure", e);
         }
         return result;
     }

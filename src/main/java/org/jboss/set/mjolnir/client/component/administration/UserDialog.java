@@ -33,9 +33,9 @@ public class UserDialog extends DialogBox {
     interface Binder extends UiBinder<Widget, UserDialog> {
     }
 
-    private static Binder uiBinder = GWT.create(Binder.class);
+    private static final Binder uiBinder = GWT.create(Binder.class);
 
-    private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
+    private final AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
 
     @UiField
     TextBox kerberosNameBox;
@@ -110,11 +110,10 @@ public class UserDialog extends DialogBox {
     private void initEditDialog(final RegisteredUser user) {
         setText("Edit User");
 
-        if (user != null && user.getKrbName() != null) { // username is not modifiable for existing users
-            kerberosNameBox.setEnabled(false);
-        } else {                                        //GH name cannot be modified with null kerberos
-            setKerberosNameBoxActiveValidation();
-            gitHubNameBox.setEnabled(false);
+        if (user != null && user.getKrbName() != null) {
+            kerberosNameBox.setEnabled(false); // LDAP username is not modifiable for existing users
+        } else {
+            setKerberosNameBoxActiveValidation(); // change handler that checks if provided LDAP name exists
         }
 
         // set field values
@@ -156,7 +155,7 @@ public class UserDialog extends DialogBox {
                 userToSave.setResponsiblePerson(responsiblePersonBox.getValue());
 
                 // save
-                administrationService.editUser(userToSave, kerberosNameBox.isEnabled(), gitHubNameBox.isEnabled(), new AsyncCallback<EntityUpdateResult<RegisteredUser>>() {
+                administrationService.editUser(userToSave, new AsyncCallback<EntityUpdateResult<RegisteredUser>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         ExceptionHandler.handle("Couldn't save user.", caught);
@@ -219,10 +218,11 @@ public class UserDialog extends DialogBox {
                 final RegisteredUser user = new RegisteredUser();
 
                 //krb name must be null, when not entered because of the unique constraint
-                String userName = kerberosNameBox.getText();
+                String krbName = kerberosNameBox.getText();
+                String githubName = gitHubNameBox.getText();
 
-                user.setKrbName(userName.isEmpty() ? null : userName);
-                user.setGitHubName(gitHubNameBox.getText());
+                user.setKrbName(krbName.isEmpty() ? null : krbName);
+                user.setGitHubName(githubName.isEmpty() ? null : githubName);
                 user.setNote(noteBox.getText());
                 user.setAdmin(adminCheckBox.getValue());
                 user.setWhitelisted(whitelistedCheckBox.getValue());
@@ -238,12 +238,7 @@ public class UserDialog extends DialogBox {
                     @Override
                     public void onSuccess(EntityUpdateResult<RegisteredUser> result) {
                         if (result.isOK()) {
-                            RegisteredUser savedUser = result.getUpdatedEntity();
-                            if (savedUser != null) {
-                                user.setKrbName(savedUser.getKrbName());
-                                user.setGitHubName(savedUser.getGitHubName());
-                            }
-                            onSave(user, activeAccountCheckBox.getValue());
+                            onSave(result.getUpdatedEntity(), activeAccountCheckBox.getValue());
                             UserDialog.this.hide();
                             UserDialog.this.removeFromParent();
                         } else {

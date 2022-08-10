@@ -13,7 +13,6 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,9 +33,9 @@ public class LdapRepositoryBean implements LdapRepository {
     private static final Logger logger = Logger.getLogger(LdapRepositoryBean.class);
 
     @EJB
-    private ApplicationParameters applicationParameters;
+    ApplicationParameters applicationParameters;
 
-    private LdapClient ldapClient;
+    LdapClient ldapClient;
 
     @PostConstruct
     public void init() {
@@ -92,30 +91,37 @@ public class LdapRepositoryBean implements LdapRepository {
     }
 
     @Override
-    public List<String> findAllUserUids(String uid) {
+    public LdapUserRecord findUserRecord(String uid) {
         try {
             final NamingEnumeration<SearchResult> results =
                     ldapClient.search(CONTEXT_NAME, "(|(uid=" + uid + ")(rhatPriorUid=" + uid + "))");
             if (results.hasMore()) {
-                ArrayList<String> uids = new ArrayList<>();
-
                 SearchResult searchResult = results.next();
                 String currentUid = (String) searchResult.getAttributes().get("uid").get();
-                uids.add(currentUid);
 
-                // add user's prior UIDs to the map of existing users
+                Attribute employeeNumberAttribute = searchResult.getAttributes().get("employeeNumber");
+                String employeeNumberString = employeeNumberAttribute == null ? null : (String) employeeNumberAttribute.get();
+                Integer employeeNumber = null;
+                try {
+                    employeeNumber = Integer.parseInt(employeeNumberString);
+                } catch (NumberFormatException e) {
+                    logger.errorf(e, "Can't parse employee number '%s'", employeeNumberString);
+                }
+
+                // add user's prior UIDs to the list
+                ArrayList<String> priorUids = new ArrayList<>();
                 Attribute priorUidAttr = searchResult.getAttributes().get("rhatPriorUid");
                 if (priorUidAttr != null) {
-                    NamingEnumeration<?> priorUids = priorUidAttr.getAll();
-                    while (priorUids.hasMore()) {
-                        String priorUid = (String) priorUids.next();
-                        uids.add(priorUid);
+                    NamingEnumeration<?> priorUidsEnum = priorUidAttr.getAll();
+                    while (priorUidsEnum.hasMore()) {
+                        String priorUid = (String) priorUidsEnum.next();
+                        priorUids.add(priorUid);
                     }
                 }
 
-                return uids;
+                return new LdapUserRecord(employeeNumber, currentUid, priorUids);
             } else {
-                return Collections.emptyList();
+                return null;
             }
         } catch (NamingException e) {
             throw new ApplicationException(LDAP_SEARCH_ERROR + e.getMessage(), e);
@@ -171,4 +177,33 @@ public class LdapRepositoryBean implements LdapRepository {
         }
     }
 
+    public static class LdapUserRecord {
+        private Integer employeeNumber;
+        private String uid;
+        private List<String> priorUids;
+
+        public LdapUserRecord(Integer employeeNumber, String uid, List<String> priorUids) {
+            this.employeeNumber = employeeNumber;
+            this.uid = uid;
+            this.priorUids = priorUids;
+        }
+
+        public Integer getEmployeeNumber() {
+            return employeeNumber;
+        }
+
+        public String getUid() {
+            return uid;
+        }
+
+        public List<String> getPriorUids() {
+            return priorUids;
+        }
+
+        public List<String> getAllUids() {
+            ArrayList<String> uids = new ArrayList<>(priorUids);
+            uids.add(uid);
+            return uids;
+        }
+    }
 }

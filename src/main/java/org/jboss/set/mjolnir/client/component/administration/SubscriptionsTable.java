@@ -21,7 +21,6 @@ import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -51,7 +50,7 @@ import org.jboss.set.mjolnir.shared.domain.Subscription;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public abstract class SubscriptionsTable implements IsWidget {
+public class SubscriptionsTable implements IsWidget {
 
     private static final int PAGE_SIZE = 50;
     private static final List<String> KRB_ACCOUNT_FILTER_OPTIONS = new ArrayList<>();
@@ -256,8 +255,6 @@ public abstract class SubscriptionsTable implements IsWidget {
     }
 
     protected void addDefaultActions() {
-        addAction("Whitelist", new WhiteListClickHandler(true));
-        addAction("Un-whitelist", new WhiteListClickHandler(false));
     }
 
     public List<Subscription> getSelectedItems() {
@@ -406,12 +403,7 @@ public abstract class SubscriptionsTable implements IsWidget {
 
     protected void addDefaultActionCells() {
         // subscriptions button
-        addActionCell(new ConditionalActionCell<Subscription>(SafeHtmlUtils.fromString("Modify"), new ModifyUserDelegate()) {
-            @Override
-            public boolean isEnabled(Subscription value) {
-                return value.getGitHubName() != null;
-            }
-        });
+        addActionCell(new ConditionalActionCell<Subscription>(SafeHtmlUtils.fromString("Modify"), new ModifyUserDelegate()));
     }
 
     protected void addActionCell(ConditionalActionCell<Subscription> actionCell) {
@@ -429,8 +421,6 @@ public abstract class SubscriptionsTable implements IsWidget {
             filterCell.clearViewData("");
         }
     }
-
-    protected abstract void dispatchWhitelist(List<Subscription> selectedItems, boolean whitelist);
 
 
     // comparators
@@ -588,20 +578,6 @@ public abstract class SubscriptionsTable implements IsWidget {
                     ", krbAccount=" + krbAccount +
                     ", whitelisted=" + whitelisted +
                     '}';
-        }
-    }
-
-    private class WhiteListClickHandler implements ClickHandler {
-
-        private boolean whitelist;
-
-        WhiteListClickHandler(boolean whitelist) {
-            this.whitelist = whitelist;
-        }
-
-        @Override
-        public void onClick(ClickEvent event) {
-            dispatchWhitelist(getSelectedItems(), whitelist);
         }
     }
 

@@ -40,12 +40,7 @@ public class RegisteredUsersView extends ViewWithUiHandlers<RegisteredUsersHandl
 
         panel.add(new HTMLPanel("h2", "Users Registered in Mjolnir"));
 
-        subscriptionsTable = new SubscriptionsTable() {
-            @Override
-            protected void dispatchWhitelist(List<Subscription> selectedItems, boolean whitelist) {
-
-            }
-        };
+        subscriptionsTable = new SubscriptionsTable();
         subscriptionsTable.addAction("Delete", new DeleteClickHandler(), true, false);
         subscriptionsTable.addAction("Register", new RegisterHandler(), true, true);
         panel.add(subscriptionsTable);

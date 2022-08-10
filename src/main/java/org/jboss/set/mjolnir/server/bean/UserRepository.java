@@ -38,21 +38,21 @@ public interface UserRepository {
     Map<String, RegisteredUser> getUsersByGitHubName(List<String> names);
 
     /**
-     * Saves new user.
+     * Registre a new user from an administration interface.
      *
      * @param registeredUser user
      */
-    void saveUser(RegisteredUser registeredUser);
+    void registerUser(RegisteredUser registeredUser, LdapRepositoryBean.LdapUserRecord ldapUserRecord);
 
     /**
      * Save or updates existing user.
      *
      * @param registeredUser user
      */
-    void saveOrUpdateUser(RegisteredUser registeredUser);
+    void updateUser(RegisteredUser registeredUser, LdapRepositoryBean.LdapUserRecord ldapUserRecord);
 
     /**
-     * Returns user by its krb name. If user doesn't exists, creates new.
+     * Returns user by its krb name. If user doesn't exist, creates new.
      */
     RegisteredUser getOrCreateUser(String kerberosName);
 

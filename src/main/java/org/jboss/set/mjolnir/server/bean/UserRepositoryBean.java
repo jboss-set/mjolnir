@@ -1,10 +1,12 @@
 package org.jboss.set.mjolnir.server.bean;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
 import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.server.entities.UserEntity;
 
+import javax.annotation.Nullable;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -17,6 +19,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * {@inheritDoc}
@@ -129,74 +133,114 @@ public class UserRepositoryBean implements UserRepository {
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void saveUser(RegisteredUser user) {
-        insertUser(user);
-    }
+    public void registerUser(RegisteredUser user, LdapRepositoryBean.LdapUserRecord ldapUserRecord) {
+        UserEntity userEntity = convertUser(user);
 
-    @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void saveOrUpdateUser(RegisteredUser user) {
-        if (!updateUser(user)) {
-            insertUser(user);
+        if (StringUtils.isNotBlank(user.getKrbName())) {
+            if (ldapUserRecord == null) {
+                throw new ApplicationException("No LDAP record found for username " + user.getKrbName());
+            }
+            userEntity.setEmployeeNumber(ldapUserRecord.getEmployeeNumber());
         }
+
+        insertUser(userEntity);
     }
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public RegisteredUser getOrCreateUser(String kerberosName) {
-        List<String> uids = ldapRepository.findAllUserUids(kerberosName);
-        List<UserEntity> userEntities = getUsersByKrbNames(uids);
+        // Note: "kerberosName" and "ldapName" are synonyms.
 
-        if (userEntities.size() > 1) {
-            logger.warnf("Several possible registered users found for UID %s", kerberosName);
+        // Given LDAP name can be current or prior employee LDAP name (employees LDAP names can change over time, prior
+        // names are recorded in employee's LDAP record). We need to retrieve current and all prior LDAP names of given
+        // employee, because an employee can be registered under any of those.
+        LdapRepositoryBean.LdapUserRecord ldapRecord = ldapRepository.findUserRecord(kerberosName);
+        if (ldapRecord == null) {
+            throw new ApplicationException("No LDAP record found for username " + kerberosName);
         }
+
+        // Now load all UserEntity records with LDAP names discovered in previous step.
+        List<UserEntity> userEntities = getUsersByKrbNames(ldapRecord.getAllUids());
 
         RegisteredUser user;
-        if (userEntities.size() == 1) {
+        if (userEntities.size() > 1) {
+            // If more than one record has been found, the situation needs to be remedied by an administrator.
+            // This can indicate following situations:
+            //
+            // * The registrations belong to the same employee, in which case the extra registrations need to be removed.
+            //   This should not happen as Mjolnir should always reuse a previous employee's registration, even after
+            //   a username change, if it exists.
+            //
+            // * The registrations belong to different employees. Administrator can verify this by checking employee
+            //   number fields. It's unknown if this can happen in practice (if Identity Access Management tooling
+            //   guards against reuse of past usernames). I tried to verify this with IAM team but the answer was not
+            //   conclusive.
+            //
+            // This risk of these situations happening seems to be reasonably low.
+            String discoveredEntityNames = userEntities.stream()
+                    .map(UserEntity::getKerberosName)
+                    .collect(Collectors.joining(", "));
+            throw new ApplicationException(String.format("Several possible registered users found for UID '%s': %s\n" +
+                            "Administrator needs to verify that the registrations belong to the same employee and " +
+                            "remove the extra registrations.",
+                    kerberosName, discoveredEntityNames));
+        } else if (userEntities.size() == 1) {
             user = convertUserEntity(userEntities.get(0));
         } else {
-            user = getUser(kerberosName);
-        }
-
-        if (user == null) {
             user = new RegisteredUser();
             user.setKrbName(kerberosName);
-            insertUser(user);
+
+            UserEntity userEntity = convertUser(user);
+            userEntity.setEmployeeNumber(ldapRecord.getEmployeeNumber());
+            insertUser(userEntity);
+            user.setId(userEntity.getId());
         }
 
         return user;
     }
 
-    private void insertUser(RegisteredUser user) {
-        UserEntity userEntity = convertUser(user);
+    private void insertUser(UserEntity userEntity) {
+        if (userEntity.getId() != null) {
+            throw new ApplicationException(
+                    String.format("Can't insert new user, the entity already has an ID: %s", userEntity));
+        }
 
         EntityManager em = entityManagerFactory.createEntityManager();
         try {
             em.persist(userEntity);
+            em.flush();
         } finally {
             em.close();
         }
     }
 
-    private boolean updateUser(RegisteredUser user) {
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void updateUser(RegisteredUser user, @Nullable LdapRepositoryBean.LdapUserRecord ldapUserRecord) {
         EntityManager em = entityManagerFactory.createEntityManager();
 
         try {
             UserEntity userEntity = getUserFromDB(user, em);
 
             if (userEntity == null) {
-                //user is not stored in the DB
-                return false;
+                throw new ApplicationException(String.format("User with ID %s was not found.", user.getId()));
             }
 
-            userEntity.setKerberosName(user.getKrbName());
+            if (StringUtils.isNotBlank(user.getKrbName()) && !user.getKrbName().equals(userEntity.getKerberosName())) {
+                // overriding LDAP name
+                throw new ApplicationException("Changing LDAP name is not allowed.");
+            } else if (StringUtils.isNotBlank(user.getKrbName()) && StringUtils.isBlank(userEntity.getKerberosName())) {
+                // setting LDAP name, while it was previously empty
+                Objects.requireNonNull(ldapUserRecord);
+                userEntity.setKerberosName(user.getKrbName());
+                userEntity.setEmployeeNumber(ldapUserRecord.getEmployeeNumber());
+            }
             userEntity.setGithubName(user.getGitHubName());
+            userEntity.setGithubId(user.getGitHubId());
             userEntity.setNote(user.getNote());
             userEntity.setAdmin(user.isAdmin());
             userEntity.setWhitelisted(user.isWhitelisted());
             userEntity.setResponsiblePerson(user.getResponsiblePerson());
-
-            return true;
         } finally {
             em.close();
         }
@@ -252,8 +296,10 @@ public class UserRepositoryBean implements UserRepository {
 
     private UserEntity convertUser(RegisteredUser user) {
         UserEntity userEntity = new UserEntity();
+        userEntity.setId(user.getId());
         userEntity.setKerberosName(user.getKrbName());
         userEntity.setGithubName(user.getGitHubName());
+        userEntity.setGithubId(user.getGitHubId());
         userEntity.setNote(user.getNote());
         userEntity.setAdmin(user.isAdmin());
         userEntity.setWhitelisted(user.isWhitelisted());
@@ -264,8 +310,10 @@ public class UserRepositoryBean implements UserRepository {
 
     private RegisteredUser convertUserEntity(UserEntity userEntity) {
         RegisteredUser registeredUser = new RegisteredUser();
+        registeredUser.setId(userEntity.getId());
         registeredUser.setKrbName(userEntity.getKerberosName());
         registeredUser.setGitHubName(userEntity.getGithubName());
+        registeredUser.setGitHubId(userEntity.getGithubId());
         registeredUser.setNote(userEntity.getNote());
         registeredUser.setAdmin(userEntity.isAdmin());
         registeredUser.setWhitelisted(userEntity.isWhitelisted());
@@ -274,34 +322,11 @@ public class UserRepositoryBean implements UserRepository {
         return registeredUser;
     }
 
-    private UserEntity getUserFromDB(RegisteredUser user, EntityManager em) {
-        if (user == null) {
-            throw new ApplicationException("Cannot retrieve a null user from the DB.");
-        }
-        if (em == null) {
-            throw new ApplicationException("Cannot open a DB connection.");
-        }
-
-        List<UserEntity> userEntities;
-
-        //first check GH name because krb name can be null
-        //githubName is unique in the DB
-        userEntities = em.createQuery("FROM UserEntity WHERE githubName=:name", UserEntity.class)
-                .setParameter("name", user.getGitHubName()).getResultList();
-
-        //kerberosName is unique in the DB
-        if (userEntities.size() == 0) {
-            userEntities = em.createQuery("FROM UserEntity WHERE kerberosName=:name", UserEntity.class)
-                    .setParameter("name", user.getKrbName()).getResultList();
-        }
-
-        UserEntity userEntity = null;
-
-        if (userEntities.size() == 1) {
-            userEntity = userEntities.get(0);
-        }
-
-        return userEntity;
+    private static UserEntity getUserFromDB(RegisteredUser user, EntityManager em) {
+        Objects.requireNonNull(user);
+        Objects.requireNonNull(user.getId(), "Can't retrieve a user, user ID is null: " + user);
+        Objects.requireNonNull(em);
+        return em.find(UserEntity.class, user.getId());
     }
 
     private static List<String> toLowerCase(final List<String> strings) {

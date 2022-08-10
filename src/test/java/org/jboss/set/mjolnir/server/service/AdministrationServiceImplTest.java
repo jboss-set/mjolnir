@@ -11,9 +11,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,7 +25,7 @@ public class AdministrationServiceImplTest {
     private RegisteredUser appUser;
 
     @Before
-    public void setup() throws SQLException, IOException {
+    public void setup() {
         // prepare working data
         appUser = new RegisteredUser();
         appUser.setAdmin(true);

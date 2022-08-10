@@ -43,7 +43,7 @@ public interface AdministrationService extends RemoteService {
 
     void deleteUsers(Collection<RegisteredUser> user) throws ApplicationException;
 
-    EntityUpdateResult<RegisteredUser> editUser(RegisteredUser user, boolean validateKrbName, boolean validateGHname) throws ApplicationException;
+    EntityUpdateResult<RegisteredUser> editUser(RegisteredUser user) throws ApplicationException;
 
     List<GithubOrganization> getSubscriptions(String gitHubName) throws ApplicationException;
 

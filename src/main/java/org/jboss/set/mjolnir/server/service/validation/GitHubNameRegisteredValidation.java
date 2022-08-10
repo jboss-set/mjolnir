@@ -14,7 +14,7 @@ import org.jboss.set.mjolnir.server.bean.UserRepository;
  */
 public class GitHubNameRegisteredValidation implements Validation<RegisteredUser> {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public GitHubNameRegisteredValidation(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -26,7 +26,7 @@ public class GitHubNameRegisteredValidation implements Validation<RegisteredUser
             ValidationResult result = new ValidationResult();
             if (!StringUtils.isEmpty(entity.getGitHubName())) {
                 RegisteredUser existingEntity = userRepository.getUserByGitHubName(entity.getGitHubName());
-                if (existingEntity != null) {
+                if (existingEntity != null && !existingEntity.getId().equals(entity.getId())) {
                     result.addFailure("This GitHub name has already been registered.");
                 }
             }

@@ -1,20 +1,22 @@
 package org.jboss.set.mjolnir.server.service;
 
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
-import org.eclipse.egit.github.core.service.UserService;
 import org.hibernate.HibernateException;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.client.service.AdministrationService;
 import org.jboss.set.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.set.mjolnir.server.bean.GitHubSubscriptionBean;
 import org.jboss.set.mjolnir.server.bean.LdapRepository;
+import org.jboss.set.mjolnir.server.bean.LdapRepositoryBean;
 import org.jboss.set.mjolnir.server.bean.OrganizationRepository;
 import org.jboss.set.mjolnir.server.bean.UserRepository;
+import org.jboss.set.mjolnir.server.github.ExtendedUserService;
 import org.jboss.set.mjolnir.server.service.validation.GitHubNameExistsValidation;
 import org.jboss.set.mjolnir.server.service.validation.GitHubNameRegisteredValidation;
 import org.jboss.set.mjolnir.server.service.validation.KrbNameTakenValidation;
 import org.jboss.set.mjolnir.server.service.validation.ResponsiblePersonAddedValidation;
-import org.jboss.set.mjolnir.server.service.validation.Validation;
 import org.jboss.set.mjolnir.server.service.validation.Validator;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
@@ -26,6 +28,8 @@ import org.jboss.set.mjolnir.shared.domain.ValidationResult;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
+
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +40,6 @@ import java.util.Map;
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class AdministrationServiceImpl extends AbstractAdminRestrictedService implements AdministrationService {
-
 
     @EJB
     private ApplicationParameters applicationParameters;
@@ -55,6 +58,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
 
     private Validator<RegisteredUser> editUserValidator;
     private Validator<RegisteredUser> addUserValidator;
+    private ExtendedUserService userService;
 
     @Override
     public void init() throws ServletException {
@@ -64,17 +68,14 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
 
         GitHubClient client = new GitHubClient();
         client.setOAuth2Token(token);
-        UserService userService = new UserService(client);
-
-
-        Validation<RegisteredUser> krbNameTakenValidation = new KrbNameTakenValidation(userRepository);
+        userService = new ExtendedUserService(client);
 
         editUserValidator = new Validator<>();
-        editUserValidator.addValidation(krbNameTakenValidation);
+        editUserValidator.addValidation(new KrbNameTakenValidation(userRepository));
         editUserValidator.addValidation(new ResponsiblePersonAddedValidation());
 
         addUserValidator = new Validator<>();
-        addUserValidator.addValidation(krbNameTakenValidation);
+        addUserValidator.addValidation(new KrbNameTakenValidation(userRepository));
         addUserValidator.addValidation(new GitHubNameRegisteredValidation(userRepository));
         addUserValidator.addValidation(new GitHubNameExistsValidation(userService));
         addUserValidator.addValidation(new ResponsiblePersonAddedValidation());
@@ -94,16 +95,10 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         }
     }
 
-    /**
-     * @see GitHubSubscriptionBean#getOrganizationMembers()
-     */
     public List<SubscriptionSummary> getOrganizationMembers() {
         return gitHubSubscriptionBean.getOrganizationMembers();
     }
 
-    /**
-     * @see GitHubSubscriptionBean#getRegisteredUsers()
-     */
     @Override
     public List<Subscription> getRegisteredUsers() {
         return gitHubSubscriptionBean.getRegisteredUsers();
@@ -117,10 +112,24 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @Override
     public EntityUpdateResult<RegisteredUser> registerUser(RegisteredUser user) {
         try {
-            ValidationResult validationResult = addUserValidator.validate(user);
+            // retrieve github ID
+            ValidationResult updateResult = updateGitHubUserId(user);
+            if (!updateResult.isOK()) {
+                return EntityUpdateResult.validationFailure(updateResult);
+            }
 
+            // verify valid LDAP username
+            LdapRepositoryBean.LdapUserRecord ldapUserRecord = null;
+            if (StringUtils.isNotBlank(user.getKrbName())) {
+                ldapUserRecord = ldapRepository.findUserRecord(user.getKrbName());
+                if (ldapUserRecord == null) {
+                    return ldapUserNotFound(user.getKrbName());
+                }
+            }
+
+            ValidationResult validationResult = addUserValidator.validate(user);
             if (validationResult.isOK()) {
-                userRepository.saveUser(user);
+                userRepository.registerUser(user, ldapUserRecord);
                 return EntityUpdateResult.ok(user);
             } else {
                 return EntityUpdateResult.validationFailure(validationResult);
@@ -149,12 +158,27 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     }
 
     @Override
-    public EntityUpdateResult<RegisteredUser> editUser(RegisteredUser user, boolean validateKrbName, boolean validateGHname) {
+    public EntityUpdateResult<RegisteredUser> editUser(RegisteredUser user) {
         try {
+            // retrive GitHub ID
+            ValidationResult updateResult = updateGitHubUserId(user);
+            if (!updateResult.isOK()) {
+                return EntityUpdateResult.validationFailure(updateResult);
+            }
+
+            // verify valid LDAP username
+            LdapRepositoryBean.LdapUserRecord ldapUserRecord = null;
+            if (StringUtils.isNotBlank(user.getKrbName())) {
+                ldapUserRecord = ldapRepository.findUserRecord(user.getKrbName());
+                if (ldapUserRecord == null) {
+                    return ldapUserNotFound(user.getKrbName());
+                }
+            }
+
             ValidationResult validationResult = editUserValidator.validate(user);
 
             if (validationResult.isOK()) {
-                userRepository.saveOrUpdateUser(user);
+                userRepository.updateUser(user, ldapUserRecord);
                 return EntityUpdateResult.ok(user);
             } else {
                 return EntityUpdateResult.validationFailure(validationResult);
@@ -192,18 +216,34 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         try {
             for (Subscription subscription : subscriptions) {
                 RegisteredUser registeredUser = subscription.getRegisteredUser();
-                if (registeredUser == null) {
-                    registeredUser = new RegisteredUser();
-                    subscription.setRegisteredUser(registeredUser);
-                    registeredUser.setGitHubName(subscription.getGitHubName());
-                    subscription.setRegisteredUser(registeredUser);
-                }
                 registeredUser.setWhitelisted(whitelist);
-                userRepository.saveOrUpdateUser(registeredUser);
+                userRepository.updateUser(registeredUser, null);
             }
             return subscriptions;
         } catch (HibernateException e) {
             throw new ApplicationException("Couldn't whitelist users.", e);
+        }
+    }
+
+    private ValidationResult updateGitHubUserId(RegisteredUser user) {
+        ValidationResult validationResult = new ValidationResult();
+        try {
+            // if GH username is set, verify it exists and retrieve GH user id
+            if (StringUtils.isNotBlank(user.getGitHubName())) {
+                User ghUser = userService.getUserIfExists(user.getGitHubName());
+                if (ghUser == null) {
+                    validationResult.addFailure(String.format("Username '%s' doesn't exist on GitHub",
+                            user.getGitHubName()));
+                } else {
+                    if (user.getGitHubId() != null && user.getGitHubId() != ghUser.getId()) {
+
+                    }
+                    user.setGitHubId(ghUser.getId());
+                }
+            }
+            return validationResult;
+        } catch (IOException e) {
+            throw new ApplicationException(e);
         }
     }
 
@@ -222,4 +262,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         this.userRepository = userRepository;
     }
 
+    private static EntityUpdateResult<RegisteredUser> ldapUserNotFound(String ldapUsername) {
+        return EntityUpdateResult.validationFailure(String.format("User '%s' not found in LDAP", ldapUsername));
+    }
 }

@@ -43,23 +43,22 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
 
     private static final String RESPONSIBLE_PERSON_ROW_ID = "Responsibleperson";
 
-    private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
-    private HTMLPanel checkboxPanel;
-    private Map<Integer, CheckBox> checkBoxes = new HashMap<>();
-    private Subscription subscription;
+    private final AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
+    private final HTMLPanel checkboxPanel;
+    private final Map<Integer, CheckBox> checkBoxes = new HashMap<>();
+    private final Subscription subscription;
 
-    private TextBox krbNameBox = new TextBox();
-    private TextBox githubNameBox = new TextBox();
-    private TextBox noteBox = new TextBox();
-    private TextBox responsiblePersonBox = new TextBox();
-    private CheckBox adminCheckBox = new CheckBox();
-    private CheckBox whitelistedCheckBox = new CheckBox();
-    private HTML feedback = new HTML();
+    private final TextBox krbNameBox = new TextBox();
+    private final TextBox githubNameBox = new TextBox();
+    private final TextBox noteBox = new TextBox();
+    private final TextBox responsiblePersonBox = new TextBox();
+    private final CheckBox adminCheckBox = new CheckBox();
+    private final CheckBox whitelistedCheckBox = new CheckBox();
+    private final HTML feedback = new HTML();
 
     public UserAndSubscriptionsUserDialog(final Subscription subscription) {
         this.subscription = subscription;
 
-        githubNameBox.setEnabled(false);
         feedback.getElement().addClassName("error");
 
         RegisteredUser registeredUser = subscription.getRegisteredUser();
@@ -83,7 +82,7 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
             }
         });
 
-        setText("User Details for " + subscription.getGitHubName());
+        setText("User Details for " + subscription.getKrbName());
         setGlassEnabled(true);
 
         final HTMLPanel panel = new HTMLPanel("");
@@ -132,8 +131,10 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
         buttonPanel.add(saveButton);
         buttonPanel.add(new InlineHTML(" "));
 
-        // retrieve subscription data and create checkboxes
-        createCheckboxes();
+        if (isNotBlank(subscription.getGitHubName())) {
+            // retrieve subscription data and create checkboxes
+            createCheckboxes();
+        }
     }
 
     private void createCheckboxes() {
@@ -205,7 +206,7 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
 
         if (subscription.getRegisteredUser() != null) {
             // modify existing user
-            administrationService.editUser(userToSave, true, true, new AsyncCallback<EntityUpdateResult<RegisteredUser>>() {
+            administrationService.editUser(userToSave, new AsyncCallback<EntityUpdateResult<RegisteredUser>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     ExceptionHandler.handle("Couldn't edit user.", caught);
@@ -249,18 +250,21 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
     }
 
     private void saveSubscriptions() {
-        administrationService.setSubscriptions(this.subscription.getGitHubName(), getSubscriptionData(), new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                ExceptionHandler.handle("Couldn't set subscriptions.", caught);
-            }
+        if (isNotBlank(this.subscription.getGitHubName())) {
+            administrationService.setSubscriptions(this.subscription.getGitHubName(), getSubscriptionData(),
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            ExceptionHandler.handle("Couldn't set subscriptions.", caught);
+                        }
 
-            @Override
-            public void onSuccess(Void result) {
-                UserAndSubscriptionsUserDialog.this.hide();
-                UserAndSubscriptionsUserDialog.this.removeFromParent();
-            }
-        });
+                        @Override
+                        public void onSuccess(Void result) {
+                            UserAndSubscriptionsUserDialog.this.hide();
+                            UserAndSubscriptionsUserDialog.this.removeFromParent();
+                        }
+                    });
+        }
     }
 
     private Map<Integer, Boolean> getSubscriptionData() {
@@ -322,6 +326,11 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
         return div;
     }
 
+    private static boolean isNotBlank(String string) {
+        return string != null
+                && !string.isEmpty();
+    }
+
     private class SaveClickHandler implements ClickHandler {
         @Override
         public void onClick(ClickEvent event) {
@@ -348,7 +357,7 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
 
     private class SelectionClickHandler implements ClickHandler {
 
-        private boolean select;
+        private final boolean select;
 
         private SelectionClickHandler(boolean select) {
             this.select = select;

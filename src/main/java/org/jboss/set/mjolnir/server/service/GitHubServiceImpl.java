@@ -22,16 +22,18 @@
 
 package org.jboss.set.mjolnir.server.service;
 
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
-import org.eclipse.egit.github.core.service.UserService;
 import org.hibernate.HibernateException;
+import org.jboss.logging.Logger;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.client.service.GitHubService;
 import org.jboss.set.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.set.mjolnir.server.bean.OrganizationRepository;
 import org.jboss.set.mjolnir.server.bean.UserRepository;
 import org.jboss.set.mjolnir.server.github.ExtendedTeamService;
-import org.jboss.set.mjolnir.server.service.validation.GitHubNameExistsValidation;
+import org.jboss.set.mjolnir.server.github.ExtendedUserService;
 import org.jboss.set.mjolnir.server.service.validation.GitHubNameRegisteredValidation;
 import org.jboss.set.mjolnir.server.service.validation.Validator;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
@@ -53,6 +55,8 @@ import java.util.List;
  */
 public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubService {
 
+    private static final Logger logger = Logger.getLogger(GitHubServiceImpl.class);
+
     @EJB
     private OrganizationRepository organizationRepository;
     @EJB
@@ -61,6 +65,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     private UserRepository userRepository;
 
     private ExtendedTeamService teamService;
+    private ExtendedUserService userService;
 
     private Validator<RegisteredUser> validator;
 
@@ -73,36 +78,46 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
         GitHubClient client = new GitHubClient();
         client.setOAuth2Token(token);
         teamService = new ExtendedTeamService(client);
-        UserService userService = new UserService(client);
+        userService = new ExtendedUserService(client);
 
         validator = new Validator<>();
         validator.addValidation(new GitHubNameRegisteredValidation(userRepository));
-        validator.addValidation(new GitHubNameExistsValidation(userService));
     }
 
     @Override
     public EntityUpdateResult<RegisteredUser> modifyGitHubName(String newGithubName) {
+        if (StringUtils.isBlank(newGithubName)) {
+            return EntityUpdateResult.validationFailure("Github name must be non blank.");
+        }
+
         try {
+            User githubUser = userService.getUserIfExists(newGithubName);
+            if (githubUser == null) {
+                return EntityUpdateResult.validationFailure(String.format("Username '%s' doesn't exist on GitHub", newGithubName));
+            }
+
             // reload authenticated user form database
             RegisteredUser authenticatedUser = getAuthenticatedUser();
-            final String krb5Name = authenticatedUser.getKrbName();
-            final RegisteredUser user = userRepository.getUser(krb5Name);
+            final RegisteredUser user = userRepository.getUser(authenticatedUser.getKrbName());
 
-            log(String.format("Changing githubName for user %s from %s to %s.",
-                    krb5Name, user.getGitHubName(), newGithubName));
+            logger.infof("Changing githubName for user %s from %s to %s.",
+                    user.getKrbName(), user.getGitHubName(), newGithubName);
 
             user.setGitHubName(newGithubName);
+            user.setGitHubId(githubUser.getId());
             authenticatedUser.setGitHubName(newGithubName);
             ValidationResult validationResult = validator.validate(user);
             if (validationResult.isOK()) {
-                userRepository.saveOrUpdateUser(user);
-                log(String.format("Successfully modified githubName for user %s", krb5Name));
+                userRepository.updateUser(user, null);
+                logger.infof("Successfully modified githubName for user %s", user.getKrbName());
                 return EntityUpdateResult.ok(user);
             } else {
-                log(String.format("Validation failure: %s", validationResult));
+                logger.warnf("Validation failure: %s", validationResult);
                 return EntityUpdateResult.validationFailure(validationResult);
             }
         } catch (HibernateException e) {
+            throw new ApplicationException(e);
+        } catch (IOException e) {
             throw new ApplicationException(e);
         }
     }
@@ -112,10 +127,11 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
         final String githubName = getCurrentUserGitHubName();
         try {
             final String state = teamService.addMembership(teamId, githubName);
-            log("Successfully added " + githubName + " to team.");            return state;
+            logger.infof("Successfully added %s to team %d.", githubName, teamId);
+            return state;
         } catch (IOException e) {
             final String message = "Unable to subscribe user " + githubName + " to team #" + teamId + ": " + e.getMessage();
-            log(message, e);
+            logger.warnf(message, e);
             throw new ApplicationException(message, e);
         }
     }
@@ -125,7 +141,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
         final String githubName = getCurrentUserGitHubName();
         try {
             teamService.removeMembership(teamId, githubName);
-            log("Successfully removed " + githubName + " from team.");
+            logger.infof("Successfully removed %s from team.", githubName);
         } catch (IOException e) {
             throw new ApplicationException("Unable to unsubscribe user " + githubName
                     + " to team #" + teamId, e);

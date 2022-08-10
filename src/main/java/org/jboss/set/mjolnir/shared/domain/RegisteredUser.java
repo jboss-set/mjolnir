@@ -33,13 +33,23 @@ import java.io.Serializable;
 
 public class RegisteredUser implements Serializable {
 
+    private Long id;
     private String krbName;
     private String gitHubName;
+    private Integer gitHubId;
     private String note;
     private String responsiblePerson;
     private boolean admin;
     private boolean whitelisted;
     private boolean loggedIn;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getKrbName() {
         return krbName;
@@ -55,6 +65,14 @@ public class RegisteredUser implements Serializable {
 
     public void setGitHubName(String gitHubName) {
         this.gitHubName = gitHubName;
+    }
+
+    public Integer getGitHubId() {
+        return gitHubId;
+    }
+
+    public void setGitHubId(Integer gitHubId) {
+        this.gitHubId = gitHubId;
     }
 
     public String getResponsiblePerson() {
@@ -99,19 +117,23 @@ public class RegisteredUser implements Serializable {
 
     public RegisteredUser copy() {
         RegisteredUser copy = new RegisteredUser();
-        copy.setKrbName(this.getKrbName());
-        copy.setGitHubName(this.getGitHubName());
-        copy.setWhitelisted(this.isWhitelisted());
-        copy.setAdmin(this.isAdmin());
-        copy.setNote(this.getNote());
-        copy.setResponsiblePerson(this.getResponsiblePerson());
+        copy.setId(id);
+        copy.setKrbName(krbName);
+        copy.setGitHubName(gitHubName);
+        copy.setGitHubId(gitHubId);
+        copy.setWhitelisted(whitelisted);
+        copy.setAdmin(admin);
+        copy.setNote(note);
+        copy.setResponsiblePerson(responsiblePerson);
         return copy;
     }
 
     public void copyTo(RegisteredUser other) {
         if (other == null) return;
 
+        other.setId(id);
         other.setGitHubName(gitHubName);
+        other.setGitHubId(gitHubId);
         other.setKrbName(krbName);
         other.setNote(note);
         other.setWhitelisted(whitelisted);
@@ -121,7 +143,8 @@ public class RegisteredUser implements Serializable {
 
     @Override
     public String toString() {
-        return "{ krb5Name " + krbName + ": githubName " + gitHubName + " }";
+        return "RegisteredUser { id = " + id + ", krbName = " + krbName + ", githubId = " + gitHubId + ", githubName = "
+                + gitHubName + " }";
     }
 
     /**

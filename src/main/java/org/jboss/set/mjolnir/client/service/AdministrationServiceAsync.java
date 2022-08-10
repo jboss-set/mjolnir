@@ -33,7 +33,7 @@ public interface AdministrationServiceAsync {
 
     void deleteUsers(Collection<RegisteredUser> user, AsyncCallback<Void> asyncCallback);
 
-    void editUser(RegisteredUser user, boolean validateKrbName, boolean validateGHname, AsyncCallback<EntityUpdateResult<RegisteredUser>> asyncCallback);
+    void editUser(RegisteredUser user, AsyncCallback<EntityUpdateResult<RegisteredUser>> asyncCallback);
 
     void getSubscriptions(String gitHubName, AsyncCallback<List<GithubOrganization>> asyncCallback);
 

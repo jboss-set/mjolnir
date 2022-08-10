@@ -118,12 +118,7 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
     }
 
     private SubscriptionsTable createSubscriptionTable() {
-        SubscriptionsTable table = new SubscriptionsTable() {
-            @Override
-            protected void dispatchWhitelist(List<Subscription> selectedItems, boolean whitelist) {
-                getUiHandlers().whitelist(selectedItems, whitelist);
-            }
-        };
+        SubscriptionsTable table = new SubscriptionsTable();
         table.addAction("Unsubscribe", new UnsubscribeActionClickHandler(), true, false);
         return table;
     }
