@@ -247,20 +247,21 @@ public class GitHubSubscriptionBean {
         logger.debugf("Transforming %d GH users to Subscription entities", users.size());
 
         // for each organization user create Subscription object
-        final Map<String, Subscription> subscriptions = new HashMap<>();
+        final Map<Integer, Subscription> subscriptions = new HashMap<>();
         final Map<String, Subscription> ldapUsersToCheck = new HashMap<>();
         for (User user: users) {
             final String gitHubName = user.getLogin();
 
             final Subscription subscription = new Subscription();
+            subscription.setGitHubId(user.getId());
             subscription.setGitHubName(gitHubName);
-            subscriptions.put(gitHubName.toLowerCase(), subscription);
+            subscriptions.put(user.getId(), subscription);
         }
 
-        // find registered users by GH names
+        // find registered users by GH ID
         logger.debug("Looking for user registrations");
-        final Map<String, RegisteredUser> registeredUsers = userRepository.getUsersByGitHubName(new ArrayList<>(subscriptions.keySet()));
-        for (Map.Entry<String, RegisteredUser> entry: registeredUsers.entrySet()) {
+        final Map<Integer, RegisteredUser> registeredUsers = userRepository.getRegisteredUsersByGitHubIds(new ArrayList<>(subscriptions.keySet()));
+        for (Map.Entry<Integer, RegisteredUser> entry: registeredUsers.entrySet()) {
             Subscription subscription = subscriptions.get(entry.getKey());
             subscription.setRegisteredUser(entry.getValue());
             ldapUsersToCheck.put(entry.getValue().getKrbName(), subscription);

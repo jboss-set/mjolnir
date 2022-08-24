@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Displays table of members of selected GH organization & team.
+ *
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
@@ -34,9 +36,9 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
     }
     private static final Templates TEMPLATES = GWT.create(Templates.class);
 
-    private SelectionTable<GithubOrganization> organizationsTable;
-    private SelectionTable<GithubTeam> teamsTable;
-    private SubscriptionsTable subscriptionsTable;
+    private final SelectionTable<GithubOrganization> organizationsTable;
+    private final SelectionTable<GithubTeam> teamsTable;
+    private final SubscriptionsTable subscriptionsTable;
     private GithubOrganization selectedOrg;
     private GithubTeam selectedTeam;
 
@@ -119,7 +121,7 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
 
     private SubscriptionsTable createSubscriptionTable() {
         SubscriptionsTable table = new SubscriptionsTable();
-        table.addAction("Unsubscribe", new UnsubscribeActionClickHandler(), true, false);
+        table.addAction("Unsubscribe", new UnsubscribeActionClickHandler(), false);
         return table;
     }
 

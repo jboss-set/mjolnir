@@ -71,28 +71,27 @@ public class UserRepositoryBean implements UserRepository {
      * @param names github names we are looking for
      * @return existing users with matching github name
      */
-    public Map<String, RegisteredUser> getUsersByGitHubName(List<String> names) {
+    public Map<Integer, RegisteredUser> getRegisteredUsersByGitHubIds(List<Integer> ids) {
         EntityManager em = entityManagerFactory.createEntityManager();
 
         try {
-            logger.debugf("Retrieving %d users by github names", names.size());
+            logger.debugf("Retrieving %d users by github names", ids.size());
 
             final int batchSize = 1000;
-            final HashMap<String, RegisteredUser> users = new HashMap<>();
+            final HashMap<Integer, RegisteredUser> users = new HashMap<>();
 
-            names = toLowerCase(names);
-            for (int i = 0; i < names.size(); i = i + batchSize) {
-                int highIndex = Math.min(i + batchSize, names.size());
+            for (int i = 0; i < ids.size(); i = i + batchSize) {
+                int highIndex = Math.min(i + batchSize, ids.size());
 
                 logger.debugf("Retrieving indexes %d to %d", i, highIndex);
 
-                List<String> sublist = names.subList(i, highIndex);
+                List<Integer> sublist = ids.subList(i, highIndex);
 
-                TypedQuery<UserEntity> query = em.createQuery("FROM UserEntity WHERE lower(githubName) in (:list)", UserEntity.class);
+                TypedQuery<UserEntity> query = em.createQuery("FROM UserEntity WHERE githubId in (:list)", UserEntity.class);
                 List<UserEntity> result = query.setParameter("list", sublist).getResultList();
 
                 for (UserEntity user : result) {
-                    users.put(user.getGithubName().toLowerCase(), convertUserEntity(user));
+                    users.put(user.getGithubId(), convertUserEntity(user));
                 }
             }
 
@@ -329,11 +328,4 @@ public class UserRepositoryBean implements UserRepository {
         return em.find(UserEntity.class, user.getId());
     }
 
-    private static List<String> toLowerCase(final List<String> strings) {
-        final List<String> result = new ArrayList<>(strings.size());
-        for (String str : strings) {
-            result.add(str.toLowerCase());
-        }
-        return result;
-    }
 }

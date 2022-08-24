@@ -35,7 +35,7 @@ public interface UserRepository {
      * @param names github names we are looking for
      * @return existing users with matching github name
      */
-    Map<String, RegisteredUser> getUsersByGitHubName(List<String> names);
+    Map<Integer, RegisteredUser> getRegisteredUsersByGitHubIds(List<Integer> ids);
 
     /**
      * Registre a new user from an administration interface.

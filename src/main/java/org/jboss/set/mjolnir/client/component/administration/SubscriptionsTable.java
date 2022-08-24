@@ -62,16 +62,16 @@ public class SubscriptionsTable implements IsWidget {
     }
 
     protected HTMLPanel panel = new HTMLPanel("");
-    private HTMLPanel buttonsPanel = new HTMLPanel("");
+    private final HTMLPanel buttonsPanel = new HTMLPanel("");
     private List<Subscription> data;
     protected ListDataProvider<Subscription> dataProvider;
     protected SubscriptionSearchPredicate searchPredicate;
-    private List<Button> actionButtons = new ArrayList<>();
-    private Set<Subscription> selectedItems = new HashSet<>();
-    private ColumnSortEvent.ListHandler<Subscription> sortHandler;
-    private List<HasCell<Subscription, ?>> hasCells = new ArrayList<>();
-    private Column<Subscription, Subscription> actionColumn;
-    private List<AbstractInputCell> filterCells = new ArrayList<>();
+    private final List<Button> actionButtons = new ArrayList<>();
+    private final Set<Subscription> selectedItems = new HashSet<>();
+    private final ColumnSortEvent.ListHandler<Subscription> sortHandler;
+    private final List<HasCell<Subscription, ?>> hasCells = new ArrayList<>();
+    private final Column<Subscription, Subscription> actionColumn;
+    private final List<AbstractInputCell> filterCells = new ArrayList<>();
 
     public SubscriptionsTable() {
         initStyles();
@@ -205,8 +205,13 @@ public class SubscriptionsTable implements IsWidget {
         dataStyle.setOverflowY(Style.Overflow.AUTO);*/
     }
 
-    public void addAction(String caption, final ClickHandler clickHandler) {
-        addAction(caption, clickHandler, false, false);
+    /**
+     * Adds a separator line to the action buttons panel.
+     */
+    public void addActionSeparator() {
+        HTMLPanel span = new HTMLPanel("span", " | ");
+        span.getElement().getStyle().setColor("#999");
+        buttonsPanel.add(span);
     }
 
     /**
@@ -215,7 +220,7 @@ public class SubscriptionsTable implements IsWidget {
      * @param separator         show separator in front of button
      * @param isPermanentAction should the button be active even if no items are selected?
      */
-    public void addAction(String caption, final ClickHandler clickHandler, boolean separator, boolean isPermanentAction) {
+    public void addAction(String caption, final ClickHandler clickHandler, boolean isPermanentAction) {
         Button button = new Button(caption, clickHandler);
 
         if (isPermanentAction) {
@@ -224,13 +229,7 @@ public class SubscriptionsTable implements IsWidget {
             button.setEnabled(false);
         }
 
-        if (separator) {
-            HTMLPanel span = new HTMLPanel("span", " | ");
-            span.getElement().getStyle().setColor("#999");
-            buttonsPanel.add(span);
-        } else {
-            buttonsPanel.add(new HTMLPanel("span", " "));
-        }
+        buttonsPanel.add(new HTMLPanel("span", " "));
 
         if (!isPermanentAction) {
             actionButtons.add(button);

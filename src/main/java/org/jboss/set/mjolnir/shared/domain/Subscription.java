@@ -9,9 +9,18 @@ import java.io.Serializable;
  */
 public class Subscription implements Serializable {
 
+    private Integer gitHubId;
     private String gitHubName;
     private RegisteredUser registeredUser;
     private boolean activeKerberosAccount;
+
+    public Integer getGitHubId() {
+        return gitHubId;
+    }
+
+    public void setGitHubId(Integer gitHubId) {
+        this.gitHubId = gitHubId;
+    }
 
     public String getGitHubName() {
         return gitHubName;

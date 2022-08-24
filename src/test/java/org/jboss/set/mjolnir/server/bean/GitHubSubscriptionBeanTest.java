@@ -11,8 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,13 +37,14 @@ public class GitHubSubscriptionBeanTest {
     private LdapRepository ldapRepository;
 
     @Before
-    public void setup() throws SQLException, IOException {
+    public void setup() {
         // prepare working data
         appUser = new RegisteredUser();
         appUser.setAdmin(true);
         appUser.setKrbName(KRB_USERNAME);
 
         gitHubUser = new User();
+        gitHubUser.setId(123);
         gitHubUser.setLogin(GITHUB_USERNAME);
 
         // create mocked dependencies
@@ -63,12 +62,12 @@ public class GitHubSubscriptionBeanTest {
     }
 
     @Test
-    public void testGetSubscriptionSummaries() throws SQLException, IOException {
+    public void testGetSubscriptionSummaries() throws Exception {
         // setup mocks
         Mockito.when(organizationRepository.getOrganizations()).thenReturn(Collections.singletonList(new GithubOrganization(ORG_NAME)));
         Mockito.when(organizationService.getMembers(ORG_NAME)).thenReturn(asList(gitHubUser));
-        Mockito.when(userRepository.getUsersByGitHubName(Collections.singletonList(GITHUB_USERNAME)))
-                .thenReturn(Collections.singletonMap(GITHUB_USERNAME, appUser));
+        Mockito.when(userRepository.getRegisteredUsersByGitHubIds(Collections.singletonList(123)))
+                .thenReturn(Collections.singletonMap(123, appUser));
         Mockito.when(ldapRepository.checkUsersExists(Mockito.anySet())).thenReturn(Collections.singletonMap(KRB_USERNAME, true));
 
         // perform a call
@@ -82,11 +81,11 @@ public class GitHubSubscriptionBeanTest {
 
         Assert.assertEquals(GITHUB_USERNAME, subscription.getGitHubName());
         Assert.assertEquals(KRB_USERNAME, subscription.getKerberosName());
-        Assert.assertEquals(true, subscription.isActiveKerberosAccount());
+        Assert.assertTrue(subscription.isActiveKerberosAccount());
     }
 
     @Test
-    public void getRegisteredUsersTest() throws SQLException {
+    public void getRegisteredUsersTest() {
         // setup mocks
         final List<RegisteredUser> registeredUsers = Arrays.asList(createUser("a", "a"), createUser("b", "b"));
         final Map<String, Boolean> usersInLdap = new HashMap<String, Boolean>();
@@ -100,8 +99,8 @@ public class GitHubSubscriptionBeanTest {
 
         // checks
         Assert.assertEquals(2, result.size());
-        Assert.assertEquals(true, findSubscriptionByKrbName(result, "a").isActiveKerberosAccount());
-        Assert.assertEquals(false, findSubscriptionByKrbName(result, "b").isActiveKerberosAccount());
+        Assert.assertTrue(findSubscriptionByKrbName(result, "a").isActiveKerberosAccount());
+        Assert.assertFalse(findSubscriptionByKrbName(result, "b").isActiveKerberosAccount());
     }
 
     private RegisteredUser createUser(String krbName, String gitHubName) {
