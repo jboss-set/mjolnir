@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.hibernate.HibernateException;
+import org.jboss.logging.Logger;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.client.service.AdministrationService;
 import org.jboss.set.mjolnir.server.bean.ApplicationParameters;
@@ -13,9 +14,8 @@ import org.jboss.set.mjolnir.server.bean.LdapRepositoryBean;
 import org.jboss.set.mjolnir.server.bean.OrganizationRepository;
 import org.jboss.set.mjolnir.server.bean.UserRepository;
 import org.jboss.set.mjolnir.server.github.ExtendedUserService;
-import org.jboss.set.mjolnir.server.service.validation.GitHubNameExistsValidation;
-import org.jboss.set.mjolnir.server.service.validation.GitHubNameRegisteredValidation;
-import org.jboss.set.mjolnir.server.service.validation.KrbNameTakenValidation;
+import org.jboss.set.mjolnir.server.service.validation.GitHubNameIsUniqueValidation;
+import org.jboss.set.mjolnir.server.service.validation.KrbNameIsUniqueValidation;
 import org.jboss.set.mjolnir.server.service.validation.ResponsiblePersonAddedValidation;
 import org.jboss.set.mjolnir.server.service.validation.Validator;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
@@ -40,6 +40,8 @@ import java.util.Map;
  * @author Tomas Hofman (thofman@redhat.com)
  */
 public class AdministrationServiceImpl extends AbstractAdminRestrictedService implements AdministrationService {
+
+    private static final Logger log = Logger.getLogger(AdministrationServiceImpl.class);
 
     @EJB
     private ApplicationParameters applicationParameters;
@@ -71,13 +73,13 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         userService = new ExtendedUserService(client);
 
         editUserValidator = new Validator<>();
-        editUserValidator.addValidation(new KrbNameTakenValidation(userRepository));
+        editUserValidator.addValidation(new KrbNameIsUniqueValidation(userRepository));
+        editUserValidator.addValidation(new GitHubNameIsUniqueValidation(userRepository));
         editUserValidator.addValidation(new ResponsiblePersonAddedValidation());
 
         addUserValidator = new Validator<>();
-        addUserValidator.addValidation(new KrbNameTakenValidation(userRepository));
-        addUserValidator.addValidation(new GitHubNameRegisteredValidation(userRepository));
-        addUserValidator.addValidation(new GitHubNameExistsValidation(userService));
+        addUserValidator.addValidation(new KrbNameIsUniqueValidation(userRepository));
+        addUserValidator.addValidation(new GitHubNameIsUniqueValidation(userRepository));
         addUserValidator.addValidation(new ResponsiblePersonAddedValidation());
     }
 
@@ -112,7 +114,7 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @Override
     public EntityUpdateResult<RegisteredUser> registerUser(RegisteredUser user) {
         try {
-            // retrieve github ID
+            // retrieve GitHub ID
             ValidationResult updateResult = updateGitHubUserId(user);
             if (!updateResult.isOK()) {
                 return EntityUpdateResult.validationFailure(updateResult);
@@ -160,10 +162,18 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
     @Override
     public EntityUpdateResult<RegisteredUser> editUser(RegisteredUser user) {
         try {
-            // retrive GitHub ID
+            // retrieve GitHub ID
             ValidationResult updateResult = updateGitHubUserId(user);
             if (!updateResult.isOK()) {
                 return EntityUpdateResult.validationFailure(updateResult);
+            }
+
+            RegisteredUser existingUserRecord = userRepository.getUser(user.getId());
+            if (user.getGitHubName() != null && user.getGitHubName().equals(existingUserRecord.getGitHubName())
+                && !user.getGitHubId().equals(existingUserRecord.getGitHubId())) {
+                String message = String.format("Can't save changes! Conflicting GH ID: GH username '%s' did not change, but IDs differ (%d != %d)",
+                        user.getGitHubName(), existingUserRecord.getGitHubId(), user.getGitHubId());
+                return EntityUpdateResult.validationFailure(message);
             }
 
             // verify valid LDAP username
@@ -174,6 +184,8 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
                     return ldapUserNotFound(user.getKrbName());
                 }
             }
+
+            log.infof("Editing user, original data: %s, new data %s", existingUserRecord, user);
 
             ValidationResult validationResult = editUserValidator.validate(user);
 
@@ -225,6 +237,17 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
         }
     }
 
+    @Override
+    public String findCurrentGithubUsername(int githubId) {
+        try {
+            User user = userService.getUserById(githubId);
+            return user.getLogin();
+        } catch (IOException e) {
+            log.errorf(e, "Can retrieve user %d via GH API.", githubId);
+            return null;
+        }
+    }
+
     private ValidationResult updateGitHubUserId(RegisteredUser user) {
         ValidationResult validationResult = new ValidationResult();
         try {
@@ -232,14 +255,15 @@ public class AdministrationServiceImpl extends AbstractAdminRestrictedService im
             if (StringUtils.isNotBlank(user.getGitHubName())) {
                 User ghUser = userService.getUserIfExists(user.getGitHubName());
                 if (ghUser == null) {
+                    log.infof("GH username '%s' was not found", user.getGitHubName());
                     validationResult.addFailure(String.format("Username '%s' doesn't exist on GitHub",
                             user.getGitHubName()));
                 } else {
-                    if (user.getGitHubId() != null && user.getGitHubId() != ghUser.getId()) {
-
-                    }
+                    log.infof("GH ID for username '%s' is %d", user.getGitHubName(), ghUser.getId());
                     user.setGitHubId(ghUser.getId());
                 }
+            } else {
+                user.setGitHubId(null);
             }
             return validationResult;
         } catch (IOException e) {

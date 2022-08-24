@@ -143,8 +143,17 @@ public class RegisteredUser implements Serializable {
 
     @Override
     public String toString() {
-        return "RegisteredUser { id = " + id + ", krbName = " + krbName + ", githubId = " + gitHubId + ", githubName = "
-                + gitHubName + " }";
+        return "RegisteredUser{" +
+                "id=" + id +
+                ", krbName='" + krbName + '\'' +
+                ", gitHubName='" + gitHubName + '\'' +
+                ", gitHubId=" + gitHubId +
+                ", note='" + note + '\'' +
+                ", responsiblePerson='" + responsiblePerson + '\'' +
+                ", admin=" + admin +
+                ", whitelisted=" + whitelisted +
+                ", loggedIn=" + loggedIn +
+                '}';
     }
 
     /**
@@ -160,7 +169,7 @@ public class RegisteredUser implements Serializable {
 
         RegisteredUser that = (RegisteredUser) o;
 
-        return gitHubName != null && gitHubName.equals(that.gitHubName);
+        return id != null && id.equals(that.id);
     }
 
     @Override

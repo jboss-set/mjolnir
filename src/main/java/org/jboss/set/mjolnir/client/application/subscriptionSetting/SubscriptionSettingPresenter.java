@@ -95,13 +95,13 @@ public class SubscriptionSettingPresenter
     private void loadData() {
         getView().setGitHubName(currentUser.getUser().getGitHubName());
 
-        LoadingIndicationEvent.fire(this, true);
+        LoadingIndicationEvent.show(this, "Retrieving GitHub subscriptions status.");
         gitHubService.getSubscriptions(new DefaultCallback<List<GithubOrganization>>() {
             @Override
             public void onSuccess(List<GithubOrganization> result) {
                 organizations = new ArrayList<>(result);
                 getView().setData(organizations);
-                LoadingIndicationEvent.fire(SubscriptionSettingPresenter.this, false);
+                LoadingIndicationEvent.hide(SubscriptionSettingPresenter.this);
                 getProxy().manualReveal(SubscriptionSettingPresenter.this);
             }
 
@@ -109,7 +109,7 @@ public class SubscriptionSettingPresenter
             public void onFailure(Throwable caught) {
                 super.onFailure(caught);
 
-                LoadingIndicationEvent.fire(SubscriptionSettingPresenter.this, false);
+                LoadingIndicationEvent.hide(SubscriptionSettingPresenter.this);
                 getProxy().manualRevealFailed();
             }
         });

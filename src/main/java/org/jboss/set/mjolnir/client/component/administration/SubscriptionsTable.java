@@ -70,8 +70,7 @@ public class SubscriptionsTable implements IsWidget {
     private final Set<Subscription> selectedItems = new HashSet<>();
     private final ColumnSortEvent.ListHandler<Subscription> sortHandler;
     private final List<HasCell<Subscription, ?>> hasCells = new ArrayList<>();
-    private final Column<Subscription, Subscription> actionColumn;
-    private final List<AbstractInputCell> filterCells = new ArrayList<>();
+    private final List<AbstractInputCell<?, ?>> filterCells = new ArrayList<>();
 
     public SubscriptionsTable() {
         initStyles();
@@ -157,7 +156,7 @@ public class SubscriptionsTable implements IsWidget {
         whitelistCol.setSortable(true);
         subscriptionTable.addColumn(whitelistCol, "Whitelist?");
 
-        subscriptionTable.addColumn(actionColumn = createActionColumn(), "Actions");
+        subscriptionTable.addColumn(createActionColumn(), "Actions");
 
 
         // sorting
@@ -402,7 +401,12 @@ public class SubscriptionsTable implements IsWidget {
 
     protected void addDefaultActionCells() {
         // subscriptions button
-        addActionCell(new ConditionalActionCell<Subscription>(SafeHtmlUtils.fromString("Modify"), new ModifyUserDelegate()));
+        addActionCell(new ConditionalActionCell<Subscription>(SafeHtmlUtils.fromString("Modify"), new ModifyUserDelegate()) {
+            @Override
+            public boolean isEnabled(Subscription subscription) {
+                return subscription.getRegisteredUser() != null;
+            }
+        });
     }
 
     protected void addActionCell(ConditionalActionCell<Subscription> actionCell) {
@@ -416,7 +420,7 @@ public class SubscriptionsTable implements IsWidget {
 
         // clear filtering fields
         searchPredicate.reset();
-        for (AbstractInputCell filterCell: filterCells) {
+        for (AbstractInputCell<?, ?> filterCell: filterCells) {
             filterCell.clearViewData("");
         }
     }

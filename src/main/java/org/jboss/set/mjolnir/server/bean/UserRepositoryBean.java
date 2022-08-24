@@ -39,6 +39,12 @@ public class UserRepositoryBean implements UserRepository {
     private LdapRepository ldapRepository;
 
     @Override
+    public RegisteredUser getUser(Long id) {
+        EntityManager em = entityManagerFactory.createEntityManager();
+        return convertUserEntity(em.find(UserEntity.class, id));
+    }
+
+    @Override
     public RegisteredUser getUser(String kerberosName) {
         return getUser(UserName.KERBEROS, kerberosName);
     }
@@ -143,6 +149,7 @@ public class UserRepositoryBean implements UserRepository {
         }
 
         insertUser(userEntity);
+        user.setId(userEntity.getId());
     }
 
     @Override
@@ -219,27 +226,27 @@ public class UserRepositoryBean implements UserRepository {
         EntityManager em = entityManagerFactory.createEntityManager();
 
         try {
-            UserEntity userEntity = getUserFromDB(user, em);
+            UserEntity existingUser = getUserFromDB(user, em);
 
-            if (userEntity == null) {
-                throw new ApplicationException(String.format("User with ID %s was not found.", user.getId()));
+            if (existingUser == null) {
+                throw new ApplicationException(String.format("User with ID %d was not found.", user.getId()));
             }
 
-            if (StringUtils.isNotBlank(user.getKrbName()) && !user.getKrbName().equals(userEntity.getKerberosName())) {
+            if (StringUtils.isNotBlank(user.getKrbName()) && !user.getKrbName().equals(existingUser.getKerberosName())) {
                 // overriding LDAP name
                 throw new ApplicationException("Changing LDAP name is not allowed.");
-            } else if (StringUtils.isNotBlank(user.getKrbName()) && StringUtils.isBlank(userEntity.getKerberosName())) {
+            } else if (StringUtils.isNotBlank(user.getKrbName()) && StringUtils.isBlank(existingUser.getKerberosName())) {
                 // setting LDAP name, while it was previously empty
                 Objects.requireNonNull(ldapUserRecord);
-                userEntity.setKerberosName(user.getKrbName());
-                userEntity.setEmployeeNumber(ldapUserRecord.getEmployeeNumber());
+                existingUser.setKerberosName(user.getKrbName());
+                existingUser.setEmployeeNumber(ldapUserRecord.getEmployeeNumber());
             }
-            userEntity.setGithubName(user.getGitHubName());
-            userEntity.setGithubId(user.getGitHubId());
-            userEntity.setNote(user.getNote());
-            userEntity.setAdmin(user.isAdmin());
-            userEntity.setWhitelisted(user.isWhitelisted());
-            userEntity.setResponsiblePerson(user.getResponsiblePerson());
+            existingUser.setGithubName(user.getGitHubName());
+            existingUser.setGithubId(user.getGitHubId());
+            existingUser.setNote(user.getNote());
+            existingUser.setAdmin(user.isAdmin());
+            existingUser.setWhitelisted(user.isWhitelisted());
+            existingUser.setResponsiblePerson(user.getResponsiblePerson());
         } finally {
             em.close();
         }
@@ -308,6 +315,10 @@ public class UserRepositoryBean implements UserRepository {
     }
 
     private RegisteredUser convertUserEntity(UserEntity userEntity) {
+        if (userEntity == null) {
+            return null;
+        }
+
         RegisteredUser registeredUser = new RegisteredUser();
         registeredUser.setId(userEntity.getId());
         registeredUser.setKrbName(userEntity.getKerberosName());

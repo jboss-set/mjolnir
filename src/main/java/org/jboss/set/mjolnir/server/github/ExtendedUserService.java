@@ -5,8 +5,11 @@ import java.io.IOException;
 import org.apache.http.HttpStatus;
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.client.GitHubRequest;
 import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.UserService;
+
+import static org.eclipse.egit.github.core.client.IGitHubConstants.SEGMENT_USER;
 
 public class ExtendedUserService extends UserService {
 
@@ -29,5 +32,20 @@ public class ExtendedUserService extends UserService {
             }
             throw e;
         }
+    }
+
+    /**
+     * Retrieves user by his GH ID.
+     */
+    public User getUserById(Integer id) throws IOException {
+        if (id == null)
+            throw new IllegalArgumentException("ID cannot be null"); //$NON-NLS-1$
+
+        GitHubRequest request = createRequest();
+        StringBuilder uri = new StringBuilder(SEGMENT_USER);
+        uri.append('/').append(id);
+        request.setUri(uri);
+        request.setType(User.class);
+        return (User) client.get(request).getBody();
     }
 }

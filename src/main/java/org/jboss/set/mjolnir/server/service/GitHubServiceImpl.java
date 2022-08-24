@@ -29,12 +29,11 @@ import org.hibernate.HibernateException;
 import org.jboss.logging.Logger;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.client.service.GitHubService;
-import org.jboss.set.mjolnir.server.bean.ApplicationParameters;
 import org.jboss.set.mjolnir.server.bean.OrganizationRepository;
 import org.jboss.set.mjolnir.server.bean.UserRepository;
 import org.jboss.set.mjolnir.server.github.ExtendedTeamService;
 import org.jboss.set.mjolnir.server.github.ExtendedUserService;
-import org.jboss.set.mjolnir.server.service.validation.GitHubNameRegisteredValidation;
+import org.jboss.set.mjolnir.server.service.validation.GitHubNameIsUniqueValidation;
 import org.jboss.set.mjolnir.server.service.validation.Validator;
 import org.jboss.set.mjolnir.shared.domain.EntityUpdateResult;
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
@@ -42,7 +41,7 @@ import org.jboss.set.mjolnir.shared.domain.GithubTeam;
 import org.jboss.set.mjolnir.shared.domain.RegisteredUser;
 import org.jboss.set.mjolnir.shared.domain.ValidationResult;
 
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,12 +56,14 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
 
     private static final Logger logger = Logger.getLogger(GitHubServiceImpl.class);
 
-    @EJB
-    private OrganizationRepository organizationRepository;
-    @EJB
-    private ApplicationParameters applicationParameters;
-    @EJB
-    private UserRepository userRepository;
+    @Inject
+    OrganizationRepository organizationRepository;
+
+    @Inject
+    UserRepository userRepository;
+
+    @Inject
+    GitHubClient gitHubClient;
 
     private ExtendedTeamService teamService;
     private ExtendedUserService userService;
@@ -73,15 +74,11 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     public void init() throws ServletException {
         super.init();
 
-        String token = applicationParameters.getMandatoryParameter(ApplicationParameters.GITHUB_TOKEN_KEY);
-
-        GitHubClient client = new GitHubClient();
-        client.setOAuth2Token(token);
-        teamService = new ExtendedTeamService(client);
-        userService = new ExtendedUserService(client);
+        teamService = new ExtendedTeamService(gitHubClient);
+        userService = new ExtendedUserService(gitHubClient);
 
         validator = new Validator<>();
-        validator.addValidation(new GitHubNameRegisteredValidation(userRepository));
+        validator.addValidation(new GitHubNameIsUniqueValidation(userRepository));
     }
 
     @Override
@@ -91,17 +88,18 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
         }
 
         try {
-            User githubUser = userService.getUserIfExists(newGithubName);
-            if (githubUser == null) {
-                return EntityUpdateResult.validationFailure(String.format("Username '%s' doesn't exist on GitHub", newGithubName));
-            }
-
             // reload authenticated user form database
             RegisteredUser authenticatedUser = getAuthenticatedUser();
             final RegisteredUser user = userRepository.getUser(authenticatedUser.getKrbName());
 
             logger.infof("Changing githubName for user %s from %s to %s.",
                     user.getKrbName(), user.getGitHubName(), newGithubName);
+
+            User githubUser = userService.getUserIfExists(newGithubName);
+            if (githubUser == null) {
+                logger.warnf("Username '%s' doesn't exist on GitHub", newGithubName);
+                return EntityUpdateResult.validationFailure(String.format("Username '%s' doesn't exist on GitHub", newGithubName));
+            }
 
             user.setGitHubName(newGithubName);
             user.setGitHubId(githubUser.getId());
@@ -185,11 +183,16 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
 
     private String getCurrentUserGitHubName() {
         final RegisteredUser user = getAuthenticatedUser();
-        final String gitHubName = user.getGitHubName();
-        if (gitHubName == null) {
-            throw new ApplicationException("Operation failed, user must set GitHub name first.");
+        Integer gitHubId = user.getGitHubId();
+        if (gitHubId == null) {
+            throw new ApplicationException("Operation failed, user GH ID not set.");
         }
-        return gitHubName;
+        try {
+            User githubUser = userService.getUserById(gitHubId);
+            return githubUser.getLogin();
+        } catch (IOException e) {
+            throw new ApplicationException("Unable to retrieve GH user by his ID: " + gitHubId, e);
+        }
     }
 
     @Override

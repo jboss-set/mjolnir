@@ -14,6 +14,14 @@ import java.util.Map;
 public interface UserRepository {
 
     /**
+     * Returns user by ID.
+     *
+     * @param id ID
+     * @return user instance or null
+     */
+    RegisteredUser getUser(Long id);
+
+    /**
      * Returns user by his krb name.
      *
      * @param kerberosName krb name

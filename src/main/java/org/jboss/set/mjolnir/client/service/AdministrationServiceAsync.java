@@ -42,4 +42,6 @@ public interface AdministrationServiceAsync {
     void unsubscribe(Collection<Subscription> subscriptions, AsyncCallback<Void> asyncCallback);
 
     void whitelist(Collection<Subscription> subscriptions, boolean whitelist, AsyncCallback<Collection<Subscription>> asyncCallback);
+
+    void findCurrentGithubUsername(int githubId, AsyncCallback<String> asyncCallback);
 }

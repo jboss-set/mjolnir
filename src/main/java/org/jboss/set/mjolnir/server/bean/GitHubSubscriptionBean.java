@@ -1,5 +1,6 @@
 package org.jboss.set.mjolnir.server.bean;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.RequestException;
@@ -158,6 +159,7 @@ public class GitHubSubscriptionBean {
                 final Subscription subscription = new Subscription();
                 subscription.setRegisteredUser(user);
                 subscription.setGitHubName(user.getGitHubName());
+                subscription.setGitHubId(user.getGitHubId());
 
                 if(user.getKrbName() != null) {
                     subscriptionMap.put(user.getKrbName(), subscription);
@@ -262,9 +264,17 @@ public class GitHubSubscriptionBean {
         logger.debug("Looking for user registrations");
         final Map<Integer, RegisteredUser> registeredUsers = userRepository.getRegisteredUsersByGitHubIds(new ArrayList<>(subscriptions.keySet()));
         for (Map.Entry<Integer, RegisteredUser> entry: registeredUsers.entrySet()) {
-            Subscription subscription = subscriptions.get(entry.getKey());
-            subscription.setRegisteredUser(entry.getValue());
-            ldapUsersToCheck.put(entry.getValue().getKrbName(), subscription);
+            Integer githubId = entry.getKey();
+            RegisteredUser registeredUser = entry.getValue();
+            Subscription subscription = subscriptions.get(githubId);
+
+            subscription.setRegisteredUser(registeredUser);
+            if (StringUtils.isNotBlank(registeredUser.getGitHubName())) {
+                // override GH username to what user provided during registration (this value is going to show up in
+                // the members table as well as in the edit form)
+                subscription.setGitHubName(registeredUser.getGitHubName());
+            }
+            ldapUsersToCheck.put(registeredUser.getKrbName(), subscription);
         }
 
         // check LDAP records for retrieved users

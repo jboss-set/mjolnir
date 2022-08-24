@@ -53,6 +53,8 @@ public interface AdministrationService extends RemoteService {
 
     Collection<Subscription> whitelist(Collection<Subscription> subscriptions, boolean whitelist);
 
+    String findCurrentGithubUsername(int githubId);
+
     class Util {
         private static AdministrationServiceAsync instance;
 

@@ -50,7 +50,7 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
     @UseGatekeeper(IsAdminGatekeeper.class)
     public interface MyProxy extends ProxyPlace<GitHubMembersPresenter> {}
 
-    private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
+    private final AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
 
     @Inject
     public GitHubMembersPresenter(EventBus eventBus, MyView view, MyProxy proxy) {
@@ -65,12 +65,12 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
 
     @Override
     public void prepareFromRequest(PlaceRequest request) {
-        LoadingIndicationEvent.fire(this, true);
+        LoadingIndicationEvent.show(this, "Loading GitHub organizations.");
 
         administrationService.getOrganizations(new DefaultCallback<List<GithubOrganization>>() {
             @Override
             public void onSuccess(List<GithubOrganization> result) {
-                LoadingIndicationEvent.fire(GitHubMembersPresenter.this, false);
+                LoadingIndicationEvent.hide(GitHubMembersPresenter.this);
                 getView().setOrganizations(result);
                 getProxy().manualReveal(GitHubMembersPresenter.this);
             }
@@ -79,7 +79,7 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
             public void onFailure(Throwable caught) {
                 super.onFailure(caught);
                 getProxy().manualRevealFailed();
-                LoadingIndicationEvent.fire(GitHubMembersPresenter.this, false);
+                LoadingIndicationEvent.hide(GitHubMembersPresenter.this);
             }
         });
     }
@@ -93,21 +93,21 @@ public class GitHubMembersPresenter extends Presenter<GitHubMembersPresenter.MyV
 
     @Override
     public void retrieveSubscriptions(GithubOrganization org, GithubTeam team) {
-        LoadingIndicationEvent.fire(this, true);
+        LoadingIndicationEvent.show(this, "Retrieving GitHub subscriptins.");
 
         administrationService.getMembers(org, team, new DefaultCallback<List<Subscription>>() {
             @Override
             public void onSuccess(List<Subscription> subscriptions) {
                 getView().setSubscriptions(subscriptions);
                 getProxy().manualReveal(GitHubMembersPresenter.this);
-                LoadingIndicationEvent.fire(GitHubMembersPresenter.this, false);
+                LoadingIndicationEvent.hide(GitHubMembersPresenter.this);
             }
 
             @Override
             public void onFailure(Throwable throwable) {
                 super.onFailure(throwable);
                 getProxy().manualRevealFailed();
-                LoadingIndicationEvent.fire(GitHubMembersPresenter.this, false);
+                LoadingIndicationEvent.hide(GitHubMembersPresenter.this);
             }
         });
     }

@@ -8,25 +8,25 @@ import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.server.bean.UserRepository;
 
 /**
- * Verifies that given GH name is not used by different Mjolnir user
+ * Verifies that given GH name is not used by different registered user.
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public class GitHubNameRegisteredValidation implements Validation<RegisteredUser> {
+public class GitHubNameIsUniqueValidation implements Validation<RegisteredUser> {
 
     private final UserRepository userRepository;
 
-    public GitHubNameRegisteredValidation(UserRepository userRepository) {
+    public GitHubNameIsUniqueValidation(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
-    public ValidationResult validate(RegisteredUser entity) {
+    public ValidationResult validate(RegisteredUser userToValidate) {
         try {
             ValidationResult result = new ValidationResult();
-            if (!StringUtils.isEmpty(entity.getGitHubName())) {
-                RegisteredUser existingEntity = userRepository.getUserByGitHubName(entity.getGitHubName());
-                if (existingEntity != null && !existingEntity.getId().equals(entity.getId())) {
+            if (!StringUtils.isEmpty(userToValidate.getGitHubName())) {
+                RegisteredUser existingUser = userRepository.getUserByGitHubName(userToValidate.getGitHubName());
+                if (existingUser != null && !existingUser.getId().equals(userToValidate.getId())) {
                     result.addFailure("This GitHub name has already been registered.");
                 }
             }
