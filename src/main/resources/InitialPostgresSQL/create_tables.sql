@@ -21,7 +21,9 @@ create sequence sq_users;
 create table users (
     id bigint default nextval('sq_users') primary key,
     krb_name varchar(255) unique,
+    employee_number int unique,
     github_name varchar(255) unique,
+    github_id int unique,
     note varchar(255),
     admin boolean not null default false,
     whitelisted boolean not null default false,

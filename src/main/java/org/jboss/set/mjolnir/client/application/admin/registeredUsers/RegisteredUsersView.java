@@ -31,7 +31,7 @@ public class RegisteredUsersView extends ViewWithUiHandlers<RegisteredUsersHandl
     }
     private static final Templates TEMPLATES = GWT.create(Templates.class);
 
-    private SubscriptionsTable subscriptionsTable;
+    private final SubscriptionsTable subscriptionsTable;
 
     @Inject
     public RegisteredUsersView() {
@@ -40,14 +40,11 @@ public class RegisteredUsersView extends ViewWithUiHandlers<RegisteredUsersHandl
 
         panel.add(new HTMLPanel("h2", "Users Registered in Mjolnir"));
 
-        subscriptionsTable = new SubscriptionsTable() {
-            @Override
-            protected void dispatchWhitelist(List<Subscription> selectedItems, boolean whitelist) {
-
-            }
-        };
-        subscriptionsTable.addAction("Delete", new DeleteClickHandler(), true, false);
-        subscriptionsTable.addAction("Register", new RegisterHandler(), true, true);
+        subscriptionsTable = new SubscriptionsTable();
+        subscriptionsTable.addActionSeparator();
+        subscriptionsTable.addAction("Delete", new DeleteClickHandler(), false);
+        subscriptionsTable.addActionSeparator();
+        subscriptionsTable.addAction("Register", new RegisterHandler(), true);
         panel.add(subscriptionsTable);
     }
 

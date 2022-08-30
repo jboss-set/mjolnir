@@ -43,7 +43,7 @@ public interface AdministrationService extends RemoteService {
 
     void deleteUsers(Collection<RegisteredUser> user) throws ApplicationException;
 
-    EntityUpdateResult<RegisteredUser> editUser(RegisteredUser user, boolean validateKrbName, boolean validateGHname) throws ApplicationException;
+    EntityUpdateResult<RegisteredUser> editUser(RegisteredUser user) throws ApplicationException;
 
     List<GithubOrganization> getSubscriptions(String gitHubName) throws ApplicationException;
 
@@ -52,6 +52,8 @@ public interface AdministrationService extends RemoteService {
     void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions) throws ApplicationException;
 
     Collection<Subscription> whitelist(Collection<Subscription> subscriptions, boolean whitelist);
+
+    String findCurrentGithubUsername(int githubId);
 
     class Util {
         private static AdministrationServiceAsync instance;

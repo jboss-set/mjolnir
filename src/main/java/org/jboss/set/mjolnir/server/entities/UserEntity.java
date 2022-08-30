@@ -23,8 +23,14 @@ public class UserEntity {
     @Column(name = "krb_name", unique = true)
     private String kerberosName;
 
+    @Column(name = "employee_number", unique = true)
+    private Integer employeeNumber;
+
     @Column(name = "github_name", unique = true)
     private String githubName;
+
+    @Column(name = "github_id", unique = true)
+    private Integer githubId;
 
     @Column(name = "responsible_person")
     private String responsiblePerson;
@@ -61,6 +67,22 @@ public class UserEntity {
 
     public void setGithubName(String githubName) {
         this.githubName = githubName;
+    }
+
+    public Integer getEmployeeNumber() {
+        return employeeNumber;
+    }
+
+    public void setEmployeeNumber(Integer employeeNumber) {
+        this.employeeNumber = employeeNumber;
+    }
+
+    public Integer getGithubId() {
+        return githubId;
+    }
+
+    public void setGithubId(Integer githubId) {
+        this.githubId = githubId;
     }
 
     public String getNote() {

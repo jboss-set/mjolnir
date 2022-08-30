@@ -9,9 +9,18 @@ import java.io.Serializable;
  */
 public class Subscription implements Serializable {
 
+    private Integer gitHubId;
     private String gitHubName;
     private RegisteredUser registeredUser;
     private boolean activeKerberosAccount;
+
+    public Integer getGitHubId() {
+        return gitHubId;
+    }
+
+    public void setGitHubId(Integer gitHubId) {
+        this.gitHubId = gitHubId;
+    }
 
     public String getGitHubName() {
         return gitHubName;
@@ -45,11 +54,21 @@ public class Subscription implements Serializable {
         return registeredUser != null && registeredUser.isWhitelisted();
     }
 
+    /**
+     * Shortcut method to retrieve LDAP username to display in UI.
+     */
+    public String getKrbName() {
+        if (registeredUser != null && registeredUser.getKrbName() != null && !registeredUser.getKrbName().isEmpty()) {
+            return registeredUser.getKrbName();
+        }
+        return "unknown";
+    }
+
     @Override
     public String toString() {
         return "Subscription{" +
                 "gitHubName='" + gitHubName + '\'' +
-                ", kerberosUser=" + registeredUser +
+                ", registeredUser=" + registeredUser +
                 ", activeKerberosAccount=" + activeKerberosAccount +
                 '}';
     }

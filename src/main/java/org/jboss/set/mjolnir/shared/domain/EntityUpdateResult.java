@@ -33,6 +33,12 @@ public class EntityUpdateResult<X extends Serializable> implements Serializable,
         return new EntityUpdateResult<Y>(Result.VALIDATION_FAILURE, validationResult, null);
     }
 
+    public static <Y extends Serializable> EntityUpdateResult<Y> validationFailure(String failureMessage) {
+        ValidationResult validationResult = new ValidationResult();
+        validationResult.addFailure(failureMessage);
+        return new EntityUpdateResult<Y>(Result.VALIDATION_FAILURE, validationResult, null);
+    }
+
     public boolean isOK() {
         return Result.OK.equals(result);
     }

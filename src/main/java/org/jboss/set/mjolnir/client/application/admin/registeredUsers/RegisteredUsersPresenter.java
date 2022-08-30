@@ -45,7 +45,7 @@ public class RegisteredUsersPresenter extends Presenter<RegisteredUsersPresenter
     @UseGatekeeper(IsAdminGatekeeper.class)
     public interface MyProxy extends ProxyPlace<RegisteredUsersPresenter> {}
 
-    private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
+    private final AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
 
     @Inject
     public RegisteredUsersPresenter(EventBus eventBus, MyView view, MyProxy proxy) {
@@ -60,21 +60,21 @@ public class RegisteredUsersPresenter extends Presenter<RegisteredUsersPresenter
 
     @Override
     public void prepareFromRequest(PlaceRequest request) {
-        LoadingIndicationEvent.fire(this, true);
+        LoadingIndicationEvent.show(this, "Retrieving registered users.");
 
         administrationService.getRegisteredUsers(new DefaultCallback<List<Subscription>>() {
             @Override
             public void onSuccess(List<Subscription> result) {
                 getView().setData(result);
                 getProxy().manualReveal(RegisteredUsersPresenter.this);
-                LoadingIndicationEvent.fire(RegisteredUsersPresenter.this, false);
+                LoadingIndicationEvent.hide(RegisteredUsersPresenter.this);
             }
 
             @Override
             public void onFailure(Throwable caught) {
                 super.onFailure(caught);
                 getProxy().manualRevealFailed();
-                LoadingIndicationEvent.fire(RegisteredUsersPresenter.this, false);
+                LoadingIndicationEvent.hide(RegisteredUsersPresenter.this);
             }
         });
     }

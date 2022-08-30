@@ -21,7 +21,6 @@ import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -51,7 +50,7 @@ import org.jboss.set.mjolnir.shared.domain.Subscription;
  *
  * @author Tomas Hofman (thofman@redhat.com)
  */
-public abstract class SubscriptionsTable implements IsWidget {
+public class SubscriptionsTable implements IsWidget {
 
     private static final int PAGE_SIZE = 50;
     private static final List<String> KRB_ACCOUNT_FILTER_OPTIONS = new ArrayList<>();
@@ -63,16 +62,15 @@ public abstract class SubscriptionsTable implements IsWidget {
     }
 
     protected HTMLPanel panel = new HTMLPanel("");
-    private HTMLPanel buttonsPanel = new HTMLPanel("");
+    private final HTMLPanel buttonsPanel = new HTMLPanel("");
     private List<Subscription> data;
     protected ListDataProvider<Subscription> dataProvider;
     protected SubscriptionSearchPredicate searchPredicate;
-    private List<Button> actionButtons = new ArrayList<>();
-    private Set<Subscription> selectedItems = new HashSet<>();
-    private ColumnSortEvent.ListHandler<Subscription> sortHandler;
-    private List<HasCell<Subscription, ?>> hasCells = new ArrayList<>();
-    private Column<Subscription, Subscription> actionColumn;
-    private List<AbstractInputCell> filterCells = new ArrayList<>();
+    private final List<Button> actionButtons = new ArrayList<>();
+    private final Set<Subscription> selectedItems = new HashSet<>();
+    private final ColumnSortEvent.ListHandler<Subscription> sortHandler;
+    private final List<HasCell<Subscription, ?>> hasCells = new ArrayList<>();
+    private final List<AbstractInputCell<?, ?>> filterCells = new ArrayList<>();
 
     public SubscriptionsTable() {
         initStyles();
@@ -158,7 +156,7 @@ public abstract class SubscriptionsTable implements IsWidget {
         whitelistCol.setSortable(true);
         subscriptionTable.addColumn(whitelistCol, "Whitelist?");
 
-        subscriptionTable.addColumn(actionColumn = createActionColumn(), "Actions");
+        subscriptionTable.addColumn(createActionColumn(), "Actions");
 
 
         // sorting
@@ -206,8 +204,13 @@ public abstract class SubscriptionsTable implements IsWidget {
         dataStyle.setOverflowY(Style.Overflow.AUTO);*/
     }
 
-    public void addAction(String caption, final ClickHandler clickHandler) {
-        addAction(caption, clickHandler, false, false);
+    /**
+     * Adds a separator line to the action buttons panel.
+     */
+    public void addActionSeparator() {
+        HTMLPanel span = new HTMLPanel("span", " | ");
+        span.getElement().getStyle().setColor("#999");
+        buttonsPanel.add(span);
     }
 
     /**
@@ -216,7 +219,7 @@ public abstract class SubscriptionsTable implements IsWidget {
      * @param separator         show separator in front of button
      * @param isPermanentAction should the button be active even if no items are selected?
      */
-    public void addAction(String caption, final ClickHandler clickHandler, boolean separator, boolean isPermanentAction) {
+    public void addAction(String caption, final ClickHandler clickHandler, boolean isPermanentAction) {
         Button button = new Button(caption, clickHandler);
 
         if (isPermanentAction) {
@@ -225,13 +228,7 @@ public abstract class SubscriptionsTable implements IsWidget {
             button.setEnabled(false);
         }
 
-        if (separator) {
-            HTMLPanel span = new HTMLPanel("span", " | ");
-            span.getElement().getStyle().setColor("#999");
-            buttonsPanel.add(span);
-        } else {
-            buttonsPanel.add(new HTMLPanel("span", " "));
-        }
+        buttonsPanel.add(new HTMLPanel("span", " "));
 
         if (!isPermanentAction) {
             actionButtons.add(button);
@@ -256,8 +253,6 @@ public abstract class SubscriptionsTable implements IsWidget {
     }
 
     protected void addDefaultActions() {
-        addAction("Whitelist", new WhiteListClickHandler(true));
-        addAction("Un-whitelist", new WhiteListClickHandler(false));
     }
 
     public List<Subscription> getSelectedItems() {
@@ -408,8 +403,8 @@ public abstract class SubscriptionsTable implements IsWidget {
         // subscriptions button
         addActionCell(new ConditionalActionCell<Subscription>(SafeHtmlUtils.fromString("Modify"), new ModifyUserDelegate()) {
             @Override
-            public boolean isEnabled(Subscription value) {
-                return value.getGitHubName() != null;
+            public boolean isEnabled(Subscription subscription) {
+                return subscription.getRegisteredUser() != null;
             }
         });
     }
@@ -425,12 +420,10 @@ public abstract class SubscriptionsTable implements IsWidget {
 
         // clear filtering fields
         searchPredicate.reset();
-        for (AbstractInputCell filterCell: filterCells) {
+        for (AbstractInputCell<?, ?> filterCell: filterCells) {
             filterCell.clearViewData("");
         }
     }
-
-    protected abstract void dispatchWhitelist(List<Subscription> selectedItems, boolean whitelist);
 
 
     // comparators
@@ -588,20 +581,6 @@ public abstract class SubscriptionsTable implements IsWidget {
                     ", krbAccount=" + krbAccount +
                     ", whitelisted=" + whitelisted +
                     '}';
-        }
-    }
-
-    private class WhiteListClickHandler implements ClickHandler {
-
-        private boolean whitelist;
-
-        WhiteListClickHandler(boolean whitelist) {
-            this.whitelist = whitelist;
-        }
-
-        @Override
-        public void onClick(ClickEvent event) {
-            dispatchWhitelist(getSelectedItems(), whitelist);
         }
     }
 

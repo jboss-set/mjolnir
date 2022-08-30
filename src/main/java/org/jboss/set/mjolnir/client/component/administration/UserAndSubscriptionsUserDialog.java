@@ -33,6 +33,9 @@ import org.jboss.set.mjolnir.shared.domain.Subscription;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Combined dialog for editing RegisteredUser and his subscriptions.
@@ -41,32 +44,44 @@ import java.util.Map;
  */
 public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
 
+    private static final Logger log = Logger.getLogger("");
+
     private static final String RESPONSIBLE_PERSON_ROW_ID = "Responsibleperson";
 
-    private AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
-    private HTMLPanel checkboxPanel;
-    private Map<Integer, CheckBox> checkBoxes = new HashMap<>();
-    private Subscription subscription;
+    private final AdministrationServiceAsync administrationService = AdministrationService.Util.getInstance();
+    private final HTMLPanel checkboxPanel;
+    private final Map<Integer, CheckBox> checkBoxes = new HashMap<>();
+    private final Subscription subscription;
 
-    private TextBox krbNameBox = new TextBox();
-    private TextBox githubNameBox = new TextBox();
-    private TextBox noteBox = new TextBox();
-    private TextBox responsiblePersonBox = new TextBox();
-    private CheckBox adminCheckBox = new CheckBox();
-    private CheckBox whitelistedCheckBox = new CheckBox();
-    private HTML feedback = new HTML();
+    private final TextBox krbNameBox = new TextBox();
+    // GH username provided by user or admin
+    private final TextBox githubNameBox = new TextBox();
+    // current GH username based on GH ID, which can be different from above if the user renamed his acount
+    private final TextBox currentGithubNameBox = new TextBox();
+    private final TextBox githubIdBox = new TextBox();
+    private final TextBox noteBox = new TextBox();
+    private final TextBox responsiblePersonBox = new TextBox();
+    private final CheckBox adminCheckBox = new CheckBox();
+    private final CheckBox whitelistedCheckBox = new CheckBox();
+    private final HTML feedback = new HTML();
+
+    private String discoveredGithubName;
 
     public UserAndSubscriptionsUserDialog(final Subscription subscription) {
         this.subscription = subscription;
 
-        githubNameBox.setEnabled(false);
+        githubIdBox.setReadOnly(true);
+        githubIdBox.setEnabled(false);
+        currentGithubNameBox.setReadOnly(true);
+        currentGithubNameBox.setEnabled(false);
+
         feedback.getElement().addClassName("error");
 
         RegisteredUser registeredUser = subscription.getRegisteredUser();
         githubNameBox.setText(subscription.getGitHubName());
         if (registeredUser != null) {
-            krbNameBox.setText(registeredUser.getKrbName());
-            noteBox.setText(registeredUser.getNote());
+            krbNameBox.setValue(registeredUser.getKrbName());
+            noteBox.setValue(registeredUser.getNote());
             adminCheckBox.setValue(registeredUser.isAdmin());
             whitelistedCheckBox.setValue(registeredUser.isWhitelisted());
             responsiblePersonBox.setValue(registeredUser.getResponsiblePerson());
@@ -83,7 +98,7 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
             }
         });
 
-        setText("User Details for " + subscription.getGitHubName());
+        setText("User Details for " + subscription.getKrbName());
         setGlassEnabled(true);
 
         final HTMLPanel panel = new HTMLPanel("");
@@ -96,12 +111,15 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
 
         HTMLPanel userForm = new HTMLPanel("p", "");
         panel.add(userForm);
-        userForm.add(createRow("GitHub Name", "User's GitHub account name", githubNameBox));
         userForm.add(createRow("Kerberos Name", "User name in company Kerberos database", krbNameBox));
+        userForm.add(createRow("Registered GitHub Name", "User's GitHub account name provided during registration", githubNameBox));
+        userForm.add(createRow("Current GitHub Name", "User's GitHub account name based on his GitHub ID", currentGithubNameBox));
+        userForm.add(createRow("GitHub ID", "User's GitHub account ID, automatically retrieved during registration", githubIdBox));
         userForm.add(createRow("Note", "Additional notes about the user", noteBox));
         userForm.add(createRow("Admin", "Does user have admin privileges?", adminCheckBox));
         userForm.add(createRow("Whitelisted", "If true, this user will not appear in the email report of users without an active kerberos account.", whitelistedCheckBox));
-        userForm.add(createRow("Responsible person", "Responsible person", responsiblePersonBox, registeredUser.isWhitelisted()));
+        userForm.add(createRow("Responsible person", "Responsible person", responsiblePersonBox,
+                registeredUser != null && registeredUser.isWhitelisted()));
         userForm.add(feedback);
 
         panel.add(new HTMLPanel("h3", "GitHub Subscriptions"));
@@ -132,13 +150,30 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
         buttonPanel.add(saveButton);
         buttonPanel.add(new InlineHTML(" "));
 
-        // retrieve subscription data and create checkboxes
-        createCheckboxes();
+        if (subscription.getGitHubId() != null) {
+            githubIdBox.setValue(subscription.getGitHubId().toString());
+            retrieveCurrentGithubUsername(subscription.getGitHubId(), (githubUsername) -> {
+                discoveredGithubName = githubUsername;
+                currentGithubNameBox.setValue(githubUsername);
+                createSubscriptionFormPart(githubUsername);
+            });
+        }
     }
 
-    private void createCheckboxes() {
+    /**
+     * Creates part of the form with checkboxes that display which teams user is subscribed to,
+     * and allow to change the subscriptions.
+     *
+     * @param currentGithubName GH username (an up-to-date username should be given, not the possibly deprecated
+     *                          value which user provided during registration)
+     */
+    private void createSubscriptionFormPart(String currentGithubName) {
         checkboxPanel.clear();
         checkBoxes.clear();
+
+        if (currentGithubName == null) {
+            return;
+        }
 
         checkboxPanel.add(new LoadingPanel());
 
@@ -146,7 +181,7 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
             @Override
             public void onSuccess(XsrfToken token) {
                 ((HasRpcToken) administrationService).setRpcToken(token);
-                administrationService.getSubscriptions(subscription.getGitHubName(), new AsyncCallback<List<GithubOrganization>>() {
+                administrationService.getSubscriptions(currentGithubName, new AsyncCallback<List<GithubOrganization>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         ExceptionHandler.handle("Couldn't get user's subscriptions.", caught);
@@ -184,28 +219,22 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
     }
 
     private void saveData() {
-        saveUserDetails(new Runnable() {
-            @Override
-            public void run() {
-                saveSubscriptions();
-            }
-        });
+        saveUserDetails(this::saveSubscriptions);
     }
 
     private void saveUserDetails(final Runnable nextStep) {
         RegisteredUser userToSave = subscription.getRegisteredUser() == null
                 ? new RegisteredUser() : subscription.getRegisteredUser().copy();
-        userToSave.setGitHubName(subscription.getGitHubName());
-        String userName = krbNameBox.getText();
-        userToSave.setKrbName(userName.isEmpty() ? null : userName);
-        userToSave.setNote(noteBox.getText());
+        userToSave.setGitHubName(githubNameBox.getValue());
+        userToSave.setKrbName(krbNameBox.getValue());
+        userToSave.setNote(noteBox.getValue());
         userToSave.setAdmin(adminCheckBox.getValue());
         userToSave.setWhitelisted(whitelistedCheckBox.getValue());
         userToSave.setResponsiblePerson(responsiblePersonBox.getValue());
 
         if (subscription.getRegisteredUser() != null) {
             // modify existing user
-            administrationService.editUser(userToSave, true, true, new AsyncCallback<EntityUpdateResult<RegisteredUser>>() {
+            administrationService.editUser(userToSave, new AsyncCallback<EntityUpdateResult<RegisteredUser>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     ExceptionHandler.handle("Couldn't edit user.", caught);
@@ -238,8 +267,12 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
             if (subscription.getRegisteredUser() == null) {
                 subscription.setRegisteredUser(new RegisteredUser());
             }
-            result.getUpdatedEntity().copyTo(subscription.getRegisteredUser());
-            onUserSavedCallback(result.getUpdatedEntity());
+            RegisteredUser updatedUser = result.getUpdatedEntity();
+            RegisteredUser displayedUser = subscription.getRegisteredUser();
+            updatedUser.copyTo(displayedUser);
+            subscription.setGitHubId(updatedUser.getGitHubId());
+            subscription.setGitHubName(updatedUser.getGitHubName());
+            onUserSavedCallback(updatedUser);
 
             // update subscriptins
             nextStep.run();
@@ -249,18 +282,21 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
     }
 
     private void saveSubscriptions() {
-        administrationService.setSubscriptions(this.subscription.getGitHubName(), getSubscriptionData(), new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                ExceptionHandler.handle("Couldn't set subscriptions.", caught);
-            }
+        if (isNotBlank(discoveredGithubName)) {
+            administrationService.setSubscriptions(discoveredGithubName, getSubscriptionData(),
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            ExceptionHandler.handle("Couldn't set subscriptions.", caught);
+                        }
 
-            @Override
-            public void onSuccess(Void result) {
-                UserAndSubscriptionsUserDialog.this.hide();
-                UserAndSubscriptionsUserDialog.this.removeFromParent();
-            }
-        });
+                        @Override
+                        public void onSuccess(Void result) {
+                            UserAndSubscriptionsUserDialog.this.hide();
+                            UserAndSubscriptionsUserDialog.this.removeFromParent();
+                        }
+                    });
+        }
     }
 
     private Map<Integer, Boolean> getSubscriptionData() {
@@ -271,6 +307,28 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
             data.put(teamId, checkBox.getValue());
         }
         return data;
+    }
+
+    /**
+     * Retrieves current GH username based on GH ID, and provides an action.
+     *
+     * @param githubId GH ID of a user
+     * @param onSuccess a consumer that accepts the discovered GH username
+     */
+    private void retrieveCurrentGithubUsername(int githubId, Consumer<String> onSuccess) {
+        log.info("Retrieving current GH username for ID " + githubId);
+        administrationService.findCurrentGithubUsername(githubId, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                log.log(Level.SEVERE, "Can't retrieve GH username for ID " + githubId,  caught);
+            }
+
+            @Override
+            public void onSuccess(String githubUsername) {
+                log.info("Current GH username for ID " + githubId + " is " + githubUsername);
+                onSuccess.accept(githubUsername);
+            }
+        });
     }
 
     private static Panel createRow(String label, String helpText, Widget formItem) {
@@ -322,6 +380,11 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
         return div;
     }
 
+    private static boolean isNotBlank(String string) {
+        return string != null
+                && !string.isEmpty();
+    }
+
     private class SaveClickHandler implements ClickHandler {
         @Override
         public void onClick(ClickEvent event) {
@@ -348,7 +411,7 @@ public abstract class UserAndSubscriptionsUserDialog extends DialogBox {
 
     private class SelectionClickHandler implements ClickHandler {
 
-        private boolean select;
+        private final boolean select;
 
         private SelectionClickHandler(boolean select) {
             this.select = select;

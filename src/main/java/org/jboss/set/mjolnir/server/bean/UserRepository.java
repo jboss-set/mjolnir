@@ -14,6 +14,14 @@ import java.util.Map;
 public interface UserRepository {
 
     /**
+     * Returns user by ID.
+     *
+     * @param id ID
+     * @return user instance or null
+     */
+    RegisteredUser getUser(Long id);
+
+    /**
      * Returns user by his krb name.
      *
      * @param kerberosName krb name
@@ -35,24 +43,24 @@ public interface UserRepository {
      * @param names github names we are looking for
      * @return existing users with matching github name
      */
-    Map<String, RegisteredUser> getUsersByGitHubName(List<String> names);
+    Map<Integer, RegisteredUser> getRegisteredUsersByGitHubIds(List<Integer> ids);
 
     /**
-     * Saves new user.
+     * Registre a new user from an administration interface.
      *
      * @param registeredUser user
      */
-    void saveUser(RegisteredUser registeredUser);
+    void registerUser(RegisteredUser registeredUser, LdapRepositoryBean.LdapUserRecord ldapUserRecord);
 
     /**
      * Save or updates existing user.
      *
      * @param registeredUser user
      */
-    void saveOrUpdateUser(RegisteredUser registeredUser);
+    void updateUser(RegisteredUser registeredUser, LdapRepositoryBean.LdapUserRecord ldapUserRecord);
 
     /**
-     * Returns user by its krb name. If user doesn't exists, creates new.
+     * Returns user by its krb name. If user doesn't exist, creates new.
      */
     RegisteredUser getOrCreateUser(String kerberosName);
 

@@ -1,5 +1,7 @@
 package org.jboss.set.mjolnir.client.application.events.loadingIndicator;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
@@ -9,11 +11,13 @@ import com.google.gwt.event.shared.HasHandlers;
  */
 public class LoadingIndicationEvent extends GwtEvent<LoadingIndicationEvent.LoadingIndicatorHandler> {
 
+    private static final Logger logger = Logger.getLogger(LoadingIndicationEvent.class.getName());
+
     public interface LoadingIndicatorHandler extends EventHandler {
         void onLoadingEvent(LoadingIndicationEvent event);
     }
 
-    private boolean start;
+    private final boolean start;
 
     public static final Type<LoadingIndicatorHandler> TYPE = new Type<>();
 
@@ -21,8 +25,13 @@ public class LoadingIndicationEvent extends GwtEvent<LoadingIndicationEvent.Load
         this.start = start;
     }
 
-    public static void fire(HasHandlers source, boolean start) {
-        source.fireEvent(new LoadingIndicationEvent(start));
+    public static void show(HasHandlers source, String message) {
+        logger.info(message);
+        source.fireEvent(new LoadingIndicationEvent(true));
+    }
+
+    public static void hide(HasHandlers source) {
+        source.fireEvent(new LoadingIndicationEvent(false));
     }
 
     @Override

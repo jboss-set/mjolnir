@@ -1,6 +1,5 @@
 package org.jboss.set.mjolnir.server.bean;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,5 +31,5 @@ public interface LdapRepository {
      * @param uid prior or current UID
      * @return list of current and prior UIDs
      */
-    List<String> findAllUserUids(String uid);
+    LdapRepositoryBean.LdapUserRecord findUserRecord(String uid);
 }
