@@ -182,7 +182,11 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
     }
 
     private String getCurrentUserGitHubName() {
-        final RegisteredUser user = getAuthenticatedUser();
+        RegisteredUser user = getAuthenticatedUser();
+
+        // reload user record from database to consume eventual change of GH username
+        user = userRepository.getUser(user.getId());
+
         Integer gitHubId = user.getGitHubId();
         if (gitHubId == null) {
             throw new ApplicationException("Operation failed, user GH ID not set.");
