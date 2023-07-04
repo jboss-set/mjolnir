@@ -175,7 +175,7 @@
                 <version>${version.gwt}</version>
                 <configuration>
                     <module>org.jboss.set.mjolnir.Mjolnir</module>
-                    <extraJvmArgs>-Xmx1024m</extraJvmArgs>
+                    <extraJvmArgs>-Xmx512m</extraJvmArgs>
                     <logLevel>INFO</logLevel>
                 </configuration>
                 <executions>
