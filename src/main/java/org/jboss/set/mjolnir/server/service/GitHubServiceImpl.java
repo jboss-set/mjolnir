@@ -86,6 +86,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
         if (StringUtils.isBlank(newGithubName)) {
             return EntityUpdateResult.validationFailure("Github name must be non blank.");
         }
+        newGithubName = newGithubName.strip();
 
         try {
             // reload authenticated user form database
