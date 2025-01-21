@@ -13,6 +13,7 @@ create table github_teams (
     org_id bigint not null,
     name varchar(255),
     github_id bigint unique,
+    selfservice boolean,
     constraint fk_github_teams_org_id foreign key (org_id) references github_orgs (id)
 );
 

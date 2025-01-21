@@ -123,6 +123,10 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
 
     @Override
     public String subscribe(int teamId) {
+        GithubTeam team = organizationRepository.getTeamByGithubId(teamId);
+        if (team == null || !team.isSelfService()) {
+            throw new ApplicationException("Users not allowed to manage subscription to this team: " + teamId);
+        }
         final String githubName = getCurrentUserGitHubName();
         try {
             final String state = teamService.addMembership(teamId, githubName);
@@ -137,6 +141,10 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
 
     @Override
     public void unsubscribe(int teamId) {
+        GithubTeam team = organizationRepository.getTeamByGithubId(teamId);
+        if (team == null || !team.isSelfService()) {
+            throw new ApplicationException("Users not allowed to manage subscription to this team: " + teamId);
+        }
         final String githubName = getCurrentUserGitHubName();
         try {
             teamService.removeMembership(teamId, githubName);

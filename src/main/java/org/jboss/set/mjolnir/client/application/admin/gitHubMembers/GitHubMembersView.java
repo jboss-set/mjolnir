@@ -112,7 +112,7 @@ public class GitHubMembersView extends ViewWithUiHandlers<GitHubMembersHandlers>
             public void setData(List<GithubTeam> values) {
                 // prepend "All teams" option
                 values = new ArrayList<>(values);
-                GithubTeam allTeamsItem = new GithubTeam("All teams", null);
+                GithubTeam allTeamsItem = new GithubTeam("All teams", null, false);
                 values.add(0, allTeamsItem);
                 super.setData(values);
             }

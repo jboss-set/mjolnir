@@ -38,9 +38,12 @@ public class GithubTeam implements Serializable {
     private String membershipState;
     private GithubOrganization organization;
 
-    public GithubTeam(String name, Integer id) {
+    private boolean selfService;
+
+    public GithubTeam(String name, Integer id, boolean selfService) {
         this.name = name;
         this.id = id;
+        this.selfService = selfService;
     }
 
     public GithubTeam() {
@@ -68,6 +71,10 @@ public class GithubTeam implements Serializable {
 
     public void setOrganization(GithubOrganization organization) {
         this.organization = organization;
+    }
+
+    public boolean isSelfService() {
+        return selfService;
     }
 
     // GWT quirk - must implement equals method for null IDs, otherwise CellTable doesn't redraw items correctly

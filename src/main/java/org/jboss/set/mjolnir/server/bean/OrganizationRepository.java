@@ -1,6 +1,7 @@
 package org.jboss.set.mjolnir.server.bean;
 
 import org.jboss.set.mjolnir.shared.domain.GithubOrganization;
+import org.jboss.set.mjolnir.shared.domain.GithubTeam;
 
 import java.util.List;
 
@@ -17,5 +18,15 @@ public interface OrganizationRepository {
      * @return organizations
      */
     List<GithubOrganization> getOrganizations();
+
+    /**
+     * Retrieves GH team with given ID.
+     */
+    GithubTeam getTeamByGithubId(long id);
+
+    /**
+     * Retrieves GH org by name.
+     */
+    GithubOrganization getOrganization(String name);
 
 }

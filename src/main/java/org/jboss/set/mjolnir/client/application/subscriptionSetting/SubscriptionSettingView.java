@@ -56,7 +56,7 @@ public class SubscriptionSettingView extends ViewWithUiHandlers<SubscribtionHand
 
             @Override
             protected void onSelectionChanged(GithubOrganization selectedObject) {
-                mySubscriptionsWidget.setData(selectedObject != null ? selectedObject.getTeams() : Collections.<GithubTeam>emptyList());
+                mySubscriptionsWidget.setData(selectedObject != null ? selectedObject.getSelfServiceTeams() : Collections.<GithubTeam>emptyList());
             }
         });
 

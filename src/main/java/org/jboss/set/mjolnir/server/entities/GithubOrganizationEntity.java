@@ -20,6 +20,7 @@ public class GithubOrganizationEntity {
     @SequenceGenerator(name = "sq_github_orgs", sequenceName = "sq_github_orgs", allocationSize = 1)
     private Long id;
 
+    @Column(name = "name")
     private String name;
 
     @Column(name = "subscriptions_enabled")

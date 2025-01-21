@@ -215,6 +215,11 @@ public class GitHubSubscriptionBean {
     public void setSubscriptions(String gitHubName, Map<Integer, Boolean> subscriptions) {
             for (Map.Entry<Integer, Boolean> entry : subscriptions.entrySet()) {
                 final Integer teamId = entry.getKey();
+                GithubTeam team = organizationRepository.getTeamByGithubId(teamId);
+                if (team == null) {
+                    throw new ApplicationException("Managing this team subscriptions not allowed: " + teamId);
+                }
+
                 if (entry.getValue()) {
                     try {
                         teamService.addMembership(teamId, gitHubName);
@@ -233,9 +238,14 @@ public class GitHubSubscriptionBean {
             }
     }
 
-    public void unsubscribeUser(String organization, String gitHubName) {
+    public void unsubscribeUser(String orgName, String gitHubName) {
         try {
-            organizationService.removeMember(organization, gitHubName);
+            GithubOrganization organization = organizationRepository.getOrganization(orgName);
+            if (organization == null) {
+                throw new ApplicationException("Managing this organization subscriptions not allowed: " + orgName);
+            }
+
+            organizationService.removeMember(orgName, gitHubName);
         } catch (IOException e) {
             throw new ApplicationException(e);
         }

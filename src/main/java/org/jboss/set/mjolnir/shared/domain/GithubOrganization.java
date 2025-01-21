@@ -25,6 +25,7 @@ package org.jboss.set.mjolnir.shared.domain;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Wrapper class to hold the team information for each Github organization in the github-team-data xml file.
@@ -58,6 +59,10 @@ public class GithubOrganization implements Serializable {
 
     public List<GithubTeam> getTeams() {
         return teams;
+    }
+
+    public List<GithubTeam> getSelfServiceTeams() {
+        return teams.stream().filter(GithubTeam::isSelfService).collect(Collectors.toList());
     }
 
     public String getName() {

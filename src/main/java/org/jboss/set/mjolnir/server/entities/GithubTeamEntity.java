@@ -31,6 +31,9 @@ public class GithubTeamEntity {
     @Column(name = "github_id", unique = true)
     private Long githubId;
 
+    @Column(name = "selfservice")
+    private Boolean selfService;
+
     public GithubTeamEntity() {
     }
 
@@ -64,5 +67,9 @@ public class GithubTeamEntity {
 
     public void setGithubId(Long githubId) {
         this.githubId = githubId;
+    }
+
+    public Boolean getSelfService() {
+        return selfService;
     }
 }
