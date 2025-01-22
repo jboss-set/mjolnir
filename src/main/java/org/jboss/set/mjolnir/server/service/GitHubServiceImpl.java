@@ -25,7 +25,6 @@ package org.jboss.set.mjolnir.server.service;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
-import org.hibernate.HibernateException;
 import org.jboss.logging.Logger;
 import org.jboss.set.mjolnir.client.exception.ApplicationException;
 import org.jboss.set.mjolnir.client.service.GitHubService;
@@ -114,9 +113,8 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
                 logger.warnf("Validation failure: %s", validationResult);
                 return EntityUpdateResult.validationFailure(validationResult);
             }
-        } catch (HibernateException e) {
-            throw new ApplicationException(e);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            logger.errorf(e, "Failed to set GH username");
             throw new ApplicationException(e);
         }
     }
@@ -134,7 +132,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             return state;
         } catch (IOException e) {
             final String message = "Unable to subscribe user " + githubName + " to team #" + teamId + ": " + e.getMessage();
-            logger.warnf(message, e);
+            logger.errorf(message, e);
             throw new ApplicationException(message, e);
         }
     }
@@ -150,6 +148,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             teamService.removeMembership(teamId, githubName);
             logger.infof("Successfully removed %s from team.", githubName);
         } catch (IOException e) {
+            logger.errorf(e, "Unable to unsubscribe user " + githubName + " to team #" + teamId);
             throw new ApplicationException("Unable to unsubscribe user " + githubName
                     + " to team #" + teamId, e);
         }
@@ -186,6 +185,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             }
             return organizations;
         } catch (IOException e) {
+            logger.errorf(e, "Can't obtain membership information from GH API.");
             throw new ApplicationException("Can't obtain membership information from GH API.", e);
         }
     }
@@ -204,6 +204,7 @@ public class GitHubServiceImpl extends AbstractServiceServlet implements GitHubS
             User githubUser = userService.getUserById(gitHubId);
             return githubUser.getLogin();
         } catch (IOException e) {
+            logger.errorf(e, "Unable to retrieve GH user by his ID: " + gitHubId);
             throw new ApplicationException("Unable to retrieve GH user by his ID: " + gitHubId, e);
         }
     }
