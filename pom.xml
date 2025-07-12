@@ -28,7 +28,7 @@
         <version.gwtp>1.6</version.gwtp>
         <version.hibernate>5.1.10.Final</version.hibernate>
         <version.jboss-javaee>1.0.4.Final</version.jboss-javaee>
-        <version.org.apache.commons>3.3.2</version.org.apache.commons>
+        <version.org.apache.commons>3.18.0</version.org.apache.commons>
         <version.org.wildfly.checkstyle-config>1.0.6.Final</version.org.wildfly.checkstyle-config>
         <version.keycloak>9.0.3</version.keycloak>
         <version.war.maven.plugin>3.2.3</version.war.maven.plugin>
